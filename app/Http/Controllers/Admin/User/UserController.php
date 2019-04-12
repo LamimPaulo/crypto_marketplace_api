@@ -1,0 +1,234 @@
+<?php
+
+namespace App\Http\Controllers\Admin\User;
+
+use App\Enum\EnumStatusDocument;
+use App\Enum\EnumTransactionCategory;
+use App\Enum\EnumUserWalletType;
+use App\Http\Controllers\Controller;
+use App\Models\Mining\MiningQuota;
+use App\Models\Mining\MiningQuotaProfit;
+use App\Models\Funds\FundQuotes;
+use App\Models\Transaction;
+use App\Models\User\Document;
+use App\Models\User\UserAccount;
+use App\Models\User\UserWallet;
+use App\User;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class UserController extends Controller
+{
+    //logged user data
+    public function index()
+    {
+        try {
+            $user = User::findOrFail(auth()->user()->id);
+            return response([
+                'message' => trans('messages.general.success'),
+                'user' => $user
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function list()
+    {
+        try {
+            $users = User::with(['level'])
+                ->where('email_verified_at', '<>', '')
+                //->where('is_admin', 0)
+                ->orderBy('created_at', 'DESC')->paginate(10);
+
+            return response($users
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function incomplete()
+    {
+        try {
+            $users = User::whereNull('email_verified_at')
+                        ->orderBy('created_at', 'DESC')->paginate(10);
+            return response($users, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|min:3'
+        ]);
+
+        try {
+            $users = User::with(['level'])
+                ->where('email_verified_at', '<>', '')
+                ->where('name', 'like', "%{$request->name}%")
+                ->orderBy('name', 'ASC')->get();
+
+            return response(['data' => $users]
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function hist(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::with(['level'])->where('email', $request->email)->firstOrFail();
+            $wallets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::WALLET])->get();
+            $accounts = UserAccount::with(['bank', 'provider'])->where(['user_id' => $user->id])->get();
+            $assets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::PRODUCT])->get();
+
+            $funds = FundQuotes::with(['fund'])->where('user_id', $user->id)->orderBy('fund_id')->get();
+
+            return response([
+                'user' => $user,
+                'wallets' => $wallets,
+                'accounts' => $accounts,
+                'assets' => $assets,
+                'funds' => $funds,
+                'documents' => $this->documents($user->id)
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function mining(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::with(['level'])->where('email', $request->email)->firstOrFail();
+            $quotas = MiningQuota::with(['plan'])->where(['user_id' => $user->id])->get();
+            $profits = MiningQuotaProfit::with(['block_info'])->where(['user_id' => $user->id])->get()->take(10);
+
+            return response([
+                'quotas' => $quotas,
+                'profits' => $profits,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function documents($user_id)
+    {
+        $document = Document::where('document_type_id', 1)->where('user_id', $user_id)->first();
+        $document_status = $document->status ?? 0;
+
+        $selfie = Document::where('document_type_id', 2)->where('user_id', $user_id)->first();
+        $selfie_status = $selfie->status ?? 0;
+
+        return [
+            'document' => [
+                'status' => EnumStatusDocument::STATUS[$document_status],
+                'message' => EnumStatusDocument::MESSAGE[app()->getLocale()][$document_status]
+            ],
+            'selfie' => [
+                'status' => EnumStatusDocument::STATUS[$selfie_status],
+                'message' => EnumStatusDocument::MESSAGE[app()->getLocale()][$selfie_status]
+            ],
+        ];
+    }
+
+    public function transactions(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::where('email', $request->email)->firstOrFail();
+            $transactions = Transaction::with('coin', 'user_account')
+                ->where('user_id', $user->id)
+                ->whereNotIn('category', [EnumTransactionCategory::DRAFT, EnumTransactionCategory::DEPOSIT])
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+
+            return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function drafts(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::where('email', $request->email)->firstOrFail();
+            $transactions =  Transaction::with([
+                'user' => function ($user) {
+                    return $user->with(['level', 'country']);
+                },
+                'coin',
+                'user_account' => function ($account) {
+                    return $account->with('bank');
+                }])
+                ->where('user_id', $user->id)
+                ->where('category', EnumTransactionCategory::DRAFT)
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+
+
+            return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function deposits(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::where('email', $request->email)->firstOrFail();
+            $transactions = Transaction::with([
+                'user' => function ($user) {
+                    return $user->with(['level', 'country']);
+                },
+                'coin',
+                'system_account' => function ($account) {
+                    return $account->with('bank');
+                }])
+                ->where('user_id', $user->id)
+                ->where('category', EnumTransactionCategory::DEPOSIT)
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+
+            return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+}

@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "name": "Binance",
+        "endpoint": "https:\/\/api.binance.com",
+        "service_key": "binance",
+        "comission_type": 1,
+        "comission": 0.1,
+        "is_active": 1
+    },
+    {
+        "id": 2,
+        "name": "CoinBase",
+        "endpoint": "https:\/\/api.coinbase.com\/v2",
+        "service_key": "coinbase",
+        "comission_type": 1,
+        "comission": 0.1,
+        "is_active": 1
+    },
+    {
+        "id": 3,
+        "name": "MaketCap",
+        "endpoint": "\"https:\/\/pro-api.coinmarketcap.com",
+        "service_key": "marketcap",
+        "comission_type": 1,
+        "comission": 0.1,
+        "is_active": 1
+    }
+]

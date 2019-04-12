@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enum\EnumOperationType;
+use App\Helpers\Localization;
+use App\Mail\NotifyLoginMail;
+use App\Mail\UnderAnalysisMail;
+use App\Mail\VerifyMail;
+use App\Models\Coin;
+use App\Models\User\UserWallet;
+use App\User;
+use App\VerifyUser;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Ramsey\Uuid\Uuid;
+use Symfony\Component\HttpFoundation\Response;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+            'code_2fa' => 'nullable|numeric',
+            'recaptcha' => 'required|captcha',
+        ]);
+
+
+        try {
+
+            $user = User::where('email', $request->username)
+                ->orWhere('phone', $request->username)
+                ->orWhere('username', $request->username)->first();
+
+            if (!$user) {
+                throw new \Exception('Ops, usuário não encontrado!');
+            }
+
+            if ($user->is_under_analysis) {
+                Mail::to($user->email)->send(new UnderAnalysisMail($user));
+                throw new \Exception('Sua conta está temporariamente bloqueada, favor entrar em contato com o suporte!');
+            }
+
+            if (!isset($user->email_verified_at)) {
+                Localization::setLocale($user);
+                Mail::to($user->email)->send(new VerifyMail($user));
+                throw new \Exception('Você deve confirmar sua conta. Enviamos um email de verificação, favor verificar sua caixa de entrada.');
+            }
+
+            if ($user->is_google2fa_active) {
+
+                if (is_null($request->code_2fa)) {
+                    throw new \Exception('Você deve informar o código 2FA para obter acesso à plataforma. Tente novamente.');
+                }
+
+                $g = new \Sonata\GoogleAuthenticator\GoogleAuthenticator();
+
+                if (!$g->checkCode($user->google2fa_secret, $request->code_2fa)) {
+                    throw new \Exception('O código 2FA informado é inválido ou expirou. Tente novamente.');
+                }
+            }
+
+            $req = Request::create('/oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => config('services.passport.client_id'),
+                'client_secret' => config('services.passport.client_secret'),
+                'username' => $user->email,
+                'password' => $request->password,
+            ]);
+            $res = app()->handle($req);
+            $responseBody = $res->getContent();
+            $response = json_decode($responseBody, true);
+
+            if (isset($response['error'])) {
+                if ($response['error'] === 'invalid_credentials') {
+                    throw new \Exception('Dados Inválidos. Tente Novamente.');
+                }
+
+                if ($response['error'] === 'invalid_request') {
+                    throw new \Exception('Dados Inválidos. Tente Novamente.');
+                }
+                throw new \Exception($response['error']);
+            }
+
+            $user['ip'] = $request->ip();
+            $user['created'] = Carbon::now('America/Sao_Paulo')->format('d/m/Y \à\s H:i:s');
+            $user['agent'] = $request->header('User-Agent');
+            Localization::setLocale($user);
+            Mail::to($user->email)->send(new NotifyLoginMail($user));
+
+            return $response;
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|min:4|max:20|regex:/(^[A-Za-z0-9_]+$)+/',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|confirmed|min:6|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
+            'phone' => 'required|numeric|min:11|unique:users',
+        ], [
+            'username.required' => 'O username é obrigatório.',
+            'username.regex' => 'O username só pode conter letras Maíusculas, mínusculas, números e _.',
+            'phone.required' => 'O número de celular é obrigatório.',
+            'phone.numeric' => 'O número de celular deve conter somente números e o ddd deve ser informado.',
+            'phone.unique' => 'O telefone informado já está em uso.',
+            'email.required' => 'Você deve informar um email.',
+            'email.email' => 'Você deve informar um email válido.',
+            'email.unique' => 'O email informado já está em uso.',
+            'password.min' => 'A senha deve conter um mínimo de 6 caracteres.',
+            'password.regex' => 'A senha deve conter ao menos uma letra Maíuscula, uma letra mínuscula, um número e um caracter especial.',
+            'password.confirmed' => 'A confirmação deve corresponder com a senha.'
+        ]);
+
+        try {
+            $user = User::create([
+                'username' => $request->username,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'country_id' => $request->country_id,
+                'password' => Hash::make($request->password),
+            ]);
+
+            $uuid4 = Uuid::uuid4();
+
+            $verifyUser = VerifyUser::create([
+                'user_id' => $user->id,
+                'token' => $uuid4->toString()
+            ]);
+
+            Localization::setLocale($user);
+            Mail::to($user->email)->send(new VerifyMail($user));
+
+            return response(['message' => 'Sua Conta foi criada com sucesso, enviamos um de confirmação para você.'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function logout()
+    {
+        try {
+            auth()->user()->tokens->each(function ($token, $key) {
+                $token->delete();
+            });
+            return response(['message' => 'Você deslogou com sucesso!'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response(['message' => "Erro na requisição. [{$e->getMessage()}]"], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    public function verifyUser($token)
+    {
+        $verifyUser = VerifyUser::where('token', $token)->first();
+        if (isset($verifyUser)) {
+            $user = $verifyUser->user;
+            if (!$user->email_verified_at) {
+                try {
+                    DB::beginTransaction();
+                    $verifyUser->user->email_verified_at = Carbon::now();
+                    $verifyUser->user->save();
+                    $this->checkWallets($user);
+                    DB::commit();
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    abort(403, $e->getMessage());
+                }
+            }
+        } else {
+            abort(403, 'Não autorizado.');
+        }
+
+        return redirect(env('FRONT_URL') . '/register/verify');
+
+    }
+
+    public function checkWallets($user)
+    {
+        if ($user->country_id != 31) {
+            $usd_wallet = UserWallet::with('coin')
+                ->whereHas('coin', function ($coin) {
+                    return $coin->where('abbr', 'LIKE', 'USD');
+                })
+                ->where(['user_id' => $user->id, 'is_active' => 1])->first();
+
+            if (!$usd_wallet) {
+                $uuid4 = Uuid::uuid4();
+                UserWallet::create([
+                    'user_id' => $user->id,
+                    'coin_id' => Coin::getByAbbr('USD')->id,
+                    'address' => $uuid4->toString(),
+                    'balance' => 0
+                ]);
+            }
+        }
+
+        if ($user->country_id == 31) {
+            $brl_wallet = UserWallet::with('coin')
+                ->whereHas('coin', function ($coin) {
+                    return $coin->where('abbr', 'LIKE', 'BRL');
+                })
+                ->where(['user_id' => $user->id, 'is_active' => 1])->first();
+
+            if (!$brl_wallet) {
+                $uuid4 = Uuid::uuid4();
+                UserWallet::create([
+                    'user_id' => $user->id,
+                    'coin_id' => Coin::getByAbbr('BRL')->id,
+                    'address' => $uuid4->toString(),
+                    'balance' => 0
+                ]);
+            }
+        }
+
+        $coins = Coin::whereNotIn('abbr', ['BRL', 'USD'])->where('is_asset', false)->where('is_active', true)->get();
+
+        foreach ($coins as $loop_coin) {
+            $wallet = UserWallet::with('coin')
+                ->whereHas('coin', function ($coin) use ($loop_coin) {
+                    return $coin->where('id', $loop_coin->id);
+                })
+                ->where(['user_id' => $user->id, 'is_active' => 1])->first();
+
+            if (!$wallet) {
+
+                $uuid4 = Uuid::uuid4();
+                $address = env('APP_ENV') == 'local' ? $uuid4->toString() : OffScreenController::post(EnumOperationType::CREATE_ADDRESS, NULL, $loop_coin->abbr);
+
+                UserWallet::create([
+                    'user_id' => $user->id,
+                    'coin_id' => $loop_coin->id,
+                    'address' => str_replace('bitcoincash:', '', $address),
+                    'balance' => 0
+                ]);
+            }
+        }
+    }
+
+}

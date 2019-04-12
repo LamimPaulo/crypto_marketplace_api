@@ -1,0 +1,101 @@
+[
+    {
+        "id": 1,
+        "parameter": "symbol",
+        "required": 1,
+        "decription": "Ex.: BTCETH",
+        "endpoint_id": 1,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 2,
+        "parameter": "side",
+        "required": 1,
+        "decription": "BUY\/SELL",
+        "endpoint_id": 1,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 3,
+        "parameter": "type",
+        "required": 1,
+        "decription": "default: MARKET",
+        "endpoint_id": 1,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 4,
+        "parameter": "quantity",
+        "required": 1,
+        "decription": "Quantidade da Moeda",
+        "endpoint_id": 1,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 5,
+        "parameter": "timestamp",
+        "required": 1,
+        "decription": "Timestamp",
+        "endpoint_id": 1,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 6,
+        "parameter": "symbol",
+        "required": 1,
+        "decription": "Ex.: BTCETH",
+        "endpoint_id": 2,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 7,
+        "parameter": "orderId",
+        "required": 0,
+        "decription": null,
+        "endpoint_id": 2,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 8,
+        "parameter": "origClientOrderId",
+        "required": 0,
+        "decription": null,
+        "endpoint_id": 2,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 9,
+        "parameter": "timestamp",
+        "required": 1,
+        "decription": "Timestamp",
+        "endpoint_id": 2,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 10,
+        "parameter": "symbol",
+        "required": 1,
+        "decription": "Ex.: BTCETH",
+        "endpoint_id": 4,
+        "created_at": null,
+        "updated_at": null
+    },
+    {
+        "id": 11,
+        "parameter": "qwerty",
+        "required": 1,
+        "decription": "123456",
+        "endpoint_id": 6,
+        "created_at": null,
+        "updated_at": null
+    }
+]
