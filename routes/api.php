@@ -292,8 +292,6 @@ Route::get('/time', function () {
     return response(['time' => \Carbon\Carbon::now()->toIso8601ZuluString()], 200);
 });
 
-Route::get('/test', 'TestsController@index');
-
 //integração mmn
 //retorna os saldos da api_key
 Route::group(['prefix' => 'pharaos-gateway', 'middleware' => 'pharaosgateway'], function () {

@@ -288,6 +288,7 @@ class UserController extends Controller
 
     public function hist()
     {
+        return '';
         try {
             $hist = Logger::where('causer_id', auth()->user()->id)
                 ->orWhere('causer_id', auth()->user()->id)

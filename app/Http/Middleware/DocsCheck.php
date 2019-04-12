@@ -31,7 +31,7 @@ class DocsCheck
         } catch (\Exception $ex) {
             return response([
                 'status' => 'error',
-                'message' => $ex->getMessage()], Response::HTTP_UNAUTHORIZED);
+                'message' => $ex->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 }

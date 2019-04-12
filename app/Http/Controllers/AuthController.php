@@ -8,6 +8,7 @@ use App\Mail\NotifyLoginMail;
 use App\Mail\UnderAnalysisMail;
 use App\Mail\VerifyMail;
 use App\Models\Coin;
+use App\Models\Country;
 use App\Models\User\UserWallet;
 use App\User;
 use App\VerifyUser;
@@ -29,7 +30,6 @@ class AuthController extends Controller
             'code_2fa' => 'nullable|numeric',
             'recaptcha' => 'required|captcha',
         ]);
-
 
         try {
 
@@ -105,7 +105,8 @@ class AuthController extends Controller
             'username' => 'required|min:4|max:20|regex:/(^[A-Za-z0-9_]+$)+/',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|confirmed|min:6|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
-            'phone' => 'required|numeric|min:11|unique:users',
+            'phone' => 'required|numeric|min:8|unique:users',
+            'recaptcha' => 'required|captcha',
         ], [
             'username.required' => 'O username é obrigatório.',
             'username.regex' => 'O username só pode conter letras Maíusculas, mínusculas, números e _.',
@@ -121,11 +122,13 @@ class AuthController extends Controller
         ]);
 
         try {
+            $country = Country::where('code', $request->countryCode)->first();
+
             $user = User::create([
                 'username' => $request->username,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'country_id' => $request->country_id,
+                'country_id' => $country->id,
                 'password' => Hash::make($request->password),
             ]);
 
@@ -185,24 +188,6 @@ class AuthController extends Controller
 
     public function checkWallets($user)
     {
-        if ($user->country_id != 31) {
-            $usd_wallet = UserWallet::with('coin')
-                ->whereHas('coin', function ($coin) {
-                    return $coin->where('abbr', 'LIKE', 'USD');
-                })
-                ->where(['user_id' => $user->id, 'is_active' => 1])->first();
-
-            if (!$usd_wallet) {
-                $uuid4 = Uuid::uuid4();
-                UserWallet::create([
-                    'user_id' => $user->id,
-                    'coin_id' => Coin::getByAbbr('USD')->id,
-                    'address' => $uuid4->toString(),
-                    'balance' => 0
-                ]);
-            }
-        }
-
         if ($user->country_id == 31) {
             $brl_wallet = UserWallet::with('coin')
                 ->whereHas('coin', function ($coin) {
