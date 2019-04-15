@@ -110,7 +110,6 @@ class DepositController extends Controller
                 'category' => EnumTransactionCategory::DEPOSIT,
                 'confirmation' => 0,
                 'system_account_id' => $request->system_account_id,
-                'payment_provider_id' => $system_account->provider_id,
                 'tx' => $request->payment_id
             ]);
 

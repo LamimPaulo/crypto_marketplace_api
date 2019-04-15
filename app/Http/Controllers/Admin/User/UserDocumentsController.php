@@ -116,8 +116,6 @@ class UserDocumentsController extends Controller
                 $doc->save();
             }
 
-            $user->user_level_id = 3;
-            $user->document_verified = 1;
             $user->save();
 
             ActivityLogger::log(trans('messages.documents.accept'), $user->id);

@@ -17,7 +17,6 @@ class CreateUserAccountsTable extends Migration
             $table->uuid('id');
             $table->uuid('user_id');
             $table->integer('bank_id')->unsigned()->nullable();
-            $table->integer('provider_id')->unsigned()->nullable();
             $table->string('agency')->nullable();
             $table->string('account')->nullable();
             $table->string('agency_digit')->nullable();

@@ -75,7 +75,6 @@ class UserController extends Controller
             $user->gender = $result['pessoa']['genero'];
             $user->mothers_name = $result['pessoa']['mae'];
             $user->birthdate = Carbon::createFromFormat('d/m/Y', $result['pessoa']['nascimento']);
-            $user->user_level_id = 2;
             $user->document_verified = 1;
             $user->save();
             unset($user->id);
@@ -288,7 +287,6 @@ class UserController extends Controller
 
     public function hist()
     {
-        return '';
         try {
             $hist = Logger::where('causer_id', auth()->user()->id)
                 ->orWhere('causer_id', auth()->user()->id)
@@ -314,26 +312,12 @@ class UserController extends Controller
             //arbitragem
             $investment = Investment::where('user_id', auth()->user()->id)->where('type_id', 1)->get();
             $investment_brl = $this->conversorService::BTC2BRLMIN($investment->sum('amount'));
-            $investment_usd = $this->conversorService::BTC2USDMIN($investment->sum('amount'));
-            //mineração
-            $mining = MiningQuota::where('user_id', auth()->user()->id)->first();
-            $miningQuota = 0;
-            if ($mining) {
-                $miningQuota = $mining->ths_quota * $mining->buy_price;
-            }
-            $mining_btc = $this->conversorService::BRL2BTCSMAX($miningQuota);
-
-            //Ativos
-            $assets = $this->cryptoAssets();
-            $assets_brl = $this->conversorService::BTC2BRLMIN($assets);
-            $assets_usd = $this->conversorService::BTC2USDMIN($assets);
             //Index Funds
             $funds = $this->indexFunds();
             $funds_btc = $this->conversorService::BRL2BTCSMAX($funds);
 
-            $total_btc = $investment->sum('amount') + $mining_btc['amount'] + $assets + $funds_btc['amount'];
+            $total_btc = $investment->sum('amount');
             $total_brl = $this->conversorService::BTC2BRLMIN($total_btc);
-            $total_usd = $this->conversorService::BTC2USDMIN($total_btc);
 
             return response([
                 'message' => trans('messages.general.success'),
@@ -342,33 +326,18 @@ class UserController extends Controller
                         'name' => trans('messages.products.arbitrage'),
                         'value_btc' => (float)number_format($investment->sum('amount'), 8),
                         'value_brl' => number_format($investment_brl['amount'], 2, ',', '.'),
-                        'value_usd' => number_format($investment_usd['amount'], 2, '.', ',')
-                    ], [
-                        'name' => trans('messages.products.mining'),
-                        'value_btc' => (float)number_format($mining_btc['amount'], 8),
-                        'value_brl' => number_format($miningQuota, 2, ',', '.'),
-                        'value_usd' => number_format($miningQuota / $dollar, 2, '.', ',')
-                    ], [
-                        'name' => trans('messages.products.crypto_assets'),
-                        'value_btc' => (float)number_format($assets, 8),
-                        'value_brl' => number_format($assets_brl['amount'], 2, ',', '.'),
-                        'value_usd' => number_format($assets_usd['amount'], 2, '.', ',')
                     ], [
                         'name' => trans('messages.products.index_fund'),
                         'value_btc' => (float)number_format($funds_btc['amount'], 8),
                         'value_brl' => number_format($funds, 2, ',', '.'),
-                        'value_usd' => number_format($funds / $dollar, 2, '.', ',')
                     ],
                 ],
                 'product_total' => [
                     'total_btc' => (float)number_format($total_btc, 8),
                     'total_brl' => number_format($total_brl['amount'], 2, ',', '.'),
-                    'total_usd' => number_format($total_usd['amount'], 2, '.', ',')
                 ],
                 'chart' => [
                     (float)$investment->sum('amount'),
-                    (float)$mining_btc['amount'],
-                    (float)$assets,
                     (float)$funds_btc['amount']
                 ]
             ], Response::HTTP_OK);

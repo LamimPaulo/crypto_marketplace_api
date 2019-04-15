@@ -19,21 +19,16 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @param  \Illuminate\Console\Scheduling\Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('paypal:confirmations')->everyMinute();
-        $schedule->command('estimate:fee')->everyMinute();
-        $schedule->command('get:btcquote')->everyFiveMinutes();
-        $schedule->command('get:binancequote')->everyMinute();
-        $schedule->command('update:fundquotes')->everyMinute();
-        $schedule->command('get:binanceconfirmations')->everyMinute();
-        $schedule->command('pool:refresh')->everyMinute();
-        $schedule->command('mining:profits')->everyMinute();
+//        $schedule->command('estimate:fee')->everyMinute();
+//        $schedule->command('get:btcquote')->everyFiveMinutes();
+//        $schedule->command('update:fundquotes')->everyMinute();
         $schedule->command('trade:execute')->everyMinute()->withoutOverlapping();
-        $schedule->command('get:marketcapquotes')->everyTenMinutes();
+//        $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('gateway:expirepayments')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute();
         $schedule->command('transactions:confirmation')->everyMinute();

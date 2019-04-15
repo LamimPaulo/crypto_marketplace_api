@@ -9,7 +9,6 @@ class Order extends Model
 {
     protected $fillable = [
         'transaction_id',
-        'provider_id',
         'symbol',
         'order_id',
         'client_order_id',
@@ -32,11 +31,6 @@ class Order extends Model
     public function transaction()
     {
         return $this->belongsTo(Transaction::class, 'transaction_id');
-    }
-
-    public function provider()
-    {
-        return $this->belongsTo(CoinProvider::class, 'provider_id');
     }
 
     public function fund()

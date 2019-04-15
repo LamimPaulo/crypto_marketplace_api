@@ -413,9 +413,6 @@ class TransactionsController extends Controller
         }
 
         try {
-            if (auth()->user()->user_level_id == 1) {
-                throw new \Exception(trans('messages.account.must_confirm_account_to_require_transferences'));
-            }
 
             $beneficiary = User::where('email', $request->email)->firstOrFail();
             $exists = UserFavAccount::where(['user_id' => auth()->user()->id, 'fav_user_id' => $beneficiary->id])->exists();

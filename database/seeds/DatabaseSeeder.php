@@ -15,22 +15,6 @@ class DatabaseSeeder extends Seeder
             $this->call(BanksSeeder::class);
         }
 
-        if(!\App\Models\CoinCurrentPrice::first()){
-            $this->call(CoinCurrentPriceSeeder::class);
-        }
-
-        if(!\App\Models\CoinPair::first()){
-            $this->call(CoinPairsSeeder::class);
-        }
-
-        if(!\App\Models\CoinPrice::first()){
-            $this->call(CoinPriceSeeder::class);
-        }
-
-        if(!\App\Models\CoinProvider::first()){
-            $this->call(CoinProviderSeeder::class);
-        }
-
         if(!\App\Models\CoinQuote::first()){
             $this->call(CoinQuoteSeeder::class);
         }
@@ -57,14 +41,6 @@ class DatabaseSeeder extends Seeder
 
         if(!\App\Models\Investments\InvestmentType::first()){
             $this->call(InvestmentTypesSeeder::class);
-        }
-
-        if(!\App\Models\Mining\MiningPlan::first()){
-            $this->call(MiningPlanSeeder::class);
-        }
-
-        if(!\App\Models\PaymentProvider::first()){
-            $this->call(PaymentProviderSeeder::class);
         }
 
         if(!\App\Models\Product::first()){

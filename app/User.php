@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Models\Mining\MiningQuotaProfit;
 use App\Models\Country;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
@@ -109,11 +108,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function country()
     {
         return $this->belongsTo(Country::class, 'country_id');
-    }
-
-    public function profits()
-    {
-        return $this->hasMany(MiningQuotaProfit::class, 'user_id');
     }
 
     public function api_key()

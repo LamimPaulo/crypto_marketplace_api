@@ -31,11 +31,9 @@ use Illuminate\Support\Facades\Storage;
  * @property mixed sender_user_id
  * @property mixed is_gateway_payment
  * @property mixed system_account_id
- * @property mixed payment_provider_id
  * @property mixed user_account_id
  * @property mixed file_path
  * @property mixed tax
- * @property mixed coin_provider_id
  * @property mixed price
  * @property mixed market
  * @property mixed created_at
@@ -61,11 +59,9 @@ class Transaction extends Model
         'sender_user_id',
         'is_gateway_payment',
         'system_account_id',
-        'payment_provider_id',
         'user_account_id',
         'file_path',
         'tax',
-        'coin_provider_id',
         'price',
         'market'
     ];
@@ -77,10 +73,8 @@ class Transaction extends Model
         'wallet_id',
         'sender_user_id',
         'system_account_id',
-        'payment_provider_id',
         'user_account_id',
         'file_path',
-        'coin_provider_id',
     ];
 
     protected $appends = [
@@ -146,12 +140,6 @@ class Transaction extends Model
             $ext = $file[1];
         }
         return $ext;
-    }
-
-    public function provider()
-    {
-        //payment_provider_id
-        return $this->belongsTo(PaymentProvider::class, 'payment_provider_id');
     }
 
     public function user()

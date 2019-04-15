@@ -14,7 +14,7 @@ class AddTimeLimitToGatewayTable extends Migration
     public function up()
     {
         Schema::table('gateway', function (Blueprint $table) {
-            $table->dateTime('time_limit')->after('mining_user_id')->nullable();
+            $table->dateTime('time_limit')->nullable();
         });
     }
 

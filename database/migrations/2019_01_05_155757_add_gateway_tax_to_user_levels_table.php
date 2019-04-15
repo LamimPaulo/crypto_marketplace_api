@@ -14,6 +14,7 @@ class AddGatewayTaxToUserLevelsTable extends Migration
     public function up()
     {
         Schema::table('user_levels', function (Blueprint $table) {
+            $table->boolean('is_gateway_elegible')->default(0);
             $table->decimal('gateway_tax', 10, 3)->default(0);
         });
     }
@@ -26,7 +27,7 @@ class AddGatewayTaxToUserLevelsTable extends Migration
     public function down()
     {
         Schema::table('user_levels', function (Blueprint $table) {
-            $table->dropColumn('gateway_tax');
+            $table->dropColumn(['gateway_tax', 'is_gateway_elegible']);
         });
     }
 }

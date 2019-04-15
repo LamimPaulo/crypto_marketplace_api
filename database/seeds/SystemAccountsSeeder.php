@@ -15,7 +15,6 @@ class SystemAccountsSeeder extends Seeder
             [
                 'id' => 1,
                 'bank_id' => 141,
-                'provider_id' => 1,
                 'agency' => 3392,
                 'account' => 2605,
                 'agency_digit' => '',

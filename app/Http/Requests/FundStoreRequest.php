@@ -31,7 +31,6 @@ class FundStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'coin_provider_id' => 'required|exists:coin_providers,id',
             'name' => 'required|unique:funds,name',
             'buy_tax' => 'required|numeric',
             'sell_tax' => 'required|numeric',
@@ -53,7 +52,6 @@ class FundStoreRequest extends FormRequest
             'coins.*.coin_id.distinct' => 'É necessário informar moedas distintas.',
             'coins.*.coin_id.exists' => 'É necessário informar moedas válidas.',
 
-            'coin_provider_id.required' => 'O provedor das moedas é necessário.',
             'name.required' => 'O nome do fundo é obrigatório.',
             'buy_tax.required' => 'A porcentagem de comissão de compra é obrigatória.',
             'sell_tax.required' => 'A porcentagem de comissão de venda é obrigatória.',
@@ -61,7 +59,6 @@ class FundStoreRequest extends FormRequest
             'start_amount.required' => 'O valor inicial investido é obrigatório.',
             'start_price.required' => 'O valor inicial da cota é obrigatório.',
 
-            'coin_provider_id.exists' => 'O provedor das moedas é inválido.',
             'name.unique' => 'O nome do fundo já está sendo utilizado',
             'buy_tax.numeric' => 'A porcentagem de comissão de compra deve ser númerica.',
             'sell_tax.numeric' => 'A porcentagem de comissão de venda deve ser númerica.',

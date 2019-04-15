@@ -12,9 +12,9 @@ class SystemAccountController extends Controller
     {
 
         if(auth()->user()->country_id===31){
-            $accounts = SystemAccount::with(['bank', 'provider'])->where('is_active', 1);
+            $accounts = SystemAccount::with(['bank'])->where('is_active', 1);
         }else{
-            $accounts = SystemAccount::with(['bank', 'provider'])->where('provider_id','>',1)->where('is_active', 1);
+            $accounts = SystemAccount::with(['bank'])->where('is_active', 1);
         }
 
 

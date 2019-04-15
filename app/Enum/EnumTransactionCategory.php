@@ -14,7 +14,8 @@ abstract class EnumTransactionCategory
     const TRANSFER = 8;
     const ARBITRAGE = 9;
     const INDEX_FUND = 10;
-    const MMN_PAYMENT = 12;
+    const CREDMINER = 11;
+    const BUY_LEVEL = 12;
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
@@ -27,6 +28,6 @@ abstract class EnumTransactionCategory
         self::TRANSFER => 'Transferência',
         self::ARBITRAGE => 'Arbitragem',
         self::INDEX_FUND => 'Index Fund',
-        self::MMN_PAYMENT => 'Pagamento Multinível',
+        self::BUY_LEVEL => 'Compra de Nível',
     ];
 }

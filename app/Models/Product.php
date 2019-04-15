@@ -8,13 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property mixed value
- * @property mixed value_usd
+ * @property mixed value_lqx
  */
 class Product extends Model
 {
-    protected $fillable = ['product_type_id', 'value', 'value_usd', 'name', 'description', 'is_active'];
+    protected $fillable = [
+        'product_type_id',
+        'value',
+        'value_lqx',
+        'name',
+        'description',
+        'is_active'
+    ];
 
-    protected $appends = ['brlValue', 'usdValue', 'btcValue'];
+    protected $appends = [
+        'brlValue',
+        'btcValue',
+        'lqxValue'
+    ];
 
     public function type()
     {
@@ -31,15 +42,15 @@ class Product extends Model
         return 'R$ ' . number_format($this->value, 2, ',', '.');
     }
 
-    public function getUsdValueAttribute()
-    {
-        return '$ ' . sprintf('%.2f', $this->value_usd);
-    }
-
     public function getBtcValueAttribute()
     {
         $conversor = new ConversorService();
         $currentValue = $conversor::BRL2BTCMIN($this->value);
         return sprintf('%.8f', $currentValue['amount']);
+    }
+
+    public function getLqxValueAttribute()
+    {
+        return sprintf('%.5f', $this->value_lqx);
     }
 }

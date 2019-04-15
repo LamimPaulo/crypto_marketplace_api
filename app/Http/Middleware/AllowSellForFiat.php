@@ -25,7 +25,7 @@ class AllowSellForFiat
             $base = Coin::getByAbbr($request->base)->is_crypto;
 
             if(!$quote) {
-                if (!$level->is_allowed_sell_by_fiat) {
+                if (!$level->is_allowed_sell_for_fiat) {
                     throw new \Exception(trans('messages.products.not_allowed_sell_by_fiat'));
                 }
             }

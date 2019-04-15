@@ -45,58 +45,9 @@ class FundQuotes extends Command
      */
     public function handle()
     {
-        $this->updateCurrentPrices();
         $this->updateFundPrices();
     }
 
-    public function updateCurrentPrices()
-    {
-        try {
-            $btc = Coin::getByAbbr('BTC');
-            $brl = Coin::getByAbbr('BRL');
-            $usd = Coin::getByAbbr('USD');
-
-            $BTCtoUSD_QUOTE = CoinQuote::where(['coin_id' => $btc->id, 'quote_coin_id' => $usd->id])->first()->average_quote;
-            $USDtoBRL_QUOTE = CoinQuote::where(['coin_id' => $usd->id, 'quote_coin_id' => $brl->id])->first()->average_quote;
-
-            DB::beginTransaction();
-
-            $coins = CoinCurrentPrice::all();
-            foreach ($coins as $coin) {
-                $fundCoins = FundCoins::with('fund')->where('coin_id', $coin->coin_id)->get();
-                foreach ($fundCoins as $fc) {
-                    if ($coin->coin_id == $btc->id) {
-
-                        $diff = $fc->price - $BTCtoUSD_QUOTE;
-                        $percent = -$diff * 100 / $fc->price;
-                        $fc->update([
-                            'current_price' => sprintf('%.8f', $percent),
-                        ]);
-                    }
-
-                    if ($coin->coin_id == $brl->id) {
-
-                        $diff = $fc->price - $USDtoBRL_QUOTE;
-                        $percent = -$diff * 100 / $fc->price;
-                        $fc->update([
-                            'current_price' => sprintf('%.8f', $percent),
-                        ]);
-
-                    }
-
-                    if ($coin->coin_id > $usd->id) {
-                        $diff = $fc->price - ($BTCtoUSD_QUOTE * $coin->price);
-                        $percent = -$diff * 100 / $fc->price;
-                        $fc->update(['current_price' => sprintf('%.8f', $percent)]);
-                    }
-                }
-            }
-            DB::commit();
-        } catch (\Exception $ex) {
-            DB::rollBack();
-            throw new \Exception($ex->getMessage());
-        }
-    }
 
     public function updateFundPrices()
     {

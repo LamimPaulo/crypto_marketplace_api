@@ -18,10 +18,6 @@ class PharaosGatewayElegible
     public function handle($request, Closure $next)
     {
         try {
-            $level = UserLevel::findOrFail(auth()->user()->user_level_id);
-            if(!$level->is_gateway_mmn_elegible){
-                throw new \Exception(trans('messages.gateway.not_elegible'));
-            }
             return $next($request);
         } catch (\Exception $ex) {
             return response([

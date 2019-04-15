@@ -32,7 +32,6 @@ class FundUpdateRequest extends FormRequest
     public function rules(Request $request)
     {
         return [
-            'coin_provider_id' => 'required|exists:coin_providers,id',
             'name' => 'required|unique:funds,name,'.$request->id.',id',
             'buy_tax' => 'required|numeric',
             'sell_tax' => 'required|numeric',
@@ -44,13 +43,11 @@ class FundUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-            'coin_provider_id.required' => 'O provedor das moedas é necessário.',
             'name.required' => 'O nome do fundo é obrigatório.',
             'buy_tax.required' => 'A porcentagem de comissão de compra é obrigatória.',
             'sell_tax.required' => 'A porcentagem de comissão de venda é obrigatória.',
             'admin_tax.required' => 'A taxa administrativa é obrigatória.',
 
-            'coin_provider_id.exists' => 'O provedor das moedas é inválido.',
             'name.unique' => 'O nome do fundo já está sendo utilizado',
             'buy_tax.numeric' => 'A porcentagem de comissão de compra deve ser númerica.',
             'sell_tax.numeric' => 'A porcentagem de comissão de venda deve ser númerica.',

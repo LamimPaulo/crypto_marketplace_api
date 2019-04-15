@@ -2,14 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Enum\EnumPharaosGatewayKeyType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * @property mixed ip
- */
-class PharaosGatewayApiKeyRequest extends FormRequest
+class BuyLevelRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,20 +25,21 @@ class PharaosGatewayApiKeyRequest extends FormRequest
     public function rules()
     {
         return [
-            'type' => [
+            'level_id' => 'required|exists:user_levels,id',
+            'abbr' => [
                 'required',
-                Rule::in(EnumPharaosGatewayKeyType::TYPE),
-            ],
-            'ip' => 'required|ip'
+                Rule::in(['BRL', 'LQX'])
+            ]
         ];
     }
 
     public function messages()
     {
         return [
-            'type.required' => 'O tipo de chave deve ser selecionado.',
-            'type.in' => 'O tipo de chave selecionado é inválido.',
-            'ip.ip' => 'O IP de acesso deve ser válido.',
+            'level_id.required' => "O identificador do nível é obrigatório.",
+            'level_id.exists' => "O nível informado é inválido.",
+            'abbr.required' => "A moeda de compra deve ser definida.",
+            'abbr.exists' => "A moeda de compra informada é inválida.",
         ];
     }
 }

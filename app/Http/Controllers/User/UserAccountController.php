@@ -49,10 +49,9 @@ class UserAccountController extends Controller
     {
         try {
             $request['user_id'] = auth()->user()->id;
-            $account = UserAccount::firstOrNew($request->only('user_id', 'bank_id', 'provider_id', 'agency', 'account', 'email'));
+            $account = UserAccount::firstOrNew($request->only('user_id', 'bank_id', 'agency', 'account', 'email'));
 
             if ($request->type == EnumAccountType::BANK) {
-                $request['provider_id'] = 1;
                 $account->fill($request->except('email'));
             } else {
                 $account->fill($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
@@ -77,7 +76,6 @@ class UserAccountController extends Controller
             $account = UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->id])->first();
 
             if ($request->type == EnumAccountType::BANK) {
-                $request['provider_id'] = 1;
                 $account->update($request->except('email'));
             } else {
                 $account->update($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));

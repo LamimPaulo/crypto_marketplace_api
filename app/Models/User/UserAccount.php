@@ -4,7 +4,6 @@ namespace App\Models\User;
 
 use App\Models\Bank;
 use App\Models\Model;
-use App\Models\PaymentProvider;
 use App\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -15,7 +14,6 @@ class UserAccount extends Model
     protected $fillable = [
         'user_id',
         'bank_id',
-        'provider_id',
         'agency',
         'account',
         'agency_digit',
@@ -28,11 +26,6 @@ class UserAccount extends Model
     ];
 
     protected $hidden = ['user_id'];
-
-    public function provider()
-    {
-        return $this->belongsTo(PaymentProvider::class, 'provider_id');
-    }
 
     public function bank()
     {

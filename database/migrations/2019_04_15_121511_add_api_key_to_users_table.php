@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddMiningFlagToGatewayTable extends Migration
+class AddApiKeyToUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class AddMiningFlagToGatewayTable extends Migration
      */
     public function up()
     {
-        Schema::table('gateway', function (Blueprint $table) {
-            $table->uuid('mining_user_id')->nullable()->after('tax');
-            $table->tinyInteger('category')->default(1)->after('tax');
+        Schema::table('users', function (Blueprint $table) {
+            $table->uuid('api_key')->nullable();
         });
     }
 
@@ -26,8 +25,8 @@ class AddMiningFlagToGatewayTable extends Migration
      */
     public function down()
     {
-        Schema::table('gateway', function (Blueprint $table) {
-            $table->dropColumn(['mining_user_id','category']);
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['api_key']);
         });
     }
 }

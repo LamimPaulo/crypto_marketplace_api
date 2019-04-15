@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
  * @property mixed id
  * @property mixed tax_crypto
  * @property mixed tax_brl
- * @property mixed tax_usd
+ * @property mixed tax_lqx
  */
 class LevelRequest extends FormRequest
 {
@@ -39,7 +39,7 @@ class LevelRequest extends FormRequest
             'name' => 'required|unique:user_levels,name,'.$request->id.',id',
             'limit_btc_diary' => 'required|numeric',
             'limit_brl_diary' => 'required|numeric',
-            'limit_usd_diary' => 'required|numeric',
+            'limit_lqx_diary' => 'required|numeric',
             'limit_transaction_auto' => 'required|numeric',
             'brokerage_fee' => 'required|numeric',
             'is_referrable' => 'required|boolean',
@@ -51,7 +51,7 @@ class LevelRequest extends FormRequest
 
             'tax_crypto' => 'nullable|array',
             'tax_brl' => 'nullable|array',
-            'tax_usd' => 'nullable|array',
+            'tax_lqx' => 'nullable|array',
 
             'tax_crypto.*.coin_tax_type' => ['required_with:tax_crypto', Rule::in(array_keys(EnumTaxType::OPERATIONS))],
             'tax_crypto.*.value'         => 'required_with:tax_crypto|numeric',
@@ -63,10 +63,10 @@ class LevelRequest extends FormRequest
             'tax_brl.*.operation'     => ['required_with:tax_brl', Rule::in(array_keys(EnumOperations::OPERATIONS))],
             'tax_brl.*.calc_type'     => ['required_with:tax_brl', Rule::in(array_keys(EnumCalcType::TYPE))],
 
-            'tax_usd.*.coin_tax_type' => ['required_with:tax_usd', Rule::in(array_keys(EnumTaxType::OPERATIONS))],
-            'tax_usd.*.value'         => 'required_with:tax_usd|numeric',
-            'tax_usd.*.operation'     => ['required_with:tax_usd', Rule::in(array_keys(EnumOperations::OPERATIONS))],
-            'tax_usd.*.calc_type'     => ['required_with:tax_usd', Rule::in(array_keys(EnumCalcType::TYPE))],
+            'tax_lqx.*.coin_tax_type' => ['required_with:tax_lqx', Rule::in(array_keys(EnumTaxType::OPERATIONS))],
+            'tax_lqx.*.value'         => 'required_with:tax_lqx|numeric',
+            'tax_lqx.*.operation'     => ['required_with:tax_lqx', Rule::in(array_keys(EnumOperations::OPERATIONS))],
+            'tax_lqx.*.calc_type'     => ['required_with:tax_lqx', Rule::in(array_keys(EnumCalcType::TYPE))],
         ];
     }
 
@@ -91,14 +91,14 @@ class LevelRequest extends FormRequest
             'tax_brl.*.calc_type.required_with'    => 'O tipo de cálculo da taxa brl é obrigatório',
             'tax_brl.*.calc_type.in'               => 'O tipo de cálculo da taxa brl selecionado é inválido',
 
-            'tax_usd.*.coin_tax_type.required_with'=> 'O tipo de taxa usd é obrigatório',
-            'tax_usd.*.coin_tax_type.in'           => 'O tipo de taxa usd selecionado é inválido',
-            'tax_usd.*.value.required_with'        => 'O valor da taxa usd é obrigatório',
-            'tax_usd.*.value.numeric'              => 'O valor da taxa usd deve ser um número válido',
-            'tax_usd.*.operation.required_with'    => 'O tipo de operação da taxa usd é obrigatório',
-            'tax_usd.*.operation.in'               => 'O tipo de operação da taxa usd selecionado é inválido',
-            'tax_usd.*.calc_type.required_with'    => 'O tipo de cálculo da taxa usd é obrigatório',
-            'tax_usd.*.calc_type.in'               => 'O tipo de cálculo da taxa usd selecionado é inválido',
+            'tax_lqx.*.coin_tax_type.required_with'=> 'O tipo de taxa lqx é obrigatório',
+            'tax_lqx.*.coin_tax_type.in'           => 'O tipo de taxa lqx selecionado é inválido',
+            'tax_lqx.*.value.required_with'        => 'O valor da taxa lqx é obrigatório',
+            'tax_lqx.*.value.numeric'              => 'O valor da taxa lqx deve ser um número válido',
+            'tax_lqx.*.operation.required_with'    => 'O tipo de operação da taxa lqx é obrigatório',
+            'tax_lqx.*.operation.in'               => 'O tipo de operação da taxa lqx selecionado é inválido',
+            'tax_lqx.*.calc_type.required_with'    => 'O tipo de cálculo da taxa lqx é obrigatório',
+            'tax_lqx.*.calc_type.in'               => 'O tipo de cálculo da taxa lqx selecionado é inválido',
 
             'name.required' => 'O nome do nível é obrigatório.',
             'name.unique' => 'O nome do nível já está em uso.',
@@ -109,8 +109,8 @@ class LevelRequest extends FormRequest
             'limit_brl_diary.required' => 'O limite diário para saques de BRL deve ser informado.',
             'limit_brl_diary.numeric' => 'O limite diário para saques de BRL deve ser um valor númerico válido.',
 
-            'limit_usd_diary.required' => 'O limite diário para saques de USD deve ser informado.',
-            'limit_usd_diary.numeric' => 'O limite diário para saques de USD deve ser um valor númerico válido.',
+            'limit_lqx_diary.required' => 'O limite diário para saques de USD deve ser informado.',
+            'limit_lqx_diary.numeric' => 'O limite diário para saques de USD deve ser um valor númerico válido.',
 
             'limit_transaction_auto.required' => 'O limite automático para envio de BTC deve ser informado.',
             'limit_transaction_auto.numeric' => 'O limite automático para envio de BTC deve ser um valor númerico válido.',

@@ -54,7 +54,6 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/list', 'UserController@list');
         //user hist
         Route::post('/hist', 'UserController@hist');
-        Route::post('/mining', 'UserController@mining');
         Route::post('/transactions', 'UserController@transactions');
         Route::post('/drafts', 'UserController@drafts');
         Route::post('/deposits', 'UserController@deposits');
@@ -106,25 +105,6 @@ Route::group(['namespace' => 'Admin'], function () {
         //resumo de cotas do fundo
         Route::get('/resume/{fund}', 'FundsController@resume');
     });
-
-    //mining
-    Route::group(['prefix' => 'mining', 'namespace' => 'Mining'], function () {
-        //status real da mineração slushpool
-        Route::get('/stats', 'MiningPoolController@stats');
-        //grafico de rewards real
-        Route::get('/reward-chart', 'MiningPoolController@rewardChart');
-        //lista de contratações dos usuários
-        Route::get('/quotas-list', 'MiningPoolController@quotasList');
-        Route::get('/mini-report', 'MiningPoolController@miniReport');
-        //lista de planos
-        Route::get('/plans', 'MiningPlanController@index');
-        //salvar plano
-        Route::post('/plan', 'MiningPlanController@store');
-        Route::post('/plan/update', 'MiningPlanController@update');
-        //lista de tipos de lucro dos planos
-        Route::get('/profit-types', 'MiningPlanController@profitTypes');
-    });
-
 
     //exchanges - coin providers
     Route::group(['prefix' => 'exchanges', 'namespace' => 'Exchanges'], function () {

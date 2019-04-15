@@ -3,7 +3,6 @@
 namespace App\Models\System;
 
 use App\Models\Bank;
-use App\Models\PaymentProvider;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +10,6 @@ class SystemAccount extends Model
 {
     protected $fillable = [
         'bank_id',
-        'provider_id',
         'agency',
         'account',
         'agency_digit',
@@ -33,11 +31,6 @@ class SystemAccount extends Model
     public function deposits()
     {
         return $this->belongsTo(Transaction::class, 'system_account_id');
-    }
-
-    public function provider()
-    {
-        return $this->belongsTo(PaymentProvider::class, 'provider_id');
     }
 
 }

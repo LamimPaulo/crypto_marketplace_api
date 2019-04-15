@@ -106,7 +106,6 @@ class DraftController extends Controller
             $transaction = Transaction::create([
                 'user_id' => $from->user_id,
                 'user_account_id' => $request->user_account_id,
-                'payment_provider_id' => $account->provider_id,
                 'coin_id' => $from->coin_id,
                 'wallet_id' => $from->id,
                 'amount' => $amount,
@@ -280,12 +279,12 @@ class DraftController extends Controller
     private function _calcUsdLimits($valorDiario, $valorTransaction)
     {
         $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
-        $limits->limit_usd_diary = floatval($limits->limit_usd_diary);
+        $limits->limit_lqx_diary = floatval($limits->limit_lqx_diary);
         $valorDiario = floatval($valorDiario);
 
-        if ($valorTransaction <= $limits->limit_usd_diary) {
+        if ($valorTransaction <= $limits->limit_lqx_diary) {
             $_limit = floatval($valorTransaction + $valorDiario);
-            if ($_limit <= $limits->limit_usd_diary) {
+            if ($_limit <= $limits->limit_lqx_diary) {
                 return true;
             }
         }

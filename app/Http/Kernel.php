@@ -69,12 +69,11 @@ class Kernel extends HttpKernel
         'pincheck' => Middleware\PinCheck::class,
         'gateway' => Middleware\Gateway::class,
         'gatewayelegible' => Middleware\GatewayElegible::class,
-        'pharaosgateway' => Middleware\PharaosGateway::class,
-        'pharaosgatewayelegible' => Middleware\PharaosGatewayElegible::class,
         'admin' => Middleware\Admin::class,
         'localization' => Middleware\Localization::class,
         'allowbuywithfiat' => Middleware\AllowBuyWithFiat::class,
         'allowsellforfiat' => Middleware\AllowSellForFiat::class,
+        'credminer' => Middleware\Credminer::class,
     ];
 
     /**

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddValueUsdToProductsTable extends Migration
+class AddLimitLqxToUserLevelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddValueUsdToProductsTable extends Migration
      */
     public function up()
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->decimal('value_usd', 10, 2)->default(0)->after('value');
+        Schema::table('user_levels', function (Blueprint $table) {
+            $table->decimal('limit_lqx_diary', 28, 18)->default(0);
         });
     }
 
@@ -25,8 +25,8 @@ class AddValueUsdToProductsTable extends Migration
      */
     public function down()
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('value_usd');
+        Schema::table('user_levels', function (Blueprint $table) {
+            $table->dropColumn('limit_lqx_diary');
         });
     }
 }

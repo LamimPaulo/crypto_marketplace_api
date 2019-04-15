@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed name
  * @property mixed limit_btc_diary
  * @property mixed limit_brl_diary
- * @property mixed limit_usd_diary
+ * @property mixed limit_lqx_diary
  * @property mixed limit_transaction_auto
  * @property mixed brokerage_fee
  * @property mixed is_referrable
@@ -25,15 +25,13 @@ class UserLevel extends Model
         'name',
         'limit_btc_diary',
         'limit_brl_diary',
-        'limit_usd_diary',
+        'limit_lqx_diary',
         'limit_transaction_auto',
         'brokerage_fee',
         'is_referrable',
         'referral_profit',
         'is_gateway_elegible',
         'gateway_tax',
-        'is_gateway_mmn_elegible',
-        'gateway_mmn_tax',
         'is_card_elegible',
         'is_active',
         'is_allowed_buy_with_fiat',
@@ -45,7 +43,6 @@ class UserLevel extends Model
     protected $appends = [
         'btcDiary',
         'brlDiary',
-        'usdDiary',
         'transactionAuto',
         'brokeragePercent',
     ];
@@ -62,7 +59,7 @@ class UserLevel extends Model
 
     public function getBtcDiaryAttribute()
     {
-        return sprintf('%.8f', $this->limit_btc_diary);
+        return sprintf('%.5f', $this->limit_btc_diary);
     }
 
     public function getBrlDiaryAttribute()
@@ -70,14 +67,9 @@ class UserLevel extends Model
         return 'R$ ' . number_format($this->limit_brl_diary, 2, ',', '.');
     }
 
-    public function getUsdDiaryAttribute()
-    {
-        return '$ ' . sprintf('%.2f', $this->limit_usd_diary);
-    }
-
     public function getTransactionAutoAttribute()
     {
-        return sprintf('%.8f', $this->limit_transaction_auto);
+        return sprintf('%.5f', $this->limit_transaction_auto);
     }
 
     public function getBrokeragePercentAttribute()
@@ -100,7 +92,7 @@ class UserLevel extends Model
         return $this->hasMany(TaxCoin::class, 'user_level_id')->where('coin_id', 2);
     }
 
-    public function tax_usd()
+    public function tax_lqx()
     {
         return $this->hasMany(TaxCoin::class, 'user_level_id')->where('coin_id', 3);
     }

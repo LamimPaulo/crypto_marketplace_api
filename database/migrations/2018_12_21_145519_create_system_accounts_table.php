@@ -16,7 +16,6 @@ class CreateSystemAccountsTable extends Migration
         Schema::create('system_accounts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('bank_id')->unsigned()->nullable();
-            $table->integer('provider_id')->unsigned()->nullable();
             $table->string('agency')->nullable();
             $table->string('account')->nullable();
             $table->string('agency_digit')->nullable();

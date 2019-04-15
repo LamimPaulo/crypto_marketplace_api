@@ -14,7 +14,7 @@ abstract class EnumTokenAction
     const PHONE_VERIFY = 8;
     const DATA_VERIFY = 9;
     const CONVERT_COIN = 10;
-    const BUY_MINING = 11;
+    const BUY_LEVEL = 11;
     const GATEWAY_KEY = 12;
     const FIAT_SEND = 13;
     const INVESTMENT_IN = 14;
@@ -34,13 +34,13 @@ abstract class EnumTokenAction
         self::PHONE_VERIFY => 'Verificação de Telefone',
         self::DATA_VERIFY => 'Atualização de Dados',
         self::CONVERT_COIN => 'Conversão de Moeda',
-        self::BUY_MINING => 'Contratação de Mineração',
         self::GATEWAY_KEY => 'Gateway de Pagamentos',
         self::FIAT_SEND => 'Transferência de Valores',
         self::INVESTMENT_IN => 'Investimento',
         self::INVESTMENT_OUT => 'Saque de Investimento',
-        self::INDEX_FUNDS_IN => 'Aquisição Index Funds',
-        self::INDEX_FUNDS_OUT => 'Saque Index Funds',
+        self::INDEX_FUNDS_IN => 'Aquisição de Investimento',
+        self::INDEX_FUNDS_OUT => 'Saque de Investimentos',
         self::CANCEL_DRAFT => 'Cancelamento de Saque',
+        self::BUY_LEVEL => 'Compra de Nível',
     ];
 }

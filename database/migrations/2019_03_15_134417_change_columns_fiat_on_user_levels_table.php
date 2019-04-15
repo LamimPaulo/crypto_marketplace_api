@@ -15,7 +15,7 @@ class ChangeColumnsFiatOnUserLevelsTable extends Migration
     {
         Schema::table('user_levels', function (Blueprint $table) {
             $table->decimal('limit_brl_diary', 12, 2)->default(0)->change();
-            $table->decimal('limit_usd_diary', 12, 2)->default(0)->change();
+            $table->decimal('limit_lqx_diary', 28, 18)->default(0)->change();
         });
     }
 

@@ -14,9 +14,9 @@ class AddInternalFlagToGatewayTable extends Migration
     public function up()
     {
         Schema::table('gateway', function (Blueprint $table) {
-            $table->uuid('payer_user_id')->nullable()->after('mining_user_id');
-            $table->integer('is_internal_payment')->unsigned()->nullable()->after('mining_user_id');
-            $table->integer('arbitrage_user_id')->unsigned()->nullable()->after('mining_user_id');
+            $table->uuid('payer_user_id')->nullable();
+            $table->integer('is_internal_payment')->unsigned()->nullable();
+            $table->integer('arbitrage_user_id')->unsigned()->nullable();
         });
     }
 

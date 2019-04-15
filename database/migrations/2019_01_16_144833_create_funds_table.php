@@ -16,7 +16,6 @@ class CreateFundsTable extends Migration
     {
         Schema::create('funds', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('coin_provider_id')->unsigned();
             $table->string('name')->unique();
             $table->enum('type', [EnumFundType::LIMITED, EnumFundType::UNLIMITED])->default(EnumFundType::UNLIMITED);
             $table->decimal('buy_tax', 18, 8)->default(1);

@@ -3,7 +3,6 @@
 namespace App\Models\Funds;
 
 use App\Enum\EnumFundType;
-use App\Models\CoinProvider;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,7 +17,6 @@ use Illuminate\Database\Eloquent\Model;
 class Funds extends Model
 {
     protected $fillable = [
-        'coin_provider_id',
         'name',
         'type',
         'buy_tax',
@@ -67,11 +65,6 @@ class Funds extends Model
     public function getStartPriceLocalAttribute()
     {
         return number_format($this->start_price, 2, ',', '.');
-    }
-
-    public function provider()
-    {
-        return $this->belongsTo(CoinProvider::class, 'coin_provider_id');
     }
 
     public function getTypeNameAttribute()

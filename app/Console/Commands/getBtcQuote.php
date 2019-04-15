@@ -40,7 +40,6 @@ class getBtcQuote extends Command
     {
 
         $quoteCoinController = new CoinQuoteController();
-        $quoteCoinController->USDTOBRL_QUOTE();
         $quoteCoinController->CRYPTO_QUOTES();
     }
 }

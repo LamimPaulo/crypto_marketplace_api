@@ -28,7 +28,6 @@ class SystemAccountController extends Controller
     {
         try {
             if($request->type==EnumAccountType::BANK){
-                $request['provider_id'] = 1;
                 SystemAccount::create($request->except('email'));
             }else{
                 SystemAccount::create($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
@@ -52,7 +51,6 @@ class SystemAccountController extends Controller
             $account = SystemAccount::findOrFail($request->id);
 
             if($request->type==EnumAccountType::BANK){
-                $request['provider_id'] = 1;
                 $account->update($request->except('email'));
             }else{
                 $account->update($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));

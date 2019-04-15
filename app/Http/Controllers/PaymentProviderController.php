@@ -27,7 +27,6 @@ class PaymentProviderController extends Controller
             'status' => EnumTransactionsStatus::PENDING,
             'type' => EnumTransactionType::IN,
             'category' => EnumTransactionCategory::DEPOSIT,
-            'payment_provider_id' => 2
         ])
             ->whereIn('coin_id', [$BRL, $USD])->orderBy('created_at')->get();
 

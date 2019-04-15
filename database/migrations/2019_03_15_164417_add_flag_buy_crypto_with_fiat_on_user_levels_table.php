@@ -14,8 +14,9 @@ class AddFlagBuyCryptoWithFiatOnUserLevelsTable extends Migration
     public function up()
     {
         Schema::table('user_levels', function (Blueprint $table) {
-            $table->boolean('is_allowed_sell_for_fiat')->default(0)->after('is_card_elegible');
-            $table->boolean('is_allowed_buy_with_fiat')->default(0)->after('is_card_elegible');
+            $table->boolean('is_card_elegible')->default(0);
+            $table->boolean('is_allowed_sell_for_fiat')->default(0);
+            $table->boolean('is_allowed_buy_with_fiat')->default(0);
         });
     }
 

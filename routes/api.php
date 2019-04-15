@@ -25,16 +25,7 @@ Route::post('/resetPassword', 'ResetPasswordController@process');
 Route::get('/countries', 'CountryController@list');
 
 Route::middleware(['auth:api', 'localization'])->group(function () {
-    Route::group(['prefix' => 'documents', 'namespace' => 'User', 'as' => 'documents.'], function () {
-        //gravar documento do usuario atual por tipo
-        Route::post('/store', 'DocumentController@store');
-        //listar todos os documentos do usuarios logado
-        Route::get('/list', 'DocumentController@index');
-        //gerar url temporaria de acesso ao documento requisitado do usuario
-        Route::get('/show/{document}', 'DocumentController@show');
-        //verificar situacao do documeto requisitado por tipo
-        Route::get('/verified/{document}', 'DocumentController@verified');
-    });
+
 
     Route::group(['prefix' => 'user', 'namespace' => 'User', 'as' => 'user.'], function () {
         //retorna dados do usuario
@@ -79,8 +70,6 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
         //lista de níves disponíveis
         Route::get('levels', 'UserLevelController@index');
-        //executa a compra de nível
-        Route::post('buy-level', 'UserLevelController@store');
 
         //retorna as contas de transaferencia favoritas do usuario
         Route::get('/fav-accounts', 'UserFavAccountController@index');
@@ -93,6 +82,17 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         //hist
         Route::get('/hist', 'UserController@hist');
         Route::get('/dashboard', 'UserController@dashboard');
+
+        Route::group(['prefix' => 'documents', 'as' => 'documents.'], function () {
+            //gravar documento do usuario atual por tipo
+            Route::post('/store', 'DocumentController@store');
+            //listar todos os documentos do usuarios logado
+            Route::get('/list', 'DocumentController@index');
+            //gerar url temporaria de acesso ao documento requisitado do usuario
+            Route::get('/show/{document}', 'DocumentController@show');
+            //verificar situacao do documeto requisitado por tipo
+            Route::get('/verified/{document}', 'DocumentController@verified');
+        });
     });
 
     //google 2fa
@@ -142,12 +142,13 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/transfer', 'TransactionsController@transfer')->middleware(['tokencheck', 'pincheck']);
     });
 
+    Route::group(['prefix' => 'levels', 'as' => 'levels.'], function () {
+        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck']);
+    });
+
     Route::group(['prefix' => 'coins', 'as' => 'coins.'], function () {
         Route::get('/', 'Admin\CoinsController@index');
         //preco da moeda indicada pelo simbolo (abbr)
-        Route::get('/price/{symbol}', 'BinanceUtilsController@getPrice');
-        //precos de todas as moedas ativadas na plataforma
-        Route::get('/prices', 'BinanceUtilsController@getPrices');
         Route::get('/quotes', 'CoinQuoteController@quotes');
 
     });
@@ -164,16 +165,6 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/estimateSellTax', 'OrderController@estimateSellTax');
     });
 
-    //detalhes da ordem pelo idetificador gerado na binance
-    Route::get('/order/{order}', 'OrderController@show');
-
-    Route::group(['prefix' => 'assets', 'as' => 'assets.'], function () {
-        //lista de ativos do usuário
-        Route::get('/coins', 'User\UserAssetsController@coins');
-        //dados do grafico de ativos do usuario
-        Route::get('/coins-chart', 'User\UserAssetsController@coinsChart');
-    });
-
     //enviar token de confirmação por email
     Route::post('/send-mail-token', 'Token\TokenMailController@generate');
     //estimar conversao de moeda fiat/crypto - venda
@@ -181,25 +172,14 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     //estimar conversao de moeda fiat/crypto - compra
     Route::post('/convert-buy', 'OrderController@convertBuy')->middleware('allowbuywithfiat');
     //realizar conversao de moeda fiat/crypto
-    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck','allowsellforfiat']);
-    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck','allowbuywithfiat']);
+    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck', 'allowsellforfiat']);
+    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck', 'allowbuywithfiat']);
     //listagem de conversoes realizadas - barra lateral
     Route::get('/conversion-list', 'OrderController@conversionList');
     //listagem de moedas em que o user possui carteira
     Route::get('/my-coins-list', 'OrderController@myCoinsList');
     //detalhes da conversao pela tx - retorna as duas transações geradas
     Route::get('/conversion/{tx}', 'OrderController@conversion');
-
-    Route::group(['prefix' => 'mining', 'namespace' => 'Mining', 'as' => 'mining.'], function () {
-        //pagamentos pendentes gateway
-        Route::get('/pending-gateway', 'MiningPoolController@pendingGateway');
-        //status de mineração do usuario
-        Route::get('/user-stats', 'MiningPoolController@userStats');
-        //gráfico de rewards do usuário
-        Route::get('/user-reward-chart', 'MiningPoolController@userRewardChart');
-        //execução de contratação de ths da mineração
-        Route::post('/buy-ths', 'MiningPlanController@buyThs')->middleware('pincheck');
-    });
 
     //gateway de pagamentos
     Route::group(['prefix' => 'gateway', 'middleware' => 'gatewayelegible'], function () {
@@ -217,16 +197,6 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/list-payments', 'GatewayApiKeyController@listPayments');
         //detalhes do pagamento
         Route::get('/show/{payment}', 'GatewayApiKeyController@showPayment');
-    });
-
-    //gateway de pagamentos piramidao
-    Route::group(['prefix' => 'pharaos-gateway'], function () {
-        //listar chave(s)
-        Route::get('/get-key', 'PharaosGatewayApiKeyController@index');
-        //gerar api key
-        Route::post('/new-key', 'PharaosGatewayApiKeyController@store')->middleware('pincheck');
-        //atualizar informações da chave
-        Route::post('/update-key', 'PharaosGatewayApiKeyController@update')->middleware('pincheck');
     });
 
     Route::group(['prefix' => 'exchange', 'namespace' => 'Exchange', 'as' => 'exchange.'], function () {
@@ -285,18 +255,22 @@ Route::post('/gateway/update-tx', 'GatewayApiKeyController@updatePayment');
 Route::post('/payments/check-key', 'GatewayController@checkKey');
 
 Route::get('/uuid', function () {
-    return response(['uuid' => \Ramsey\Uuid\Uuid::uuid4()->toString()], 200);
+    $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+    return response([
+        'uuid' => $id,
+        'key' => str_replace("-", "", $id)
+    ], 200);
 });
 
 Route::get('/time', function () {
     return response(['time' => \Carbon\Carbon::now()->toIso8601ZuluString()], 200);
 });
 
-//integração mmn
-//retorna os saldos da api_key
-Route::group(['prefix' => 'pharaos-gateway', 'middleware' => 'pharaosgateway'], function () {
-    Route::post('/balances', 'PharaosGatewayApiKeyController@balances');
-    Route::post('/convert', 'PharaosGatewayApiKeyController@convert');
-});
-
 Route::post('operation', 'OperationController@index');
+
+//gateway de saques credminer
+Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
+    function () {
+        Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');//<---ok
+        Route::post('/check-key', 'Credminer\PaymentController@checkKey');//<---ok
+    });
