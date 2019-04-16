@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Enum\EnumAccountType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserAccountRequest;
 use App\Models\User\UserAccount;
@@ -13,7 +12,7 @@ class UserAccountController extends Controller
 {
     public function index()
     {
-        $accounts = UserAccount::with(['bank', 'provider'])->where('user_id', auth()->user()->id);
+        $accounts = UserAccount::with(['bank'])->where('user_id', auth()->user()->id);
 
         if ($accounts->count() > 0) {
             return response([
@@ -33,7 +32,7 @@ class UserAccountController extends Controller
     public function show($account)
     {
         try {
-            $account = UserAccount::with(['bank', 'provider'])->where('user_id', auth()->user()->id)->findOrFail($account);
+            $account = UserAccount::with(['bank'])->where('user_id', auth()->user()->id)->findOrFail($account);
             return response([
                 'message' => trans('messages.general.success'),
                 'account' => $account
@@ -49,13 +48,9 @@ class UserAccountController extends Controller
     {
         try {
             $request['user_id'] = auth()->user()->id;
-            $account = UserAccount::firstOrNew($request->only('user_id', 'bank_id', 'agency', 'account', 'email'));
+            $account = UserAccount::firstOrNew($request->only('user_id', 'bank_id', 'agency', 'account'));
 
-            if ($request->type == EnumAccountType::BANK) {
-                $account->fill($request->except('email'));
-            } else {
-                $account->fill($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
-            }
+            $account->fill($request->all());
             $account->save();
 
             return response([
@@ -75,11 +70,7 @@ class UserAccountController extends Controller
         try {
             $account = UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->id])->first();
 
-            if ($request->type == EnumAccountType::BANK) {
-                $account->update($request->except('email'));
-            } else {
-                $account->update($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
-            }
+            $account->update($request->all());
 
             return response([
                 'message' => trans('messages.account.updated'),

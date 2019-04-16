@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bank;
-use App\Models\PaymentProvider;
 
 class BankController extends Controller
 {
@@ -18,11 +17,5 @@ class BankController extends Controller
             ];
         }
         return $banks;
-    }
-
-    public function providers()
-    {
-        $providers = PaymentProvider::where('id', '2')->orderBy('name')->get();
-        return $providers;
     }
 }

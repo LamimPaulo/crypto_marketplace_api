@@ -22,7 +22,6 @@ class UserAccount extends Model
         'type',
         'category',
         'observation',
-        'email'
     ];
 
     protected $hidden = ['user_id'];

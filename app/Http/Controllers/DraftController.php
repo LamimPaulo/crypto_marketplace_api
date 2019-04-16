@@ -45,10 +45,6 @@ class DraftController extends Controller
     public function store(DraftRequest $request)
     {
         try {
-            if (auth()->user()->user_level_id === 1) {
-                throw new \Exception(trans('messages.withdrawal.must_confirm_account_to_require_draft'));
-            }
-
             $draft = Transaction::where(['type'=>EnumTransactionType::OUT, 'category' => EnumTransactionCategory::DRAFT, 'status'=> EnumTransactionsStatus::PENDING, 'user_id'=> auth()->user()->id])->first();
             if($draft){
                 throw new \Exception(trans('messages.withdrawal.already_pending'));
