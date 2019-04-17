@@ -5,14 +5,15 @@ namespace App\Models\Funds;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
-class FundQuoteHists extends Model
+class FundBalancesHists extends Model
 {
+    protected $table = 'fund_balances_hists';
+
     protected $fillable = [
         'user_id',
         'fund_id',
-        'quote',
-        'value',
-        'amount'
+        'balance',
+        'type'
     ];
 
     public function fund()

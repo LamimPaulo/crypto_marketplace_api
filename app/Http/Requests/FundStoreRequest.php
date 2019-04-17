@@ -2,10 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enum\EnumFundType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 /**
  * @property mixed coins
@@ -33,11 +30,14 @@ class FundStoreRequest extends FormRequest
         return [
             'name' => 'required|unique:funds,name',
             'buy_tax' => 'required|numeric',
-            'sell_tax' => 'required|numeric',
-            'admin_tax' => 'required|numeric',
+            'redemption_tax' => 'required|numeric',
+            'early_redemption_tax' => 'required|numeric',
+            'coin_id' => 'required|exists:coins,id',
+            'price' => 'required|numeric',
+            'monthly_profit' => 'required|numeric',
+            'validity' => 'required|numeric',
             'is_active' => 'required|boolean',
-            'start_amount' => 'required|numeric',
-            'start_price' => 'required|numeric',
+
             'coins' => 'required|array',
             'coins.*.coin_id' => 'required|distinct|exists:coins,id',
             'coins.*.percent' => 'required|numeric'
@@ -52,19 +52,25 @@ class FundStoreRequest extends FormRequest
             'coins.*.coin_id.distinct' => 'É necessário informar moedas distintas.',
             'coins.*.coin_id.exists' => 'É necessário informar moedas válidas.',
 
-            'name.required' => 'O nome do fundo é obrigatório.',
-            'buy_tax.required' => 'A porcentagem de comissão de compra é obrigatória.',
-            'sell_tax.required' => 'A porcentagem de comissão de venda é obrigatória.',
-            'admin_tax.required' => 'A taxa administrativa é obrigatória.',
-            'start_amount.required' => 'O valor inicial investido é obrigatório.',
-            'start_price.required' => 'O valor inicial da cota é obrigatório.',
+            'name.required' => 'O nome do fundo deve ser informado.',
+            'buy_tax.required' => 'A taxa de compra deve ser informada.',
+            'redemption_tax' => 'A taxa de retirada deve ser informada.',
+            'early_redemption_tax' => 'A taxa de antecipação deve ser informada.',
+            'coin_id' => 'A moeda deve ser informada.',
+            'price' => 'O preço do fundo deve ser informado.',
+            'monthly_profit' => 'A percentagem de lucro deve ser informada.',
+            'validity' => 'O prazo do fundo deve ser informado.',
+            'is_active' => 'O status de atividade deve ser informado.',
 
             'name.unique' => 'O nome do fundo já está sendo utilizado',
-            'buy_tax.numeric' => 'A porcentagem de comissão de compra deve ser númerica.',
-            'sell_tax.numeric' => 'A porcentagem de comissão de venda deve ser númerica.',
-            'admin_tax.numeric' => 'A taxa administrativa deve ser númerica (%).',
-            'start_amount.numeric' => 'O valor inicial investido deve ser númerico',
-            'start_price.numeric' => 'O valor inicial da cota deve ser númerico',
+            'buy_tax.numeric' => 'A taxa de compra deve ser em formato númerico (%).',
+            'redemption_tax.numeric' => 'A taxa de retirada deve ser em formato númerico (%).',
+            'early_redemption_tax.numeric' => 'A taxa de antecipação deve ser em formato númerico (%).',
+            'coin_id.exists',
+            'price.numeric' => 'O preço do fundo deve ser em formato númerico (%).',
+            'monthly_profit.numeric' => 'A percentagem de lucro deve ser em formato númerico (%).',
+            'validity.numeric' => 'O prazo do fundo deve ser em formato númerico (meses).',
+            'is_active.boolean' => 'O status do fundo deve ser ativo ou inativo.',
         ];
     }
 }

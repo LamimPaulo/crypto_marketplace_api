@@ -3,8 +3,9 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use App\Enum\EnumFundBalanceType;
 
-class CreateFundQuotesTable extends Migration
+class CreateFundBalancesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +14,13 @@ class CreateFundQuotesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fund_quotes', function (Blueprint $table) {
+        Schema::create('fund_balances', function (Blueprint $table) {
             $table->increments('id');
             $table->uuid('user_id');
             $table->integer('fund_id')->unsigned();
-            $table->integer('quote')->default(0);
-            $table->decimal('value', 18,8)->default(0);
-            $table->decimal('amount', 18,8)->default(0);
+            $table->decimal('balance', 28,18)->default(0);
+            $table->enum('type', [EnumFundBalanceType::BLOCKED, EnumFundBalanceType::FREE])
+                ->default(EnumFundBalanceType::BLOCKED);
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ class CreateFundQuotesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fund_quotes');
+        Schema::dropIfExists('fund_balances');
     }
 }

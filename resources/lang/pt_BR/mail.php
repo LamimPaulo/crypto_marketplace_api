@@ -48,9 +48,9 @@ return [
         'access' => 'Acesso em',
         'source' => 'Origem',
         'info_2' => 'Você está recebendo este e-mail para garantir que foi você.',
-        'info_3' => '- Verifique sempre se o e-mail foi mesmo enviado através de um endereço válido da Navi Capital. Nós nunca iremos enviar um e-mail pedindo a sua senha ou qualquer informação pessoal.',
+        'info_3' => '- Verifique sempre se o e-mail foi mesmo enviado através de um endereço válido da Liquidex. Nós nunca iremos enviar um e-mail pedindo a sua senha ou qualquer informação pessoal.',
         'info_4' => '- Não acesse sites suspeitos. Se você acessar a sua conta através de uma rede Wi-Fi pública, é altamente recomendável o uso de uma VPN.',
-        'info_5' => 'Está é uma mensagem automática, por favor não responda. Se você não fez esta solicitação ou não é nosso cliente, entre em contato imediatamente com a Navi Capital.',
+        'info_5' => 'Está é uma mensagem automática, por favor não responda. Se você não fez esta solicitação ou não é nosso cliente, entre em contato imediatamente com a Liquidex.',
     ],
     'password_change' => [
         'subject' => 'Solicitação de Troca de Senha',

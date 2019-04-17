@@ -6,9 +6,7 @@ use App\Enum\EnumStatusDocument;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
-use App\Models\Mining\MiningQuota;
-use App\Models\Mining\MiningQuotaProfit;
-use App\Models\Funds\FundQuotes;
+use App\Models\Funds\FundBalances;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserAccount;
@@ -94,10 +92,10 @@ class UserController extends Controller
         try {
             $user = User::with(['level'])->where('email', $request->email)->firstOrFail();
             $wallets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::WALLET])->get();
-            $accounts = UserAccount::with(['bank', 'provider'])->where(['user_id' => $user->id])->get();
+            $accounts = UserAccount::with(['bank'])->where(['user_id' => $user->id])->get();
             $assets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::PRODUCT])->get();
 
-            $funds = FundQuotes::with(['fund'])->where('user_id', $user->id)->orderBy('fund_id')->get();
+            $funds = FundBalances::with(['fund'])->where('user_id', $user->id)->orderBy('fund_id')->get();
 
             return response([
                 'user' => $user,

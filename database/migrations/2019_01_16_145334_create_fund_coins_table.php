@@ -18,9 +18,6 @@ class CreateFundCoinsTable extends Migration
             $table->integer('fund_id')->unsigned();
             $table->integer('coin_id')->unsigned();
             $table->decimal('percent')->default(0);
-            $table->decimal('price',18,8)->default(0);
-            $table->decimal('current_price',18,8)->default(0);
-            $table->decimal('amount',28,18)->default(0);
             $table->timestamps();
         });
     }

@@ -96,28 +96,10 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/coins', 'FundsController@coins');
         //retorna as moedas que ainda não compõem o fundo
         Route::post('/remaining-coins', 'FundsController@remaining');
-        //retorna as operacoes de usuarios relativas ao fundo
-        Route::post('/operations', 'FundsController@operations');
-        //retorna as ordens feitas pelo admin relativas ao fundo
-        Route::post('/orders', 'FundsController@orders');
-        //retornas a quantidade de cotas por usuario do fundo
-        Route::post('/quotes', 'FundsController@quotes');
-        //resumo de cotas do fundo
-        Route::get('/resume/{fund}', 'FundsController@resume');
     });
 
     //exchanges - coin providers
     Route::group(['prefix' => 'exchanges', 'namespace' => 'Exchanges'], function () {
-        //listagem de coin providers
-        Route::get('/assets', 'ExchangesController@assets');
-        //detalhe coin provider
-        Route::get('/assets-provider/{provider}', 'ExchangesController@assetProvider');
-        //atualizar coin providers
-        Route::post('/assets-update', 'ExchangesController@assetsUpdate');
-        Route::post('/assets-store', 'ExchangesController@assetsStore');
-        Route::post('/assets-endpoints-update', 'ExchangesController@assetsEnpointsUpdate');
-        Route::post('/assets-endpoint-delete', 'ExchangesController@assetsEndpointDelete');
-
         //listagem de exchanges arbitrage
         Route::get('/arbitrage', 'ExchangesController@arbitrage');
         Route::get('/arbitrage-provider/{exchange}', 'ExchangesController@arbitrageExchange');

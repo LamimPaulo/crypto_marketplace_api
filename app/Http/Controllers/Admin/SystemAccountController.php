@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enum\EnumAccountType;
 use App\Http\Controllers\Controller;
 use App\Models\System\SystemAccount;
 use Illuminate\Http\Request;
@@ -27,11 +26,7 @@ class SystemAccountController extends Controller
     public function store(Request $request)
     {
         try {
-            if($request->type==EnumAccountType::BANK){
-                SystemAccount::create($request->except('email'));
-            }else{
-                SystemAccount::create($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
-            }
+            SystemAccount::create($request->all());
 
             return response([
                 'status' => 'success',
@@ -50,11 +45,7 @@ class SystemAccountController extends Controller
         try {
             $account = SystemAccount::findOrFail($request->id);
 
-            if($request->type==EnumAccountType::BANK){
-                $account->update($request->except('email'));
-            }else{
-                $account->update($request->except('bank_id', 'agency', 'account', 'agency_digit', 'account_digit','category'));
-            }
+            $account->update($request->all());
 
             return response([
                 'status' => 'success',

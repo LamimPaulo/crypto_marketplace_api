@@ -57,7 +57,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'no-reply@navi.inf.br'),
-        'name' => env('MAIL_FROM_NAME', 'Navi Capital'),
+        'name' => env('MAIL_FROM_NAME', 'Liquidex'),
     ],
 
     /*

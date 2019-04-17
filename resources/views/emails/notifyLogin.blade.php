@@ -4,7 +4,7 @@
     <!-- NAME: 1 COLUMN -->
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navi Capital</title>
+    <title>Liquidex</title>
 </head>
 
 <body>
@@ -203,7 +203,7 @@
                                                         </strong>
                                                         <br>
                                                         <div style="color: #A5A5A5; font-size: 10px; margin-bottom: 5px;">
-                                                            Copyright {{date('Y')}} Navi Capital. Direitos
+                                                            Copyright {{date('Y')}} Liquidex. Direitos
                                                             Reservados.
                                                         </div>
                                                     </center>

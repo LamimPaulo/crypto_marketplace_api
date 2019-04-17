@@ -11,12 +11,7 @@ class SystemAccountController extends Controller
     public function index()
     {
 
-        if(auth()->user()->country_id===31){
-            $accounts = SystemAccount::with(['bank'])->where('is_active', 1);
-        }else{
-            $accounts = SystemAccount::with(['bank'])->where('is_active', 1);
-        }
-
+        $accounts = SystemAccount::with(['bank'])->where('is_active', 1);
 
         if ($accounts->count() > 0) {
             return response([

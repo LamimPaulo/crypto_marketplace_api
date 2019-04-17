@@ -12,8 +12,8 @@ use App\Models\Coin;
 use App\Models\CoinQuote;
 use App\Models\Funds\FundCoins;
 use App\Models\Funds\FundOrders;
-use App\Models\Funds\FundQuoteHists;
-use App\Models\Funds\FundQuotes;
+use App\Models\Funds\FundBalancesHists;
+use App\Models\Funds\FundBalances;
 use App\Models\Funds\Funds;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
@@ -84,7 +84,7 @@ class FundsController extends Controller
         try {
             Funds::where('is_active', true)->findOrFail($fund_id);
 
-            $balance = FundQuotes::where(['fund_id' => $fund_id, 'user_id' => auth()->user()->id])->first();
+            $balance = FundBalances::where(['fund_id' => $fund_id, 'user_id' => auth()->user()->id])->first();
 
             if (!$balance) {
                 throw new \Exception(trans('messages.products.fund_not_acquired'));
@@ -124,7 +124,7 @@ class FundsController extends Controller
             $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET, 'coin_id' => $coin_id])->first();
 
             DB::beginTransaction();
-            $fundQuote = FundQuotes::firstOrNew([
+            $fundQuote = FundBalances::firstOrNew([
                 'user_id' => auth()->user()->id,
                 'fund_id' => $request->fund_id
             ]);
@@ -135,9 +135,9 @@ class FundsController extends Controller
             $fundQuote->quote = $request->quotes;
             $fundQuote->amount = $values['total'] - $values['tax'];
 
-            FundQuotes::increments($fundQuote);
+            FundBalances::increments($fundQuote);
 
-            FundQuoteHists::create([
+            FundBalancesHists::create([
                 'user_id' => auth()->user()->id,
                 'fund_id' => $request->fund_id,
                 'quote' => $request->quotes,
@@ -203,7 +203,7 @@ class FundsController extends Controller
             $values = $this->estimateSellTax($request);
             $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
 
-            $fundQuote = FundQuotes::where(['user_id' => auth()->user()->id, 'fund_id' => $request->fund_id])->firstOrFail();
+            $fundQuote = FundBalances::where(['user_id' => auth()->user()->id, 'fund_id' => $request->fund_id])->firstOrFail();
 
             if ($request->quotes > $fundQuote->quote) {
                 throw new \Exception(trans('messages.products.insuficient_profit'));
@@ -222,7 +222,7 @@ class FundsController extends Controller
 
             $fundQuote->save();
 
-            FundQuoteHists::create([
+            FundBalancesHists::create([
                 'user_id' => auth()->user()->id,
                 'fund_id' => $request->fund_id,
                 'quote' => $request->quotes,
@@ -318,7 +318,7 @@ class FundsController extends Controller
         $total = $quotes - $tax;
         $admin_tax = 0;
 
-        $balance = FundQuotes::where(['fund_id' => $request->fund_id, 'user_id' => auth()->user()->id])->first();
+        $balance = FundBalances::where(['fund_id' => $request->fund_id, 'user_id' => auth()->user()->id])->first();
 
         if ($balance) {
             if ($total > $balance->amount) {
@@ -338,7 +338,7 @@ class FundsController extends Controller
     public function userList()
     {
         try {
-            $funds = FundQuotes::with(['fund'])->where('user_id', auth()->user()->id)->orderBy('fund_id')->get();
+            $funds = FundBalances::with(['fund'])->where('user_id', auth()->user()->id)->orderBy('fund_id')->get();
 
             $chart = [];
             foreach ($funds as $fund) {

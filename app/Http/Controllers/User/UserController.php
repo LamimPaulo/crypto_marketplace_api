@@ -16,7 +16,7 @@ use App\Models\Mining\MiningQuota;
 use App\Models\CoinCurrentPrice;
 use App\Models\CoinQuote;
 use App\Models\Country;
-use App\Models\Funds\FundQuotes;
+use App\Models\Funds\FundBalances;
 use App\Models\Investments\Investment;
 use App\Models\System\ActivityLogger as Logger;
 use App\Models\User\UserWallet;
@@ -350,7 +350,7 @@ class UserController extends Controller
 
     private function indexFunds()
     {
-        $funds = FundQuotes::with(['fund'])->where('user_id', auth()->user()->id)->get();
+        $funds = FundBalances::with(['fund'])->where('user_id', auth()->user()->id)->get();
         $sum = 0;
 
         foreach ($funds as $fund) {

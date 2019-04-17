@@ -48,9 +48,9 @@ return [
         'access' => 'Access in',
         'source' => 'Source',
         'info_2' => 'You are receiving this email to make sure it was you.',
-        'info_3' => '- Always verify that the email has even been sent through a valid Navi Capital address. We will never send you an email asking for your password or any personal information.',
+        'info_3' => '- Always verify that the email has even been sent through a valid Liquidex address. We will never send you an email asking for your password or any personal information.',
         'info_4' => '- Do not access suspicious sites. If you access your account through a public Wi-Fi network, we strongly recommend using a VPN.',
-        'info_5' => 'This is an automated message, please do not reply. If you have not made this request or are not our customer, please contact Navi Capital immediately.',
+        'info_5' => 'This is an automated message, please do not reply. If you have not made this request or are not our customer, please contact Liquidex immediately.',
     ],
     'password_change' => [
         'subject' => 'Password Change Request',

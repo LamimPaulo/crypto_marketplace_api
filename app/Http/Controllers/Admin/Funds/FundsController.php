@@ -8,14 +8,9 @@ use App\Http\Requests\FundStoreRequest;
 use App\Http\Requests\FundUpdateCoinsRequest;
 use App\Http\Requests\FundUpdateRequest;
 use App\Models\Coin;
-use App\Models\CoinCurrentPrice;
 use App\Models\CoinQuote;
 use App\Models\Funds\FundCoins;
-use App\Models\Funds\FundOrders;
-use App\Models\Funds\FundQuotes;
 use App\Models\Funds\Funds;
-use App\Models\Order;
-use App\Services\ConversorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -23,15 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FundsController extends Controller
 {
-    protected $conversorService;
-
-    public function __construct(
-        ConversorService $conversor
-    )
-    {
-        $this->conversorService = $conversor;
-    }
-
     public function index()
     {
         try {
@@ -39,7 +25,7 @@ class FundsController extends Controller
                 'coins' => function ($coins) {
                     return $coins->with('coin');
                 },
-                'provider'
+                'coin'
             ])->orderBy('is_active', 'DESC');
 
             return response([
@@ -59,41 +45,16 @@ class FundsController extends Controller
     {
         try {
             DB::beginTransaction();
-
             $this->validateCoins($request);
 
-            $request['type'] = EnumFundType::UNLIMITED;
-            $request['value'] = $request->start_price;
             $fund = Funds::create($request->all());
-
-            $btc_price = CoinCurrentPrice::where('coin_id', 1)->first()->price;
 
             if (count($request->coins)) {
                 foreach ($request->coins as $coin) {
-                    if ($coin['coin_id'] == 1) {
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => $btc_price,
-                            'amount' => ($request->start_amount * $coin['percent'] / 100) / $btc_price
-                        ]);
-                    } elseif ($coin['coin_id'] == 2) {
-                        $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => $dollar,
-                            'amount' => ($request->start_amount * $coin['percent'] / 100) * $dollar
-                        ]);
-                    } else {
-                        $currentPrice = CoinCurrentPrice::where('coin_id', $coin['coin_id'])->first()->price;
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => $btc_price * $currentPrice,
-                            'amount' => ($request->start_amount * $coin['percent'] / 100) / ($btc_price * $currentPrice)
-                        ]);
-                    }
+                    $fund->coins()->create([
+                        'percent' => $coin['percent'],
+                        'coin_id' => $coin['coin_id'],
+                    ]);
                 }
             }
 
@@ -115,7 +76,7 @@ class FundsController extends Controller
 
     public function coins()
     {
-        $coins = Coin::where('abbr', '<>', 'USD')->where('is_active', true)->orderBy('name')->get()->makeVisible('id');
+        $coins = Coin::where('is_active', true)->orderBy('name')->get()->makeVisible('id');
 
         return response([
             'coins' => $coins,
@@ -146,7 +107,6 @@ class FundsController extends Controller
                         }
                     ]);
                 },
-                'provider'
             ])->findOrFail($fund_id);
 
             return response([
@@ -291,48 +251,6 @@ class FundsController extends Controller
                 'total_sell' => $operationsSell,
                 'available' => abs($operationsBuy - $operationsSell)
             ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
-    public function operations(Request $request)
-    {
-        try {
-            $operations = FundOrders::with('user')->where('fund_id', $request->fund_id)->orderBy('updated_at', 'DESC')->paginate(10);
-
-            return response($operations, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
-    public function orders(Request $request)
-    {
-        try {
-            $operations = Order::with('provider')->where('fund_id', $request->fund_id)->orderBy('updated_at', 'DESC')->paginate(10);
-
-            return response($operations, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
-    public function quotes(Request $request)
-    {
-        try {
-            $quotes = FundQuotes::with('user', 'fund')->where('fund_id', $request->fund_id)->paginate(10);
-
-            return response($quotes, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'status' => 'error',
