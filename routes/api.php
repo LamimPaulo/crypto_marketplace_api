@@ -273,3 +273,5 @@ Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
         Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');//<---ok
         Route::post('/check-key', 'Credminer\PaymentController@checkKey');//<---ok
     });
+
+Route::get('comando', 'Admin\Funds\FundsController@expirationCommand');

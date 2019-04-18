@@ -32,8 +32,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('gateway:expirepayments')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute();
         $schedule->command('transactions:confirmation')->everyMinute();
-        $schedule->command('investment:percentages')->monthlyOn(1, '00:30');
-        $schedule->command('investment:profits')->dailyAt('01:00');
+        $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
+        $schedule->command('nanotech:profits')->dailyAt('01:00');
+//        $schedule->command('funds:profits')->monthlyOn(10, '00:30');
+//        $schedule->command('funds:expiration')->dailyAt('01:00');
     }
 
     /**

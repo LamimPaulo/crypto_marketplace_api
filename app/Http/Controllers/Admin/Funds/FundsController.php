@@ -10,11 +10,13 @@ use App\Http\Requests\FundStoreRequest;
 use App\Http\Requests\FundUpdateCoinsRequest;
 use App\Http\Requests\FundUpdateRequest;
 use App\Models\Coin;
+use App\Models\Funds\FundBalances;
+use App\Models\Funds\FundBalancesHists;
 use App\Models\Funds\FundCoins;
 use App\Models\Funds\Funds;
 use App\Models\Funds\FundTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -257,6 +259,45 @@ class FundsController extends Controller
                 'status' => 'error',
                 'message' => $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function expirationCommand()
+    {
+        try {
+            $balances = FundBalances::with('fund')
+                ->where('end_date', Carbon::today())
+                ->where('balance_blocked', '>', 0)
+                ->get();
+
+            foreach ($balances as $balance) {
+                FundTransaction::create([
+                    'user_id' => $balance->user_id,
+                    'fund_id' => $balance->fund_id,
+                    'coin_id' => $balance->fund->coin_id,
+                    'value' => $balance->balance_blocked,
+                    'tax' => 0,
+                    'profit_percent' => 0,
+                    'type' => EnumTransactionType::IN,
+                    'category' => EnumFundTransactionCategory::WITHDRAWAL,
+                    'status' => EnumTransactionsStatus::SUCCESS,
+                ]);
+
+                FundBalances::decrements_blocked($balance, $balance->balance_blocked);
+                FundBalances::increments_free($balance, $balance->balance_blocked);
+
+                $newBalance = FundBalances::find($balance->id);
+                FundBalancesHists::create([
+                    'fund_balance_id' => $balance->id,
+                    'balance_free' => $newBalance->balance_free,
+                    'balance_blocked' => $newBalance->balance_blocked
+                ]);
+
+                $balance->end_date = Carbon::today()->addMonths($balance->fund->validity);
+                $balance->save();
+            }
+        }catch (\Exception $e){
+            return $e;
         }
     }
 }

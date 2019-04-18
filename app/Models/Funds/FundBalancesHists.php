@@ -2,7 +2,6 @@
 
 namespace App\Models\Funds;
 
-use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class FundBalancesHists extends Model

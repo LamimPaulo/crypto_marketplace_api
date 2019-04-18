@@ -331,7 +331,7 @@ class FundsController extends Controller
                 'tax' => $tax,
                 'profit_percent' => 0,
                 'type' => EnumTransactionType::OUT,
-                'category' => EnumFundTransactionCategory::WITHDRAWAL,
+                'category' => EnumFundTransactionCategory::PROFIT_WITHDRAWAL,
                 'status' => EnumTransactionsStatus::SUCCESS,
             ]);
 

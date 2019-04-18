@@ -10,14 +10,14 @@ use App\Models\Investments\InvestmentProfitPercent;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class InvestmentProfits extends Command
+class NanotechProfits extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'investment:profits';
+    protected $signature = 'nanotech:profits';
 
     /**
      * The console command description.
