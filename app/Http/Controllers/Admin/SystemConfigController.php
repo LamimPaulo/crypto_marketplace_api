@@ -28,7 +28,7 @@ class SystemConfigController extends Controller
         try {
             $config = SysConfig::findOrFail($request->id);
             if($config->investiment_return!=$request->investiment_return){
-                Artisan::call('investment:percentages');
+                Artisan::call('nanotech:percentages');
             }
             $config->update($request->all());
 

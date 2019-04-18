@@ -54,8 +54,6 @@ class CoinsController extends Controller
             $request['abbr'] = strtoupper($request->abbr);
             Coin::create($request->all());
 
-            Artisan::call("generate:binancepairs");
-
             return response([
                 'status' => 'success',
                 'message' => 'Moeda adicionada com sucesso.'
@@ -76,8 +74,6 @@ class CoinsController extends Controller
 
             $coin = Coin::findOrFail($request->id);
             $coin->update($request->all());
-
-            Artisan::call("generate:binancepairs");
 
             return response([
                 'status' => 'success',
