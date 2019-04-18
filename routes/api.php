@@ -217,16 +217,15 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //funds
     Route::group(['prefix' => 'funds', 'namespace' => 'Funds', 'as' => 'funds.'], function () {
-        //negociar index funds
+        //negociar fundo de investimentos
         Route::post('/buy', 'FundsController@buy')->middleware('pincheck');
-        Route::post('/sell', 'FundsController@sell')->middleware('pincheck');
+        //saque antecipado
+        Route::post('/earlyRedemption', 'FundsController@earlyRedemption')->middleware('pincheck');
+        Route::post('/withdrawal', 'FundsController@withdrawal')->middleware('pincheck');
         //estimar taxa de compra
         Route::post('/estimate-buy-tax', 'FundsController@estimateBuyTax');
-        //estimar taxa de venda
-        Route::post('/estimate-sell-tax', 'FundsController@estimateSellTax');
 
         Route::get('/list', 'FundsController@index');
-        Route::get('/balance/{fund}', 'FundsController@show');
         Route::get('/chart/{fund}', 'FundsController@pieChart');
         Route::get('/user-chart', 'FundsController@userChart');
         Route::get('/user-list', 'FundsController@userList');

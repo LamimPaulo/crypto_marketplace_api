@@ -10,19 +10,13 @@ class FundBalancesHists extends Model
     protected $table = 'fund_balances_hists';
 
     protected $fillable = [
-        'user_id',
-        'fund_id',
-        'balance',
-        'type'
+        'fund_balance_id',
+        'balance_free',
+        'balance_blocked'
     ];
 
     public function fund()
     {
-        return $this->belongsTo(Funds::class, 'fund_id');
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(FundBalances::class, 'fund_balance_id');
     }
 }

@@ -312,7 +312,7 @@ class UserController extends Controller
             //arbitragem
             $investment = Investment::where('user_id', auth()->user()->id)->where('type_id', 1)->get();
             $investment_brl = $this->conversorService::BTC2BRLMIN($investment->sum('amount'));
-            //Index Funds
+            //Fundos de Investimentos
             $funds = $this->indexFunds();
             $funds_btc = $this->conversorService::BRL2BTCSMAX($funds);
 

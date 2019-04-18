@@ -9,7 +9,7 @@ abstract class EnumOrderCategory
 
     const CATEGORY = [
         self::ASSETS => 'Ativos',
-        self::FUNDS => 'Index Fund',
+        self::FUNDS => 'Fundos de Investimento',
     ];
 
 }

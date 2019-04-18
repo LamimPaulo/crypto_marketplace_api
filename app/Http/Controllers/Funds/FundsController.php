@@ -2,51 +2,46 @@
 
 namespace App\Http\Controllers\Funds;
 
-use App\Enum\EnumOrderStatus;
+use App\Enum\EnumFundTransactionCategory;
 use App\Enum\EnumTransactionCategory;
+use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FundRequest;
-use App\Models\Coin;
 use App\Models\CoinQuote;
-use App\Models\Funds\FundCoins;
-use App\Models\Funds\FundOrders;
-use App\Models\Funds\FundBalancesHists;
 use App\Models\Funds\FundBalances;
+use App\Models\Funds\FundBalancesHists;
+use App\Models\Funds\FundCoins;
 use App\Models\Funds\Funds;
+use App\Models\Funds\FundTransaction;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
-use App\Services\ConversorService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
 class FundsController extends Controller
 {
-    protected $conversorService;
-    protected $balanceService;
-
-    public function __construct(
-        ConversorService $conversor,
-        BalanceService $balance
-    )
-    {
-        $this->conversorService = $conversor;
-        $this->balanceService = $balance;
-    }
-
     public function index()
     {
         try {
             $funds = Funds::with([
                 'coins' => function ($coins) {
-                    return $coins->orderBy('percent', 'DESC')->with('coin');
+                    return $coins->with('coin')->orderBy('percent', 'DESC');
                 },
-                'quotes'
-            ])->where('is_active', true);
+                'coin' => function ($coin) {
+                    return $coin->with([
+                        'wallets' => function ($wallets) {
+                            return $wallets->where('user_id', auth()->user()->id);
+                        }
+                    ]);
+                },
+            ])->orderBy('is_active', 'DESC');
 
             return response([
                 'status' => 'success',
@@ -107,64 +102,49 @@ class FundsController extends Controller
     public function buy(FundRequest $request)
     {
         try {
-
-
-            $fiat = auth()->user()->country_id==31 ? "BRL" : "USD";
             $values = $this->estimateBuyTax($request);
+            $acquired = $values['total'] - $values['tax'];
             $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
 
-            $product_coin = Coin::getByAbbr($fiat)->id;
-            $this->balanceService->priorityConversor($values['total'], $product_coin);
-
-            if (!$this->balanceService->verifyBalance($values['total'], $fiat)) {
+            if (!$values['balance_valid']) {
                 throw new \Exception(trans('messages.wallet.insuficient_balance'));
             }
 
-            $coin_id = Coin::getByAbbr($fiat)->id;
-            $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET, 'coin_id' => $coin_id])->first();
+            $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET, 'coin_id' => $fund->coin_id])->first();
 
             DB::beginTransaction();
-            $fundQuote = FundBalances::firstOrNew([
+
+            $fundBalance = FundBalances::where([
                 'user_id' => auth()->user()->id,
                 'fund_id' => $request->fund_id
-            ]);
+            ])->first();
 
-            $fundQuote->value = $values['price'];
-            $fundQuote->save();
+            if (!$fundBalance) {
+                $fundBalance = FundBalances::create([
+                    'user_id' => auth()->user()->id,
+                    'fund_id' => $request->fund_id,
+                    'balance_free' => 0,
+                    'balance_blocked' => 0,
+                    'end_date' => Carbon::now()->addMonths($fund->validity)
+                ]);
+            }
 
-            $fundQuote->quote = $request->quotes;
-            $fundQuote->amount = $values['total'] - $values['tax'];
-
-            FundBalances::increments($fundQuote);
+            FundBalances::increments_blocked($fundBalance, $acquired);
 
             FundBalancesHists::create([
-                'user_id' => auth()->user()->id,
-                'fund_id' => $request->fund_id,
-                'quote' => $request->quotes,
-                'value' => $values['price'],
-                'amount' => $fundQuote->amount
-            ]);
-
-            FundOrders::create([
-                'user_id' => auth()->user()->id,
-                'fund_id' => $fund->id,
-                'side' => 'BUY',
-                'quotes_executed' => 0,
-                'quotes' => $request->quotes,
-                'admin_tax' => 0,
-                'tax' => $values['tax'],
-                'is_executed' => 0,
-                'value' => $values['total'] - $values['tax'],
+                'fund_balance_id' => $fundBalance->id,
+                'balance_free' => $fundBalance->balance_free,
+                'balance_blocked' => $fundBalance->balance_blocked
             ]);
 
             $transaction = Transaction::create([
                 'user_id' => auth()->user()->id,
-                'coin_id' => $coin_id,
+                'coin_id' => $wallet->coin_id,
                 'wallet_id' => $wallet->id,
-                'amount' => $values['total'] - $values['tax'],
-                'status' => EnumOrderStatus::FILLED,
+                'amount' => $acquired,
+                'status' => EnumTransactionsStatus::SUCCESS,
                 'type' => EnumTransactionType::OUT,
-                'category' => EnumTransactionCategory::INDEX_FUND,
+                'category' => EnumTransactionCategory::FUND,
                 'confirmation' => 0,
                 'fee' => 0,
                 'tax' => $values['tax'],
@@ -177,7 +157,21 @@ class FundsController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
+            FundTransaction::create([
+                'user_id' => $transaction->user_id,
+                'fund_id' => $fund->id,
+                'coin_id' => $transaction->coin_id,
+                'transaction_id' => $transaction->id,
+                'value' => $transaction->amount,
+                'tax' => $transaction->tax,
+                'profit_percent' => 0,
+                'type' => EnumTransactionType::IN,
+                'category' => EnumFundTransactionCategory::PURCHASE,
+                'status' => $transaction->status,
+            ]);
+
+            $balanceService = new BalanceService();
+            $balanceService::decrements($transaction);
 
             DB::commit();
             return response([
@@ -195,66 +189,41 @@ class FundsController extends Controller
         }
     }
 
-    public function sell(FundRequest $request)
+    public function earlyRedemption(Request $request)
     {
         try {
+            $fundBalance = FundBalances::with('fund')
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'id' => $request->id
+                ])->firstOrFail();
+
             DB::beginTransaction();
 
-            $values = $this->estimateSellTax($request);
-            $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
-
-            $fundQuote = FundBalances::where(['user_id' => auth()->user()->id, 'fund_id' => $request->fund_id])->firstOrFail();
-
-            if ($request->quotes > $fundQuote->quote) {
-                throw new \Exception(trans('messages.products.insuficient_profit'));
+            if ($fundBalance->balance_blocked === 0) {
+                throw new \Exception("Sem saldo disponível para realizar a operação.");
             }
 
-            $fiat = auth()->user()->country_id==31 ? "BRL" : "USD";
-            $coin_id = Coin::getByAbbr($fiat)->id;
-            $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET, 'coin_id' => $coin_id])->first();
-
-            $fundQuote->quote -= $request->quotes;
-            $fundQuote->amount -= $values['total'];
-
-            if ($fundQuote->amount < 0) {
-                $fundQuote->amount = 0;
-            }
-
-            $fundQuote->save();
-
-            FundBalancesHists::create([
+            $wallet = UserWallet::where([
                 'user_id' => auth()->user()->id,
-                'fund_id' => $request->fund_id,
-                'quote' => $request->quotes,
-                'value' => $values['price'],
-                'amount' => -$values['total']
-            ]);
+                'type' => EnumUserWalletType::WALLET,
+                'coin_id' => $fundBalance->fund->coin_id])->firstOrFail();
 
-            FundOrders::create([
-                'user_id' => auth()->user()->id,
-                'fund_id' => $fund->id,
-                'side' => 'SELL',
-                'quotes_executed' => 0,
-                'quotes' => $request->quotes,
-                'admin_tax' => $values['admin_tax'],
-                'tax' => $values['tax'],
-                'is_executed' => 0,
-                'value' => $values['total'],
-            ]);
+            $tax = $fundBalance->balance_blocked * $fundBalance->fund->early_redemption_tax / 100;
 
             $transaction = Transaction::create([
                 'user_id' => auth()->user()->id,
-                'coin_id' => $coin_id,
+                'coin_id' => $wallet->coin_id,
                 'wallet_id' => $wallet->id,
-                'amount' => $values['total'],
-                'status' => EnumOrderStatus::FILLED,
+                'amount' => $fundBalance->balance_blocked - $tax,
+                'status' => EnumTransactionsStatus::SUCCESS,
                 'type' => EnumTransactionType::IN,
-                'category' => EnumTransactionCategory::INDEX_FUND,
+                'category' => EnumTransactionCategory::FUND,
                 'confirmation' => 0,
                 'fee' => 0,
-                'tax' => $values['tax'] + $values['admin_tax'],
+                'tax' => $tax,
                 'tx' => Uuid::uuid4()->toString(),
-                'error' => 'Venda de ' . $fund->name,
+                'info' => 'Antecipação de Fundo (' . $fundBalance->fund->name .')',
             ]);
 
             TransactionStatus::create([
@@ -262,13 +231,128 @@ class FundsController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $transaction->tax = 0;
-            $this->balanceService::increments($transaction);
+            $balanceService = new BalanceService();
+            $balanceService::increments($transaction);
+
+            FundTransaction::create([
+                'user_id' => auth()->user()->id,
+                'fund_id' => $fundBalance->fund_id,
+                'transaction_id' => $transaction->id,
+                'coin_id' => $fundBalance->fund->coin_id,
+                'value' => $fundBalance->balance_blocked - $tax,
+                'tax' => $tax,
+                'profit_percent' => 0,
+                'type' => EnumTransactionType::OUT,
+                'category' => EnumFundTransactionCategory::EARLY_WITHDRAWAL,
+                'status' => EnumTransactionsStatus::SUCCESS,
+            ]);
+
+            FundBalances::decrements_blocked($fundBalance, $fundBalance->balance_blocked);
+
+            $fundBalance = FundBalances::with('fund')
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'id' => $request->id
+                ])->firstOrFail();
+
+            FundBalancesHists::create([
+                'fund_balance_id' => $fundBalance->id,
+                'balance_free' => $fundBalance->balance_free,
+                'balance_blocked' => $fundBalance->balance_blocked
+            ]);
 
             DB::commit();
             return response([
                 'status' => 'success',
-                'message' => trans('messages.products.index_fund_sold_success'),
+                'message' => trans('messages.withdrawal.success'),
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function withdrawal(Request $request)
+    {
+        try {
+            $fundBalance = FundBalances::with('fund')
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'id' => $request->id
+                ])->firstOrFail();
+
+            DB::beginTransaction();
+
+            if ($fundBalance->balance_free === 0) {
+                throw new \Exception("Sem saldo disponível para realizar a operação.");
+            }
+
+            $wallet = UserWallet::where([
+                'user_id' => auth()->user()->id,
+                'type' => EnumUserWalletType::WALLET,
+                'coin_id' => $fundBalance->fund->coin_id])->firstOrFail();
+
+            $tax = $fundBalance->balance_free * $fundBalance->fund->redemption_tax / 100;
+
+            $transaction = Transaction::create([
+                'user_id' => auth()->user()->id,
+                'coin_id' => $wallet->coin_id,
+                'wallet_id' => $wallet->id,
+                'amount' => $fundBalance->balance_free - $tax,
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'type' => EnumTransactionType::IN,
+                'category' => EnumTransactionCategory::FUND,
+                'confirmation' => 0,
+                'fee' => 0,
+                'tax' => $tax,
+                'tx' => Uuid::uuid4()->toString(),
+                'info' => 'Lucro de Fundo (' . $fundBalance->fund->name .')',
+            ]);
+
+            TransactionStatus::create([
+                'status' => $transaction->status,
+                'transaction_id' => $transaction->id,
+            ]);
+
+            $balanceService = new BalanceService();
+            $balanceService::increments($transaction);
+
+            FundTransaction::create([
+                'user_id' => auth()->user()->id,
+                'fund_id' => $fundBalance->fund_id,
+                'transaction_id' => $transaction->id,
+                'coin_id' => $fundBalance->fund->coin_id,
+                'value' => $fundBalance->balance_free - $tax,
+                'tax' => $tax,
+                'profit_percent' => 0,
+                'type' => EnumTransactionType::OUT,
+                'category' => EnumFundTransactionCategory::WITHDRAWAL,
+                'status' => EnumTransactionsStatus::SUCCESS,
+            ]);
+
+            FundBalances::decrements_free($fundBalance, $fundBalance->balance_free);
+
+            $fundBalance = FundBalances::with('fund')
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'id' => $request->id
+                ])->firstOrFail();
+
+            FundBalancesHists::create([
+                'fund_balance_id' => $fundBalance->id,
+                'balance_blocked' => $fundBalance->balance_blocked,
+                'balance_free' => $fundBalance->balance_free
+            ]);
+
+            DB::commit();
+            return response([
+                'status' => 'success',
+                'message' => trans('messages.withdrawal.success'),
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
@@ -283,79 +367,53 @@ class FundsController extends Controller
 
     public function estimateBuyTax(FundRequest $request)
     {
-        $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
+        $fund = Funds::with('coin')->where('is_active', true)->findOrFail($request->fund_id);
 
-        $price = $fund->value;
+        $balanceService = new BalanceService();
 
-        if (auth()->user()->country_id != 31) {
-            $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
-            $price = $fund->value / $dollar;
-        }
+        $price = $fund->price;
 
         $quotes = $request->quotes * $price;
         $tax = $quotes * ($fund->buy_tax / 100);
+        $total = $quotes + $tax;
+        $isvalid = true;
 
-        return [
-            'price' => $price * 1,
-            'tax' => $tax,
-            'total' => $quotes + $tax
-        ];
-    }
-
-    public function estimateSellTax(FundRequest $request)
-    {
-        $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
-
-        $price = $fund->value;
-
-        if (auth()->user()->country_id != 31) {
-            $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
-            $price = $fund->value / $dollar;
-        }
-
-        $quotes = $request->quotes * $price;
-        $tax = $quotes * ($fund->sell_tax / 100);
-        $total = $quotes - $tax;
-        $admin_tax = 0;
-
-        $balance = FundBalances::where(['fund_id' => $request->fund_id, 'user_id' => auth()->user()->id])->first();
-
-        if ($balance) {
-            if ($total > $balance->amount) {
-                $diff = $total - $balance->amount;
-                $admin_tax = $diff * ($fund->admin_tax / 100);
-            }
+        if (!$balanceService->verifyBalance($total, $fund->coin->abbr)) {
+            $isvalid = false;
         }
 
         return [
             'price' => $price * 1,
             'tax' => $tax,
-            'admin_tax' => $admin_tax,
-            'total' => $total - $admin_tax
+            'total' => $total,
+            'balance_valid' => $isvalid
         ];
     }
 
     public function userList()
     {
-        try {
-            $funds = FundBalances::with(['fund'])->where('user_id', auth()->user()->id)->orderBy('fund_id')->get();
+        $funds = FundBalances::with([
+            'fund' => function ($fund) {
+                return $fund->with([
+                    'coin' => function ($coin) {
+                        return $coin->with([
+                            'wallets' => function ($wallets) {
+                                return $wallets->where('user_id', auth()->user()->id);
+                            }
+                        ]);
+                    },
+                    'coins' => function ($coins) {
+                        return $coins->with('coin')->orderBy('percent', 'DESC');
+                    },
+                ]);
+            },
+            'user'
+        ])->where('user_id', auth()->user()->id)->orderBy('updated_at', 'DESC')->get();
 
-            $chart = [];
-            foreach ($funds as $fund) {
-                array_push($chart, (float)$fund->quote);
-            }
+        return response([
+            'status' => 'success',
+            'funds' => $funds,
+        ], Response::HTTP_OK);
 
-            return response([
-                'status' => 'success',
-                'chart' => $chart,
-                'funds' => $funds,
-            ], Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            return response([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
     }
 }

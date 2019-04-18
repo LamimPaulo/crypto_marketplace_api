@@ -13,7 +13,7 @@ abstract class EnumTransactionCategory
     const MINING = 7;
     const TRANSFER = 8;
     const ARBITRAGE = 9;
-    const INDEX_FUND = 10;
+    const FUND = 10;
     const CREDMINER = 11;
     const BUY_LEVEL = 12;
 
@@ -26,8 +26,8 @@ abstract class EnumTransactionCategory
         self::CONVERSION => 'Conversão',
         self::MINING => 'Mineração',
         self::TRANSFER => 'Transferência',
-        self::ARBITRAGE => 'Arbitragem',
-        self::INDEX_FUND => 'Index Fund',
+        self::ARBITRAGE => 'Nanotech',
+        self::FUND => 'Fundos de Investimento',
         self::BUY_LEVEL => 'Compra de Nível',
     ];
 }

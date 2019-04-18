@@ -27,9 +27,25 @@ class FundTransaction extends Model
         'status',
     ];
 
-    protected $appends = ['typeName', 'categoryName', 'statusName', 'dateLocal', 'updatedLocal'];
+    protected $appends = ['typeName', 'categoryName', 'statusName', 'dateLocal', 'updatedLocal', 'valueLocal', 'taxLocal'];
 
     //Appends
+    public function getValueLocalAttribute()
+    {
+        if ($this->coin_id == 2) {
+            return number_format($this->value, 2, '.', ',');
+        }
+        return sprintf("%.5f", $this->value);
+    }
+
+    public function getTaxLocalAttribute()
+    {
+        if ($this->coin_id == 2) {
+            return number_format($this->tax, 2, '.', ',');
+        }
+        return sprintf("%.5f", $this->tax);
+    }
+
     public function getCategoryNameAttribute()
     {
         return EnumFundTransactionCategory::CATEGORY[$this->category];

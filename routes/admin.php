@@ -82,20 +82,25 @@ Route::group(['namespace' => 'Admin'], function () {
 
     //funds
     Route::group(['prefix' => 'funds', 'namespace' => 'Funds'], function () {
-        //gravar index funds
+        //resumo
+        Route::get('/resume/{fund}', 'FundsController@resume');
+        //gravar fundo de investimentos
         Route::post('/store', 'FundsController@store');
-        //atualizar index funds
+        //atualizar fundo de investimentos
         Route::post('/update', 'FundsController@update');
-        //atualizar as moedas componentes do index fund
+        //atualizar as moedas componentes do fundo de investimento
         Route::post('/update-coins', 'FundsController@updateCoins');
-        //listagem de index funds
+        //listagem de fundo de investimentos
         Route::get('/list', 'FundsController@index');
-        //detalhe do index fund
+        //detalhe do fundo de investimento
         Route::get('/list/{fund}', 'FundsController@show');
         //retorna a lista de moedas possíveis para o fundo
         Route::get('/coins', 'FundsController@coins');
         //retorna as moedas que ainda não compõem o fundo
         Route::post('/remaining-coins', 'FundsController@remaining');
+
+        Route::get('/transactions/{fund}', 'FundTransactionsController@transactions');
+        Route::get('/profits/{fund}', 'FundTransactionsController@profits');
     });
 
     //exchanges - coin providers

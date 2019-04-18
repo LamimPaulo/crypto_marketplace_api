@@ -14,7 +14,7 @@ class InvestmentTypesSeeder extends Seeder
         $types = [
             [
                 'id' => 1,
-                'type' => 'Arbitragem',
+                'type' => 'Nanotech',
                 'brokerage_fee' => 1,
                 'montly_return' => 5,
 

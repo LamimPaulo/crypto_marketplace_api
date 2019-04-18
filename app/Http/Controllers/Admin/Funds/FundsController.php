@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Admin\Funds;
 
-use App\Enum\EnumFundType;
+use App\Enum\EnumFundTransactionCategory;
+use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FundStoreRequest;
 use App\Http\Requests\FundUpdateCoinsRequest;
 use App\Http\Requests\FundUpdateRequest;
 use App\Models\Coin;
-use App\Models\CoinQuote;
 use App\Models\Funds\FundCoins;
 use App\Models\Funds\Funds;
+use App\Models\Funds\FundTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +43,10 @@ class FundsController extends Controller
         }
     }
 
+    /**
+     * @param FundStoreRequest $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
     public function store(FundStoreRequest $request)
     {
         try {
@@ -84,6 +90,10 @@ class FundsController extends Controller
 
     }
 
+    /**
+     * @param $request
+     * @throws \Exception
+     */
     private function validateCoins($request)
     {
         $total_percent = 0;
@@ -96,17 +106,19 @@ class FundsController extends Controller
         }
     }
 
+    /**
+     * @param $fund_id
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
     public function show($fund_id)
     {
         try {
+
             $fund = Funds::with([
                 'coins' => function ($coins) {
-                    return $coins->with([
-                        'coin' => function ($coin) {
-                            return $coin->with('price');
-                        }
-                    ]);
+                    return $coins->with('coin');
                 },
+                'coin'
             ])->findOrFail($fund_id);
 
             return response([
@@ -120,14 +132,17 @@ class FundsController extends Controller
         }
     }
 
+    /**
+     * @param $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
+     */
     public function update(FundUpdateRequest $request)
     {
         try {
             DB::beginTransaction();
 
             $fund = Funds::findOrFail($request->id);
-            unset($request['start_price']);
-            unset($request['start_amount']);
             $fund->update($request->all());
 
             DB::commit();
@@ -155,8 +170,6 @@ class FundsController extends Controller
 
             $fund = Funds::findOrFail($request->id);
 
-            $quote = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first()->average_quote;
-
             $new_coins = [];
 
             foreach ($request->coins as $coin) {
@@ -168,26 +181,10 @@ class FundsController extends Controller
                 $coin_ = FundCoins::where('fund_id', $fund->id)->where('coin_id', $coin['coin_id'])->first();
 
                 if (!$coin_) {
-                    if ($coin['coin_id'] == 1) {
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => $quote
-                        ]);
-                    } elseif ($coin['coin_id'] == 2) {
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => 1
-                        ]);
-                    } else {
-                        $currentPrice = CoinCurrentPrice::where('coin_id', $coin['coin_id'])->first()->price;
-                        $fund->coins()->create([
-                            'percent' => $coin['percent'],
-                            'coin_id' => $coin['coin_id'],
-                            'price' => $quote * $currentPrice,
-                        ]);
-                    }
+                    $fund->coins()->create([
+                        'percent' => $coin['percent'],
+                        'coin_id' => $coin['coin_id'],
+                    ]);
                 } else {
                     $coin_->update([
                         'percent' => $coin['percent'],
@@ -201,8 +198,6 @@ class FundsController extends Controller
             foreach ($delete as $d) {
                 $d->delete();
             }
-
-            Artisan::call("update:fundquotes");
 
             DB::commit();
             return response([
@@ -228,29 +223,35 @@ class FundsController extends Controller
                 array_push($coins_taken, $coin['coin_id']);
             }
         }
-        $coinsController = new CoinsController();
-        $coins = $coinsController->index();
-        return $coins->whereNotIn('coin_id', $coins_taken);
+        return Coin::whereNotIn('coin_id', $coins_taken)->get();
     }
 
+    /**
+     * @param $fund
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
     public function resume($fund)
     {
         try {
-            $operationsBuy = FundOrders::where([
+            $profits = FundTransaction::where([
                 'fund_id' => $fund,
-                'side' => 'BUY'
-            ])->sum('quotes');
+                'type' => EnumTransactionType::IN,
+                'category' => EnumFundTransactionCategory::PROFIT,
+                'status' => EnumTransactionsStatus::SUCCESS
+            ])->sum('value');
 
-            $operationsSell = FundOrders::where([
+            $sales = FundTransaction::where([
                 'fund_id' => $fund,
-                'side' => 'SELL'
-            ])->sum('quotes');
+                'type' => EnumTransactionType::IN,
+                'category' => EnumFundTransactionCategory::PURCHASE,
+                'status' => EnumTransactionsStatus::SUCCESS
+            ])->sum('value');
 
             return response([
-                'total_buy' => $operationsBuy,
-                'total_sell' => $operationsSell,
-                'available' => abs($operationsBuy - $operationsSell)
+                'total_sale' => $sales,
+                'total_profits' => $profits,
             ], Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return response([
                 'status' => 'error',

@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use App\Enum\EnumFundBalanceType;
 
 class CreateFundBalancesTable extends Migration
 {
@@ -19,8 +18,8 @@ class CreateFundBalancesTable extends Migration
             $table->uuid('user_id');
             $table->integer('fund_id')->unsigned();
             $table->decimal('balance', 28,18)->default(0);
-            $table->enum('type', [EnumFundBalanceType::BLOCKED, EnumFundBalanceType::FREE])
-                ->default(EnumFundBalanceType::BLOCKED);
+            $table->enum('type', [0, 1])
+                ->default(0);
             $table->timestamps();
         });
     }

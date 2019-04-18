@@ -37,6 +37,12 @@ class Funds extends Model
         return sprintf("%.5f", $this->price);
     }
 
+    public function coins_percent()
+    {
+        return $this->hasMany(FundCoins::class, 'fund_id')->percent;
+    }
+
+    //Relations
     public function coin()
     {
         return $this->belongsTo(Coin::class, 'coin_id');
@@ -47,8 +53,8 @@ class Funds extends Model
         return $this->hasMany(FundCoins::class, 'fund_id');
     }
 
-    public function coins_percent()
+    public function balances()
     {
-        return $this->hasMany(FundCoins::class, 'fund_id')->percent;
+        return $this->hasMany(FundBalances::class, 'fund_id');
     }
 }

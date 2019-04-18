@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class CreateFundBalancesHistsTable extends Migration
+class AlterFundBalancesHistsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateFundBalancesHistsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('fund_balances_hists');
+
         Schema::create('fund_balances_hists', function (Blueprint $table) {
             $table->increments('id');
-            $table->uuid('user_id');
-            $table->integer('fund_id')->unsigned();
-            $table->decimal('balance', 28,18)->default(0);
-            $table->enum('type', [0, 1])
-                ->default(0);
+            $table->integer('fund_balance_id')->unsigned();
+            $table->decimal('balance_free', 28, 18)->default(0);
+            $table->decimal('balance_blocked', 28, 18)->default(0);
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateFundBalancesHistsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fund_balances_hists');
+        //
     }
 }
