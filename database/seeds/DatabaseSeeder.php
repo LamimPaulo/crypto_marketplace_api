@@ -39,8 +39,8 @@ class DatabaseSeeder extends Seeder
             $this->call(ExchangeTaxSeeder::class);
         }
 
-        if(!\App\Models\Investments\InvestmentType::first()){
-            $this->call(InvestmentTypesSeeder::class);
+        if(!\App\Models\Nanotech\InvestmentType::first()){
+            $this->call(NanotechTypesSeeder::class);
         }
 
         if(!\App\Models\Product::first()){

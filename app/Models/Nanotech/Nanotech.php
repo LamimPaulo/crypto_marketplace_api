@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Models\Investments;
+namespace App\Models\Nanotech;
 
 use App\Models\Coin;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
-class Investment extends Model
+class Nanotech extends Model
 {
+    protected $table = 'nanotech';
+
     protected $fillable = [
         'user_id',
         'coin_id',
@@ -23,7 +25,7 @@ class Investment extends Model
 
     public function type()
     {
-        return $this->belongsTo(InvestmentType::class, 'type_id');
+        return $this->belongsTo(NanotechType::class, 'type_id');
     }
 
     public function user()
@@ -33,7 +35,7 @@ class Investment extends Model
 
     public function operations()
     {
-        $this->hasMany(InvestmentOperation::class, 'investment_id');
+        $this->hasMany(NanotechOperation::class, 'investment_id');
     }
 
     public static function increments($operation)

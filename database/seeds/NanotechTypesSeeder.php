@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class InvestmentTypesSeeder extends Seeder
+class NanotechTypesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -21,7 +21,7 @@ class InvestmentTypesSeeder extends Seeder
             ]
         ];
         foreach ($types as $type) {
-            \App\Models\Investments\InvestmentType::create($type);
+            \App\Models\Nanotech\NanotechType::create($type);
         }
     }
 }

@@ -5,8 +5,8 @@ namespace App;
 use App\Models\Country;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
-use App\Models\Investments\Investment;
-use App\Models\Investments\InvestmentOperation;
+use App\Models\Nanotech\Nanotech;
+use App\Models\Nanotech\NanotechOperation;
 use App\Models\User\Document;
 use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
@@ -117,12 +117,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function investments()
     {
-        return $this->hasMany(Investment::class, 'user_id');
+        return $this->hasMany(Nanotech::class, 'user_id');
     }
 
     public function investment_operations()
     {
-        return $this->hasMany(InvestmentOperation::class, 'user_id');
+        return $this->hasMany(NanotechOperation::class, 'user_id');
     }
 
     public function documents()

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Investments;
+namespace App\Models\Nanotech;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InvestmentProfitPercent extends Model
+class NanotechProfitPercent extends Model
 {
     protected $fillable = [
         'percent',
@@ -14,6 +14,6 @@ class InvestmentProfitPercent extends Model
 
     public function investment_type()
     {
-        return $this->belongsTo(InvestmentType::class, 'type_id');
+        return $this->belongsTo(NanotechType::class, 'type_id');
     }
 }

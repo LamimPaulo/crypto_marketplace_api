@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Investments;
+namespace App\Models\Nanotech;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InvestmentType extends Model
+class NanotechType extends Model
 {
     protected $fillable = [
         'type',
@@ -14,11 +14,11 @@ class InvestmentType extends Model
 
     public function investments()
     {
-        $this->hasMany(Investment::class, 'type_id');
+        $this->hasMany(Nanotech::class, 'type_id');
     }
 
     public function profit_percents()
     {
-        $this->hasMany(InvestmentProfitPercent::class, 'type_id');
+        $this->hasMany(NanotechProfitPercent::class, 'type_id');
     }
 }

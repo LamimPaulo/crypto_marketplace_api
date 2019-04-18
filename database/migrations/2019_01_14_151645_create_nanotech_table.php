@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateInvestmentTypesTable extends Migration
+class CreateNanotechTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateInvestmentTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('investment_types', function (Blueprint $table) {
+        Schema::create('nanotech', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('type')->unique();
-            $table->decimal('brokerage_fee', 10, 8)->default(0);//per operation
-            $table->decimal('montly_return', 10, 8)->default(0);
+            $table->uuid('user_id');
+            $table->integer('coin_id')->unsigned();
+            $table->integer('type_id')->unsigned();
+            $table->decimal('amount', 28, 18);
+            $table->integer('status')->unsigned()->default(1);
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ class CreateInvestmentTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('investment_types');
+        Schema::dropIfExists('nanotech');
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-abstract class EnumInvestmentOperationType {
+abstract class EnumNanotechOperationType {
     const IN = 1;
     const PROFIT = 2;
     const DRAFT = 3;

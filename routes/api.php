@@ -207,12 +207,12 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/last-trades', 'ExchangesController@last_trades');
     });
 
-    Route::group(['prefix' => 'investments', 'namespace' => 'Investments', 'as' => 'investments.'], function () {
-        Route::get('/data/{type}', 'InvestmentController@index');
-        Route::get('/chart/{type}', 'InvestmentController@chart');
+    Route::group(['prefix' => 'nanotech', 'namespace' => 'Nanotech', 'as' => 'nanotech.'], function () {
+        Route::get('/data/{type}', 'NanotechController@index');
+        Route::get('/chart/{type}', 'NanotechController@chart');
 
-        Route::post('/send', 'InvestmentController@send')->middleware('pincheck');
-        Route::post('/draft', 'InvestmentController@draft')->middleware('pincheck');
+        Route::post('/send', 'NanotechController@send')->middleware('pincheck');
+        Route::post('/draft', 'NanotechController@draft')->middleware('pincheck');
     });
 
     //funds

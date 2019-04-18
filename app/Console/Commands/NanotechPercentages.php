@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Investments\InvestmentProfitPercent;
-use App\Models\Investments\InvestmentType;
+use App\Models\Nanotech\NanotechProfitPercent;
+use App\Models\Nanotech\NanotechType;
 use Illuminate\Console\Command;
 
 class NanotechPercentages extends Command
@@ -44,12 +44,12 @@ class NanotechPercentages extends Command
 
     private function generate()
     {
-        $investmentReturn = InvestmentType::all();
+        $investmentReturn = NanotechType::all();
         $days = 31;
         foreach ($investmentReturn as $ir) {
             $random = $this->_random_numbers_sum(31, $ir->montly_return * 1000);
             for ($i = 0; $i < $days; $i++) {
-                $percentage = InvestmentProfitPercent::where([
+                $percentage = NanotechProfitPercent::where([
                     'day' => date('Y-m-d', strtotime("+$i days")),
                     'type_id' => $ir->type_id
                 ])->get();
@@ -57,7 +57,7 @@ class NanotechPercentages extends Command
                 if ($percentage->count()) {
                     $percentage[0]->update(['percent' => floatval($random[$i] / 1000)]);
                 } else {
-                    InvestmentProfitPercent::create([
+                    NanotechProfitPercent::create([
                         'day' => date('Y-m-d', strtotime("+$i days")),
                         'percent' => floatval($random[$i] / 1000),
                         'type_id' => $ir->id

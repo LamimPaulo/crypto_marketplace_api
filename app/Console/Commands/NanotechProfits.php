@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Enum\EnumInvestmentOperationStatus;
-use App\Enum\EnumInvestmentOperationType;
-use App\Models\Investments\Investment;
-use App\Models\Investments\InvestmentOperation;
-use App\Models\Investments\InvestmentProfitPercent;
+use App\Enum\EnumNanotechOperationStatus;
+use App\Enum\EnumNanotechOperationType;
+use App\Models\Nanotech\Nanotech;
+use App\Models\Nanotech\NanotechOperation;
+use App\Models\Nanotech\NanotechProfitPercent;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -48,28 +48,28 @@ class NanotechProfits extends Command
 
     private function generate()
     {
-        $investments = Investment::all();
+        $investments = Nanotech::all();
 
         foreach ($investments as $investment) {
-            $profits_today = InvestmentOperation::where('type', EnumInvestmentOperationType::PROFIT)
+            $profits_today = NanotechOperation::where('type', EnumNanotechOperationType::PROFIT)
                                                 ->where('investment_id', $investment->id)
                                                 ->whereDate('created_at', '=', Carbon::today()->toDateString())
                                                 ->where('user_id', $investment->user_id)->count();
 
             if ($profits_today == 0) {
-                $profitPercentToday = InvestmentProfitPercent::where('day', date("Y-m-d"))
+                $profitPercentToday = NanotechProfitPercent::where('day', date("Y-m-d"))
                                                              ->where('type_id', $investment->type_id)->first()->percent;
 
                 $total_profit = ($profitPercentToday * $investment->amount) / 100;
 
                 if($total_profit>0) {
-                    InvestmentOperation::create([
+                    NanotechOperation::create([
                         'user_id' => $investment->user_id,
                         'investment_id' => $investment->id,
                         'amount' => $total_profit,
                         'profit_percentage' => $profitPercentToday,
-                        'status' => EnumInvestmentOperationStatus::SUCCESS,
-                        'type' => EnumInvestmentOperationType::PROFIT,
+                        'status' => EnumNanotechOperationStatus::SUCCESS,
+                        'type' => EnumNanotechOperationType::PROFIT,
                     ]);
                 }
             }

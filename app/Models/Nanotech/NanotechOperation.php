@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Models\Investments;
+namespace App\Models\Nanotech;
 
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
-class InvestmentOperation extends Model
+class NanotechOperation extends Model
 {
     protected $fillable = [
         'user_id',
@@ -20,7 +20,7 @@ class InvestmentOperation extends Model
 
     public function investment()
     {
-        $this->belongsTo(Investment::class, 'investment_id');
+        $this->belongsTo(Nanotech::class, 'investment_id');
     }
 
     public function user()

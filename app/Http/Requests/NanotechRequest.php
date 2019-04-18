@@ -10,7 +10,7 @@ use Illuminate\Validation\Rule;
  * @property mixed type
  * @property mixed operation_type
  */
-class InvestmentRequest extends FormRequest
+class NanotechRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,7 +34,7 @@ class InvestmentRequest extends FormRequest
                 'required',
                 Rule::in([1, 2, 3, 4, 5, 6]),
             ],
-            'type' => 'required|exists:investment_types,id',
+            'type' => 'required|exists:nanotech_types,id',
             'amount' => 'required|numeric'
         ];
     }

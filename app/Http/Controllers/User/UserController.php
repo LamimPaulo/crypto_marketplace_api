@@ -17,7 +17,7 @@ use App\Models\CoinCurrentPrice;
 use App\Models\CoinQuote;
 use App\Models\Country;
 use App\Models\Funds\FundBalances;
-use App\Models\Investments\Investment;
+use App\Models\Nanotech\Nanotech;
 use App\Models\System\ActivityLogger as Logger;
 use App\Models\User\UserWallet;
 use App\Services\ConversorService;
@@ -310,7 +310,7 @@ class UserController extends Controller
         try {
             $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
             //arbitragem
-            $investment = Investment::where('user_id', auth()->user()->id)->where('type_id', 1)->get();
+            $investment = Nanotech::where('user_id', auth()->user()->id)->where('type_id', 1)->get();
             $investment_brl = $this->conversorService::BTC2BRLMIN($investment->sum('amount'));
             //Fundos de Investimentos
             $funds = $this->indexFunds();

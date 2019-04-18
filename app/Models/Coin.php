@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Investments\Investment;
+use App\Models\Nanotech\Nanotech;
 use App\Models\User\UserWallet;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,7 +50,7 @@ class Coin extends Model
 
     public function investments()
     {
-        return $this->hasMany(Investment::class, 'coin_id');
+        return $this->hasMany(Nanotech::class, 'coin_id');
     }
 
     public function price()
