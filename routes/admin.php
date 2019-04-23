@@ -145,6 +145,9 @@ Route::group(['namespace' => 'Admin'], function () {
         //configuracoes do sistema
         Route::get('/system', 'SystemConfigController@index');
         Route::post('/system', 'SystemConfigController@update');
+        //configurcoes nanotech
+        Route::get('/nanotech', 'NanotechTypeController@index');
+        Route::post('/nanotech', 'NanotechTypeController@update');
     });
 });
 

@@ -8,7 +8,6 @@ class NanotechType extends Model
 {
     protected $fillable = [
         'type',
-        'brokerage_fee',
         'montly_return'
     ];
 

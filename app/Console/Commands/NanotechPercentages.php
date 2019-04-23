@@ -49,20 +49,13 @@ class NanotechPercentages extends Command
         foreach ($investmentReturn as $ir) {
             $random = $this->_random_numbers_sum(31, $ir->montly_return * 1000);
             for ($i = 0; $i < $days; $i++) {
-                $percentage = NanotechProfitPercent::where([
+                $percentage = NanotechProfitPercent::firstOrNew([
                     'day' => date('Y-m-d', strtotime("+$i days")),
-                    'type_id' => $ir->type_id
-                ])->get();
+                    'type_id' => $ir->id
+                ]);
 
-                if ($percentage->count()) {
-                    $percentage[0]->update(['percent' => floatval($random[$i] / 1000)]);
-                } else {
-                    NanotechProfitPercent::create([
-                        'day' => date('Y-m-d', strtotime("+$i days")),
-                        'percent' => floatval($random[$i] / 1000),
-                        'type_id' => $ir->id
-                    ]);
-                }
+                $percentage->percent = abs($random[$i] / 1000);
+                $percentage->save();
             }
         }
     }
