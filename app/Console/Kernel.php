@@ -34,8 +34,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:confirmation')->everyMinute();
         $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
         $schedule->command('nanotech:profits')->dailyAt('01:00');
-//        $schedule->command('funds:profits')->monthlyOn(10, '00:30');
-//        $schedule->command('funds:expiration')->dailyAt('01:00');
+        $schedule->command('funds:profits')->monthlyOn(10, '00:30');
+        $schedule->command('funds:expiration')->dailyAt('01:00');
+        $schedule->command('masternode:update')->everyFifteenMinutes();
     }
 
     /**

@@ -211,7 +211,7 @@ return [
         'payment_coin_in'       => 'The payment type selected is invalid.',
         'ip_ip'                 => 'The access IP must be valid.',
     ],
-    'investment' => [
+    'nanotech' => [
         'operation_type_required' => 'The type of operation is required.',
         'operation_type_in'       => 'The type of operation selected is invalid.',
         'type_required'           => 'The type of investment is required.',

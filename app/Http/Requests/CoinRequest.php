@@ -32,7 +32,7 @@ class CoinRequest extends FormRequest
             'is_active' => 'required|boolean',
             'decimal' => 'required|numeric',
             'is_crypto' => 'required|boolean',
-            'is_asset' => 'required|boolean',
+            'is_wallet' => 'required|boolean',
             'buy_tax' => 'required|numeric',
             'sell_tax' => 'required|numeric',
         ];
@@ -51,7 +51,7 @@ class CoinRequest extends FormRequest
             'decimal.required'       => 'É necessário informar a quantidade de casas decimais para a moeda.',
             'decimal.numeric'        => 'A quantidade de casas decimais deve ser em formato numérico.',
             'is_crypto.required'     => 'É necessário informar o tipo de moeda.',
-            'is_asset.required'     => 'É necessário informar o tipo de produto.',
+            'is_wallet.required'     => 'É necessário informar o tipo de produto.',
             'buy_tax.required'       => 'É necessário informar a taxa de venda para a moeda.',
             'buy_tax.numeric'        => 'A taxa de venda deve ser em formato numérico.',
             'sell_tax.required'       => 'É necessário informar a taxa de compra para a moeda.',

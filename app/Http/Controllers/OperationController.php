@@ -77,7 +77,7 @@ class OperationController extends Controller
     public function fees()
     {
         try {
-            $coins = Coin::where('is_crypto', true)->where('is_asset', false)->where('is_active', true)->get();
+            $coins = Coin::where('is_crypto', true)->where('is_wallet', true)->where('is_active', true)->get();
 
             $newCoins = [];
 

@@ -23,7 +23,7 @@ class CoinSeeder extends Seeder
                 'shortname' => $obj->shortname,
                 'abbr' => $obj->abbr,
                 'is_active' => $obj->is_active,
-                'is_asset' => $obj->is_asset,
+                'is_wallet' => $obj->is_wallet,
                 'is_crypto' => $obj->is_crypto,
                 'decimal' => $obj->decimal,
                 'sell_tax' => $obj->sell_tax,

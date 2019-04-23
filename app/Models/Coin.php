@@ -13,7 +13,8 @@ class Coin extends Model
         'shortname',
         'abbr',
         'is_active',
-        'is_asset',
+        'is_wallet',
+        'is_masternode',
         'decimal',
         'is_crypto',
         'fee_low',
@@ -53,13 +54,13 @@ class Coin extends Model
         return $this->hasMany(Nanotech::class, 'coin_id');
     }
 
-    public function price()
-    {
-        return $this->hasOne(CoinCurrentPrice::class);
-    }
-
     public function wallets()
     {
         return $this->hasMany(UserWallet::class, 'coin_id');
+    }
+
+    public function masternodes()
+    {
+        return $this->hasMany(Masternode::class, 'coin_id');
     }
 }

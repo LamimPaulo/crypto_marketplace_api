@@ -51,7 +51,7 @@ class NanotechController extends Controller
                 'user_investment' => $this->start($type),
                 'user_profit' => $this->profit($type),
                 'total_user_investment' => $this->totalSum($type),
-                'coin' => 'BTC'
+                'coin' => 'LQX'
             ];
         } catch (\Exception $e) {
             return \response([
@@ -126,14 +126,14 @@ class NanotechController extends Controller
 
             $investment = Nanotech::where('type_id', $type)
                 ->where('user_id', auth()->user()->id)
-                ->where('coin_id', 1)->first();
+                ->where('coin_id', 3)->first();
 
             if (!$investment) {
                 return 0;
             }
 
             $operation = NanotechOperation::whereIn('type',
-                [EnumNanotechOperationType::PROFIT, EnumNanotechOperationType::PROFIT_DRAFT, EnumNanotechOperationType::PROFIT_IN])
+                [EnumNanotechOperationType::PROFIT, EnumNanotechOperationType::PROFIT_WITHDRAWAL, EnumNanotechOperationType::PROFIT_IN])
                 ->where('user_id', auth()->user()->id)
                 ->where('investment_id', $investment->id);
 
@@ -171,7 +171,7 @@ class NanotechController extends Controller
         }
 
         //verificar se o usuario ja possui investimento
-        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 1);
+        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 3);
         if (!$investment) {
             return response(['message' => trans('messages.products.error_creating_investment')], Response::HTTP_BAD_REQUEST);
         }
@@ -194,7 +194,7 @@ class NanotechController extends Controller
 
             if (EnumNanotechOperationType::IN == $request->operation_type) {
                 //verificar se possui saldo suficiente para deposito
-                $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'coin_id' => 1, 'type' => EnumUserWalletType::WALLET])->first();
+                $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'coin_id' => 3, 'type' => EnumUserWalletType::WALLET])->first();
                 if ($wallet->balance < $request->amount) {
                     throw new \Exception(trans('messages.wallet.insuficient_balance'));
                 }
@@ -220,7 +220,7 @@ class NanotechController extends Controller
             }
 
             if (EnumNanotechOperationType::PROFIT_IN == $request->operation_type) {
-                if ($request->coin != 1) {
+                if ($request->coin != 3) {
                     throw new \Exception(trans('messages.coin.not_compatible_with_investment'));
                 }
                 //verificar se o valor de lucro é valido
@@ -241,7 +241,7 @@ class NanotechController extends Controller
             //increment investment
             $operation = NanotechOperation::create($operation);
             $operation->type_id = $request->type;
-            $operation->coin_id = 1;
+            $operation->coin_id = 3;
 
             Nanotech::increments($operation);
 
@@ -260,7 +260,7 @@ class NanotechController extends Controller
      */
     private function _calc_amount($amount, $coin)
     {
-        if ($coin == 1) {
+        if ($coin == 3) {
             return $amount;
         }
 
@@ -275,17 +275,7 @@ class NanotechController extends Controller
             $request['base'] = 'BRL';
             $result = $this->conversorService::BRL2BTCSMAX($amount);
             return $this->convertCoin($request, $result);
-        }
-
-        if ($coin == 3 AND auth()->user()->country_id != 31) {
-            if (!$this->balanceService->verifyBalance($amount, 'USD')) {
-                return response(['message' => 'Insufficient balance to complete the operation'], Response::HTTP_BAD_REQUEST);
-            }
-
-            $result = $this->conversorService::USD2BTCMAX($amount);
-            $request['base'] = 'USD';
-            return $this->convertCoin($request, $result);
-        }
+        }       
 
         throw new \Exception(trans('messages.coin.not_compatible_with_investment'));
     }
@@ -298,20 +288,20 @@ class NanotechController extends Controller
      */
     public function draft(Request $request)
     {
-        if ($request->operation_type != EnumNanotechOperationType::DRAFT_TOTAL) {
+        if ($request->operation_type != EnumNanotechOperationType::TOTAL_WITHDRAWAL) {
             if (!is_numeric($request->amount) OR $request->amount <= 0) {
                 return response(['message' => trans('messages.invalid_value_request')], Response::HTTP_BAD_REQUEST);
             }
         }
 
-        if ($request->operation_type != EnumNanotechOperationType::DRAFT
-            AND $request->operation_type != EnumNanotechOperationType::PROFIT_DRAFT
-            AND $request->operation_type != EnumNanotechOperationType::DRAFT_TOTAL) {
+        if ($request->operation_type != EnumNanotechOperationType::WITHDRAWAL
+            AND $request->operation_type != EnumNanotechOperationType::PROFIT_WITHDRAWAL
+            AND $request->operation_type != EnumNanotechOperationType::TOTAL_WITHDRAWAL) {
             return response(['message' => trans('messages.general.invalid_operation_type')], Response::HTTP_BAD_REQUEST);
         }
 
         //verificar se o usuario ja possui investimento
-        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 1);
+        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 3);
         if (!$investment) {
             return response(['message' => trans('messages.products.error_creating_investment')], Response::HTTP_BAD_REQUEST);
         }
@@ -327,7 +317,7 @@ class NanotechController extends Controller
                 'type' => $request->operation_type,
             ];
 
-            if (EnumNanotechOperationType::DRAFT == $request->operation_type) {
+            if (EnumNanotechOperationType::WITHDRAWAL == $request->operation_type) {
                 //verificar se possui saldo suficiente para saque
                 $investmentBalance = $this->start($request->type);
                 if ($request->amount > $investmentBalance) {
@@ -336,11 +326,11 @@ class NanotechController extends Controller
                 //solicitar saque de acordo com valor digitado
                 $operation = NanotechOperation::create($operation);
                 $operation->type_id = $request->type;
-                $operation->coin_id = 1;
+                $operation->coin_id = 3;
                 Nanotech::increments($operation);
             }
 
-            if (EnumNanotechOperationType::PROFIT_DRAFT == $request->operation_type) {
+            if (EnumNanotechOperationType::PROFIT_WITHDRAWAL == $request->operation_type) {
                 //verificar se possui lucro suficiente para saque
                 $profit = $this->profit($request->type);
                 if ($request->amount > $profit) {
@@ -350,28 +340,28 @@ class NanotechController extends Controller
                 NanotechOperation::create($operation);
             }
 
-            if (EnumNanotechOperationType::DRAFT_TOTAL == $request->operation_type) {
+            if (EnumNanotechOperationType::TOTAL_WITHDRAWAL == $request->operation_type) {
                 //solicitar saque do investimento total
                 $operation = NanotechOperation::create([
                     'user_id' => auth()->user()->id,
-                    'coin_id' => 1,
+                    'coin_id' => 3,
                     'investment_id' => $investment,
                     'amount' => 0 - $this->start($request->type),
                     'status' => EnumNanotechOperationStatus::PENDING,
-                    'type' => EnumNanotechOperationType::DRAFT,
+                    'type' => EnumNanotechOperationType::WITHDRAWAL,
                 ]);
 
                 //solicitar saque do lucro total
                 NanotechOperation::create([
                     'user_id' => auth()->user()->id,
-                    'coin_id' => 1,
+                    'coin_id' => 3,
                     'investment_id' => $investment,
                     'amount' => 0 - $this->profit($request->type),
                     'status' => EnumNanotechOperationStatus::PENDING,
-                    'type' => EnumNanotechOperationType::PROFIT_DRAFT,
+                    'type' => EnumNanotechOperationType::PROFIT_WITHDRAWAL,
                 ]);
                 $operation->type_id = $request->type;
-                $operation->coin_id = 1;
+                $operation->coin_id = 3;
                 Nanotech::increments($operation);
             }
 

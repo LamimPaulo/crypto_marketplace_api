@@ -211,7 +211,7 @@ return [
         'payment_coin_in'       => 'O tipo de pagamento selecionado é inválido.',
         'ip_ip'                 => 'O IP de acesso deve ser válido.',
     ],
-    'investment' => [
+    'nanotech' => [
         'operation_type_required' => 'O tipo de operação é obrigatório.',
         'operation_type_in'       => 'O tipo de operação selecionado é inválido.',
         'type_required'           => 'O tipo de investimento é obrigatório.',

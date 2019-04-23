@@ -42,12 +42,12 @@ class NanotechRequest extends FormRequest
     public function messages()
     {
         return [
-            'operation_type.required'   => trans('validation.investment.operation_type_required'),
-            'operation_type.in'         => trans('validation.investment.operation_type_in'),
-            'type.required'             => trans('validation.investment.type_required'),
-            'type.exists'               => trans('validation.investment.type_exists'),
-            'amount.required'           => trans('validation.investment.amount_required'),
-            'amount.numeric'            => trans('validation.investment.amount_numeric'),
+            'operation_type.required' => trans('validation.investment.operation_type_required'),
+            'operation_type.in'       => trans('validation.investment.operation_type_in'),
+            'type.required'           => trans('validation.investment.type_required'),
+            'type.exists'             => trans('validation.investment.type_exists'),
+            'amount.required'         => trans('validation.investment.amount_required'),
+            'amount.numeric'          => trans('validation.investment.amount_numeric'),
         ];
     }
 }

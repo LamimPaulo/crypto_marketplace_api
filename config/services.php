@@ -67,10 +67,6 @@ return [
         'secret' => env('BINANCE_SECRET'),
         'key' => env('BINANCE_KEY'),
     ],
-    'slushpool' => [
-        'stats' => 'https://slushpool.com/stats/json/1363999-7b032578eaf1d8cba87bb9acace28e97',
-        'workers' => 'https://slushpool.com/accounts/profile/json/1363999-7b032578eaf1d8cba87bb9acace28e97'
-    ],
     'marketcap' => [
         'key' => 'e5ea3914-506d-472a-8cc6-679b99bb3b21',
         'DASH' => [
@@ -81,6 +77,10 @@ return [
             'email' => 'xmr.marketcap@navi.inf.br',
             'key' => 'ecbe6f64-e5fd-4fe8-b0f6-451b09330be2',
         ],
+    ],
+    'masternode' => [
+        'api' => 'https://masternodes.pro/api/v1/',
+        'key' => env("MASTERNODE_KEY")
     ]
 
 ];

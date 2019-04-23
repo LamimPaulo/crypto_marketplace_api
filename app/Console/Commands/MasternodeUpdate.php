@@ -2,29 +2,24 @@
 
 namespace App\Console\Commands;
 
-use App\Enum\EnumNanotechOperationStatus;
-use App\Enum\EnumNanotechOperationType;
-use App\Models\Nanotech\Nanotech;
-use App\Models\Nanotech\NanotechOperation;
-use App\Models\Nanotech\NanotechProfitPercent;
-use Carbon\Carbon;
+use App\Http\Controllers\MasternodeController;
 use Illuminate\Console\Command;
 
-class NanotechProfits extends Command
+class MasternodeUpdate extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'nanotech:profits';
+    protected $signature = 'masternode:update';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Gera os lucros diários para os investidores';
+    protected $description = 'Update Masternode stats';
 
     /**
      * Create a new command instance.
@@ -40,14 +35,11 @@ class NanotechProfits extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \Exception
      */
     public function handle()
     {
-        $this->generate();
-    }
-
-    private function generate()
-    {
-
+        $masternode = new MasternodeController();
+        $masternode->updateCommand();
     }
 }

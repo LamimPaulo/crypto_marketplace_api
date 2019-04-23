@@ -11,7 +11,7 @@ class CoinQuoteController extends Controller
 {
     public function CRYPTO_QUOTES()
     {
-        $coins = Coin::where('is_asset', false)->where('is_crypto', true)->get();
+        $coins = Coin::where('is_wallet', true)->where('is_crypto', true)->get();
         $api = new \GuzzleHttp\Client(['http_errors' => false]);
 
         try {
@@ -52,7 +52,7 @@ class CoinQuoteController extends Controller
 
     public function MARKETCAP_CRYPTO_QUOTES()
     {
-        $coins = Coin::whereIn('abbr', ['DASH', 'XMR'])->where('is_asset', false)->where('is_crypto', true)->get();
+        $coins = Coin::whereIn('abbr', ['DASH', 'XMR'])->where('is_wallet', true)->where('is_crypto', true)->get();
 
         try {
 
@@ -119,7 +119,7 @@ class CoinQuoteController extends Controller
             }
             )
             ->where('is_active', true)
-            ->where('is_asset', false)
+            ->where('is_wallet', true)
             ->where('is_crypto', true)
             ->get();
     }

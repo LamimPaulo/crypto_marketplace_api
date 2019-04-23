@@ -42,7 +42,7 @@ class estimateFee extends Command
     public function estimateFeeBTC()
     {
         try {
-            $coins = Coin::where('is_crypto', true)->where('is_asset', false)->where('is_active', true)->get();
+            $coins = Coin::where('is_crypto', true)->where('is_wallet', true)->where('is_active', true)->get();
 
             foreach ($coins as $coin) {
                 $fee_1 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 1, $coin->abbr);

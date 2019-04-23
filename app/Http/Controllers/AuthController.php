@@ -206,7 +206,7 @@ class AuthController extends Controller
             }
         }
 
-        $coins = Coin::whereNotIn('abbr', ['BRL', 'USD'])->where('is_asset', false)->where('is_active', true)->get();
+        $coins = Coin::whereNotIn('abbr', ['BRL', 'USD'])->where('is_wallet', true)->where('is_active', true)->get();
 
         foreach ($coins as $loop_coin) {
             $wallet = UserWallet::with('coin')

@@ -212,7 +212,11 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/chart/{type}', 'NanotechController@chart');
 
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
-        Route::post('/draft', 'NanotechController@draft')->middleware('pincheck');
+        Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
+    });
+
+    Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
+        Route::get('/list', 'MasternodeController@listNodes');
     });
 
     //funds
@@ -233,6 +237,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/update/{fund}', 'FundsController@updateFund');
 
     });
+
+
 
     Route::prefix('admin')->middleware('admin')->group(base_path('routes/admin.php'));
 
@@ -270,8 +276,8 @@ Route::post('operation', 'OperationController@index');
 //gateway de saques credminer
 Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
     function () {
-        Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');//<---ok
-        Route::post('/check-key', 'Credminer\PaymentController@checkKey');//<---ok
+        Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
+        Route::post('/check-key', 'Credminer\PaymentController@checkKey');
     });
 
-Route::get('comando', 'Admin\Funds\FundsController@expirationCommand');
+//Route::get('comando', 'MasternodeController@index');

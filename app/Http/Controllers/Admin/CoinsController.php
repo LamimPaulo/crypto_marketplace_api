@@ -90,7 +90,7 @@ class CoinsController extends Controller
     public function walletsOrder()
     {
         try {
-            $coins = Coin::where('is_asset', 0)->orderBy('wallet_order')->get()->makeVisible('id');
+            $coins = Coin::where('is_wallet', true)->orderBy('wallet_order')->get()->makeVisible('id');
 
             return response([
                 'message' => 'sucess',
