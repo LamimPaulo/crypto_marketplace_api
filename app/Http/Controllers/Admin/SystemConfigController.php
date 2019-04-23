@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enum\EnumWeekdays;
 use App\Http\Controllers\Controller;
 use App\Models\SysConfig;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\HttpFoundation\Response;
 
 class SystemConfigController extends Controller
@@ -26,10 +26,16 @@ class SystemConfigController extends Controller
     public function update(Request $request)
     {
         try {
-            $config = SysConfig::findOrFail($request->id);
-            if($config->investiment_return!=$request->investiment_return){
-                Artisan::call('nanotech:percentages');
+            $days = $request->withdrawalDaysStr;
+            $wdays = [];
+
+            foreach ($days as $d) {
+                array_push($wdays, EnumWeekdays::NUM[$d]);
             }
+
+            $request['withdrawal_days'] = implode(",", $wdays);
+
+            $config = SysConfig::findOrFail($request->id);
             $config->update($request->all());
 
             return response([
