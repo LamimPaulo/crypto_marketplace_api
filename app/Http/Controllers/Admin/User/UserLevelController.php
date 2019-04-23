@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Admin\User;
 
-use App\Enum\EnumCalcType;
-use App\Enum\EnumOperations;
-use App\Enum\EnumTaxType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LevelRequest;
+use App\Models\Product;
 use App\Models\TaxCoin;
 use App\Models\User\UserLevel;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +15,7 @@ class UserLevelController extends Controller
     public function index()
     {
         try {
-            $levels = UserLevel::with(['tax_brl', 'tax_crypto'])->get();
+            $levels = UserLevel::with(['tax_brl', 'tax_crypto', 'product'])->get();
             return response([
                 'message' => trans('messages.general.success'),
                 'levels' => $levels
@@ -32,9 +30,18 @@ class UserLevelController extends Controller
     public function enumTypes()
     {
         return [
-            'calc_types' => EnumCalcType::TYPE,
-            'operation_types' => EnumOperations::OPERATIONS,
-            'tax_types' => EnumTaxType::OPERATIONS
+            'calc_types' => [
+                1 => 'Porcentagem',
+                2 => 'Decimal'
+            ],
+            'operation_types' => [
+                3 => 'Envio',
+                5 => 'Saque',
+            ],
+            'tax_types' => [
+                1 => 'TED',
+                2 => 'Operação',
+            ]
         ];
     }
 
@@ -100,6 +107,11 @@ class UserLevelController extends Controller
             $level = UserLevel::findOrFail($request->id);
             $level->update($request->all());
 
+            $product = Product::findOrFail($request->product_id);
+            $product->value = $request->product['value'];
+            $product->value_lqx = $request->product['value_lqx'];
+            $product->save();
+
             //tax coins update
             foreach ($level->taxes as $tax_) {
                 $tax_->delete();
@@ -136,7 +148,7 @@ class UserLevelController extends Controller
             DB::rollBack();
             return response([
                 'status' => 'error',
-                'message' => $ex
+                'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }

@@ -23,7 +23,6 @@ class Product extends Model
 
     protected $appends = [
         'brlValue',
-        'btcValue',
         'lqxValue'
     ];
 
@@ -40,13 +39,6 @@ class Product extends Model
     public function getBrlValueAttribute()
     {
         return 'R$ ' . number_format($this->value, 2, ',', '.');
-    }
-
-    public function getBtcValueAttribute()
-    {
-        $conversor = new ConversorService();
-        $currentValue = $conversor::BRL2BTCMIN($this->value);
-        return sprintf('%.8f', $currentValue['amount']);
     }
 
     public function getLqxValueAttribute()

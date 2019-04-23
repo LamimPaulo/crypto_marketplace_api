@@ -46,7 +46,7 @@ class NanotechController extends Controller
         try {
             return [
                 'average_profits' => $this->returnPercentage($type),
-                'brokerage_fee' => $this->brokerageFee(),
+                'brokerage_fee' => $this->brokerageFee($type),
                 'under_managment' => $this->total($type),
                 'user_investment' => $this->start($type),
                 'user_profit' => $this->profit($type),
@@ -61,11 +61,22 @@ class NanotechController extends Controller
         }
     }
 
-    public function brokerageFee()
+    public function brokerageFee($type)
     {
         try {
             $fee = UserLevel::where('id', auth()->user()->user_level_id)->first();
-            return round($fee->brokerage_fee);
+            switch ($type) {
+                case (1):
+                    return $fee->nanotech_btc_fee;
+                    break;
+                case (2):
+                    return $fee->nanotech_lqx_fee;
+                    break;
+                default:
+                    return $fee->masternode_fee;
+                    break;
+            }
+
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
@@ -177,7 +188,7 @@ class NanotechController extends Controller
         }
 
         try {
-            $brokerageFeePercentage = $this->brokerageFee();
+            $brokerageFeePercentage = $this->brokerageFee($request->type);
             $request['amount'] = $this->_calc_amount($request->amount, $request->coin);
 
             $brokerageFee = $request->amount * $brokerageFeePercentage / 100;
@@ -275,7 +286,7 @@ class NanotechController extends Controller
             $request['base'] = 'BRL';
             $result = $this->conversorService::BRL2BTCSMAX($amount);
             return $this->convertCoin($request, $result);
-        }       
+        }
 
         throw new \Exception(trans('messages.coin.not_compatible_with_investment'));
     }
