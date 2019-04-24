@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\User;
 
 use App\Enum\EnumTokenAction;
-use App\Enum\EnumUserWalletType;
 use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Token\TokenSmsController;
@@ -12,14 +11,10 @@ use App\Http\Requests\UserPasswordRequest;
 use App\Http\Requests\UserPhoneRequest;
 use App\Http\Requests\UserPinRequest;
 use App\Http\Requests\UserRequest;
-use App\Models\Mining\MiningQuota;
-use App\Models\CoinCurrentPrice;
-use App\Models\CoinQuote;
 use App\Models\Country;
 use App\Models\Funds\FundBalances;
 use App\Models\Nanotech\Nanotech;
 use App\Models\System\ActivityLogger as Logger;
-use App\Models\User\UserWallet;
 use App\Services\ConversorService;
 use App\User;
 use Carbon\Carbon;
@@ -62,7 +57,7 @@ class UserController extends Controller
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            if ($user->country_id!==31) {
+            if ($user->country_id !== 31) {
                 return response([
                     'message' => 'The request could not be processed.'
                 ], Response::HTTP_BAD_REQUEST);
@@ -104,7 +99,7 @@ class UserController extends Controller
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            if ($user->country_id===31) {
+            if ($user->country_id === 31) {
                 return response([
                     'message' => 'A requisição não pode ser processada.'
                 ], Response::HTTP_BAD_REQUEST);
@@ -308,37 +303,70 @@ class UserController extends Controller
     public function dashboard()
     {
         try {
-            $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
-            //arbitragem
-            $investment = Nanotech::where('user_id', auth()->user()->id)->where('type_id', 1)->get();
-            $investment_brl = $this->conversorService::BTC2BRLMIN($investment->sum('amount'));
-            //Fundos de Investimentos
-            $funds = $this->indexFunds();
-            $funds_btc = $this->conversorService::BRL2BTCSMAX($funds);
+            $conversor = new ConversorService();
+            //nanotech btc
+            $nanotech_btc = Nanotech::where([
+                'user_id' => auth()->user()->id,
+                'type_id' => 1
+            ]);
 
-            $total_btc = $investment->sum('amount');
-            $total_brl = $this->conversorService::BTC2BRLMIN($total_btc);
+            $nanotech_btc_to_brl = $conversor::CRYPTO2FIAT_MIN($nanotech_btc->sum('amount'), "BTC");
+            $nanotech_brl_to_lqx = $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX");
+
+            //nanotech qlx
+            $nanotech_lqx = Nanotech::where([
+                'user_id' => auth()->user()->id,
+                'type_id' => 2
+            ]);
+
+            $nanotech_lqx_to_brl = $conversor::CRYPTO2FIAT_MIN($nanotech_lqx->sum('amount'), "LQX");
+
+            //masternode
+            $masternode = Nanotech::where([
+                'user_id' => auth()->user()->id,
+                'type_id' => 3
+            ]);
+
+            $masternode_to_brl = $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX");
+
+            $products = [
+                [
+                    'name' => "Nanotech BTC",
+                    'value_lqx' => $nanotech_brl_to_lqx['amount'],
+                    'value_brl' => $nanotech_btc_to_brl['amount'],
+                ],
+                [
+                    'name' => "Nanotech LQX",
+                    'value_lqx' => $nanotech_lqx->sum('amount'),
+                    'value_brl' => $nanotech_lqx_to_brl['amount'],
+                ],
+                [
+                    'name' => "Masternode",
+                    'value_lqx' => $masternode->sum('amount'),
+                    'value_brl' => $masternode_to_brl['amount'],
+                ],
+            ];
+
+            //total
+            $products_total['value_lqx'] = 0;
+            $products_total['value_brl'] = 0;
+
+            foreach ($products as $product) {
+                $products_total['value_lqx'] += $product['value_lqx'];
+                $products_total['value_brl'] += $product['value_brl'];
+            }
+
+            //chart
+            $total = $nanotech_brl_to_lqx['amount'] + $nanotech_lqx->sum('amount') + $nanotech_lqx->sum('amount');
 
             return response([
                 'message' => trans('messages.general.success'),
-                'products' => [
-                    [
-                        'name' => trans('messages.products.arbitrage'),
-                        'value_btc' => (float)number_format($investment->sum('amount'), 8),
-                        'value_brl' => number_format($investment_brl['amount'], 2, ',', '.'),
-                    ], [
-                        'name' => trans('messages.products.index_fund'),
-                        'value_btc' => (float)number_format($funds_btc['amount'], 8),
-                        'value_brl' => number_format($funds, 2, ',', '.'),
-                    ],
-                ],
-                'product_total' => [
-                    'total_btc' => (float)number_format($total_btc, 8),
-                    'total_brl' => number_format($total_brl['amount'], 2, ',', '.'),
-                ],
+                'products' => $products,
+                'product_total' => $products_total,
                 'chart' => [
-                    (float)$investment->sum('amount'),
-                    (float)$funds_btc['amount']
+                    (float)round($nanotech_brl_to_lqx['amount'] * 100 / $total,3),
+                    (float)round($nanotech_lqx->sum('amount') * 100 / $total,3),
+                    (float)round($masternode->sum('amount') * 100 / $total,3)
                 ]
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -348,39 +376,12 @@ class UserController extends Controller
         }
     }
 
-    private function indexFunds()
+    public function funds()
     {
         $funds = FundBalances::with(['fund'])->where('user_id', auth()->user()->id)->get();
         $sum = 0;
 
-        foreach ($funds as $fund) {
-            $sum += $fund->quote * $fund->fund->value;
-        }
-
-        return $sum;
-    }
-
-    private function cryptoAssets()
-    {
-        $wallets = UserWallet::with('coin')
-            ->where('user_id', auth()->user()->id)
-            ->where('balance', '>', 0)
-            ->where('type', EnumUserWalletType::PRODUCT)
-            ->get();
-
-        $sum = 0;
-
-        foreach ($wallets as $wallet) {
-            $sum += $wallet->coin_id == 1 ? $wallet->balance : $this->btcEquivalence($wallet->balance, $wallet->coin_id);
-        }
-
-        return $sum;
-    }
-
-    private function btcEquivalence($value, $coin)
-    {
-        $quotePrice = CoinCurrentPrice::where('coin_id', $coin)->first()->price;
-        return $value * $quotePrice;
+        return $funds;
     }
 
     /**

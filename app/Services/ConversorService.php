@@ -105,11 +105,13 @@ class ConversorService
         ];
     }
 
-    public static function BTC2USDMIN($value)
+    public static function CRYPTO2FIAT_MIN(float $value, string $crypto, string  $fiat="BRL")
     {
-        $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 3])->first();
-        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->sell_quote * $value));
+        $crypto_id = Coin::getByAbbr($crypto);
+        $fiat_id = Coin::getByAbbr($fiat);
+
+        $cotacao = CoinQuote::where(['coin_id' => $crypto_id->id, 'quote_coin_id' => $fiat_id->id])->first();
+        $cotacao->value = sprintf('%.' . $fiat_id->decimal . 'f', floatval($cotacao->sell_quote * $value));
 
         return [
             'amount' => $cotacao->value,
@@ -118,11 +120,13 @@ class ConversorService
         ];
     }
 
-    public static function BTC2USDMAX(float $value)
+    public static function CRYPTO2FIAT_MAX(float $value, string $crypto, string  $fiat="BRL")
     {
-        $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 3])->first();
-        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->buy_quote * $value));
+        $crypto_id = Coin::getByAbbr($crypto);
+        $fiat_id = Coin::getByAbbr($fiat);
+
+        $cotacao = CoinQuote::where(['coin_id' => $crypto_id->id, 'quote_coin_id' => $fiat_id->id])->first();
+        $cotacao->value = sprintf('%.' . $fiat_id->decimal . 'f', floatval($cotacao->buy_quote * $value));
 
         return [
             'amount' => $cotacao->value,
@@ -131,11 +135,13 @@ class ConversorService
         ];
     }
 
-    public static function USD2BTCMAX($value)
+    public static function FIAT2CRYPTO_MAX(float $value, string $crypto, string  $fiat="BRL")
     {
-        $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 3])->first();
-        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->buy_quote));
+        $crypto_id = Coin::getByAbbr($crypto);
+        $fiat_id = Coin::getByAbbr($fiat);
+
+        $cotacao = CoinQuote::where(['coin_id' => $crypto_id->id, 'quote_coin_id' => $fiat_id->id])->first();
+        $cotacao->value = sprintf('%.' . $crypto_id->decimal . 'f', floatval($value / $cotacao->buy_quote));
 
         return [
             'amount' => $cotacao->value,
@@ -144,11 +150,13 @@ class ConversorService
         ];
     }
 
-    public static function USDTAX2BTCMIN($value)
+    public static function FIAT2CRYPTO_MIN(float $value, string $crypto, string  $fiat="BRL")
     {
-        $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 3])->first();
-        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->sell_quote));
+        $crypto_id = Coin::getByAbbr($crypto);
+        $fiat_id = Coin::getByAbbr($fiat);
+
+        $cotacao = CoinQuote::where(['coin_id' => $crypto_id->id, 'quote_coin_id' => $fiat_id->id])->first();
+        $cotacao->value = sprintf('%.' . $crypto_id->decimal . 'f', floatval($value / $cotacao->sell_quote));
 
         return [
             'amount' => $cotacao->value,

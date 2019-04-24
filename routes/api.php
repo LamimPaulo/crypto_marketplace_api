@@ -25,8 +25,6 @@ Route::post('/resetPassword', 'ResetPasswordController@process');
 Route::get('/countries', 'CountryController@list');
 
 Route::middleware(['auth:api', 'localization'])->group(function () {
-
-
     Route::group(['prefix' => 'user', 'namespace' => 'User', 'as' => 'user.'], function () {
         //retorna dados do usuario
         Route::get('/', 'UserController@index');
@@ -238,9 +236,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     });
 
-
-
     Route::prefix('admin')->middleware('admin')->group(base_path('routes/admin.php'));
+
 
 });
 
@@ -279,5 +276,3 @@ Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
         Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
         Route::post('/check-key', 'Credminer\PaymentController@checkKey');
     });
-
-//Route::get('comando', 'MasternodeController@index');
