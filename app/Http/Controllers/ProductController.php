@@ -25,14 +25,16 @@ class ProductController extends Controller
             $coin = Coin::getByAbbr($request->abbr);
             $wallet = UserWallet::where('coin_id', $coin->id)->first();
 
-            if (!(abs($level->product->value) <= abs($wallet->balance))) {
-                throw new \Exception(trans('messages.transaction.value_exceeds_balance'));
-            }
-
             $amount = $level->product->value;
             if ($coin->abbr == 'LQX') {
                 $amount = $level->product->value_lqx;
             }
+
+            if (!(abs($amount) <= abs($wallet->balance))) {
+                throw new \Exception(trans('messages.transaction.value_exceeds_balance')." ($amount) <= {$wallet->balance}");
+            }
+
+
 
             $user = User::where('id', auth()->user()->id)->first();
 
