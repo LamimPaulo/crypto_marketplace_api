@@ -19,7 +19,7 @@ class NanotechTypesSeeder extends Seeder
                 'coin_id' => 3
             ], [
                 'id' => 2,
-                'type' => 'Nanotech LQX',
+                'type' => 'Nanotech BTC',
                 'montly_return' => 2,
                 'coin_id' => 1
             ], [

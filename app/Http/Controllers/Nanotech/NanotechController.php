@@ -22,6 +22,7 @@ use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -53,7 +54,8 @@ class NanotechController extends Controller
                 'user_investment' => $this->start($type->id),
                 'user_profit' => $this->profit($type->id),
                 'total_user_investment' => $this->totalSum($type->id),
-                'coin' => $type->coin->abbr
+                'coin' => $type->coin->abbr,
+                'chart_data' => $this->chart($type->id)
             ];
         } catch (\Exception $e) {
             return \response([
@@ -165,8 +167,14 @@ class NanotechController extends Controller
         }
     }
 
-    public function chart()
+    public function chart($type)
     {
+        return NanotechProfitPercent::select("percent","day")
+            ->where('day', '>', Carbon::now()->subMonths(1))
+            ->where('day', '<', Carbon::now()->addMonths(1))
+            ->where('type_id', $type)
+            ->orderBy('day')
+            ->get();
     }
 
     /**
