@@ -17,6 +17,8 @@ abstract class EnumTransactionCategory
     const CREDMINER = 11;
     const BUY_LEVEL = 12;
     const NANOTECH_CREDMINER = 13;
+    const MASTERNODE_CREDMINER = 14;
+    const FUND_CREDMINER = 15;
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
@@ -32,5 +34,7 @@ abstract class EnumTransactionCategory
         self::FUND => 'Fundos de Investimento',
         self::CREDMINER => 'Saque Credminer',
         self::BUY_LEVEL => 'Compra de Nível',
+        self::FUND_CREDMINER => 'Fundos Credminer',
+        self::MASTERNODE_CREDMINER => 'Masternode Credminer',
     ];
 }

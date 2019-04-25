@@ -276,6 +276,11 @@ Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
         Route::get('/nanotech', 'Credminer\NanotechController@index');
         Route::post('/nanotech/info', 'Credminer\NanotechController@info');
         Route::post('/nanotech/invest', 'Credminer\NanotechController@invest');
+
+        Route::get('/investments', 'Credminer\InvestmentController@index');
+        Route::post('/investment/invest', 'Credminer\InvestmentController@invest');
+        Route::post('/investment/estimate', 'Credminer\InvestmentController@estimate');
+        Route::post('/investment/acquired', 'Credminer\InvestmentController@acquired');
     });
 
 //gateway de saques credminer
