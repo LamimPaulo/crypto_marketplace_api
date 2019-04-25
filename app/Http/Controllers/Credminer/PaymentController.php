@@ -98,14 +98,14 @@ class PaymentController extends Controller
 
     public function withdrawal(Request $request) {
         try {
-
             $request->validate([
-                'amount' => 'required|numeric',
-                'api_key' => 'required|exists:users,api_key'
+                'amount'    => 'required|numeric',
+                'api_key'   => 'required|exists:users,api_key',
+                'coin'      => 'required|exists:coins,abbr'
             ]);
 
             $user = User::where('api_key', '=', $request->get('api_key'))->firstOrFail();
-            $coin = Coin::getByAbbr('LQX');
+            $coin = Coin::getByAbbr($request->coin);
 
             $wallet = UserWallet::where([
                 'user_id' => $user->id,
@@ -130,7 +130,7 @@ class PaymentController extends Controller
                 'toAddress' => $wallet->address,
                 'amount' => $request->amount,
                 'status' => EnumTransactionsStatus::SUCCESS,
-                'type' => EnumTransactionType::OUT,
+                'type' => EnumTransactionType::IN,
                 'category' => EnumTransactionCategory::CREDMINER,
                 'fee' => 0,
                 'tax' => 0,
@@ -147,6 +147,8 @@ class PaymentController extends Controller
 
             return response([
                 'amount' => $transaction->amount,
+                'coin' => $request->coin,
+                'tx' => $transaction->tx,
                 'created' => $transaction->created_at,
                 'status' => EnumTransactionsStatus::STATUS[$transaction->status]
                     ], Response::HTTP_CREATED);

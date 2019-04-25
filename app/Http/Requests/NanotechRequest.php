@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enum\EnumNanotechOperationType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,7 +33,10 @@ class NanotechRequest extends FormRequest
         return [
             'operation_type' => [
                 'required',
-                Rule::in([1, 2, 3, 4, 5, 6]),
+                Rule::in([
+                    EnumNanotechOperationType::IN,
+                    EnumNanotechOperationType::PROFIT_IN,
+                ])
             ],
             'type' => 'required|exists:nanotech_types,id',
             'amount' => 'required|numeric'

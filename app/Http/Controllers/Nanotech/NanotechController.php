@@ -21,6 +21,7 @@ use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -44,19 +45,20 @@ class NanotechController extends Controller
     public function index($type)
     {
         try {
+            $type = NanotechType::with('coin')->findOrFail($type);
             return [
-                'average_profits' => $this->returnPercentage($type),
-                'brokerage_fee' => $this->brokerageFee($type),
-                'under_managment' => $this->total($type),
-                'user_investment' => $this->start($type),
-                'user_profit' => $this->profit($type),
-                'total_user_investment' => $this->totalSum($type),
-                'coin' => 'LQX'
+                'average_profits' => $this->returnPercentage($type->id),
+                'brokerage_fee' => $this->brokerageFee($type->id),
+                'under_managment' => $this->total($type->id),
+                'user_investment' => $this->start($type->id),
+                'user_profit' => $this->profit($type->id),
+                'total_user_investment' => $this->totalSum($type->id),
+                'coin' => $type->coin->abbr
             ];
         } catch (\Exception $e) {
             return \response([
                 'status' => 'error',
-                'message' => $e->getMessage() . '(' . $e->getLine()
+                'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -137,7 +139,7 @@ class NanotechController extends Controller
 
             $investment = Nanotech::where('type_id', $type)
                 ->where('user_id', auth()->user()->id)
-                ->where('coin_id', 3)->first();
+                ->first();
 
             if (!$investment) {
                 return 0;
@@ -181,61 +183,27 @@ class NanotechController extends Controller
             return response(['message' => trans('messages.general.invalid_operation_type')], Response::HTTP_BAD_REQUEST);
         }
 
+        $type = NanotechType::findOrFail($request->type);
         //verificar se o usuario ja possui investimento
-        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 3);
+        $investment = $this->checkNanotech(auth()->user()->id, $type->id, $type->coin_id);
         if (!$investment) {
             return response(['message' => trans('messages.products.error_creating_investment')], Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $brokerageFeePercentage = $this->brokerageFee($request->type);
-            $request['amount'] = $this->_calc_amount($request->amount, $request->coin);
-
-            $brokerageFee = $request->amount * $brokerageFeePercentage / 100;
-            $amount = $request->amount - $brokerageFee;
             $operation = [
                 'user_id' => auth()->user()->id,
                 'investment_id' => $investment,
-                'amount' => $amount,
-                'brokerage_fee_percentage' => $brokerageFeePercentage,
+                'amount' => $request->amount,
+                'brokerage_fee_percentage' => 0,
                 'status' => EnumNanotechOperationStatus::SUCCESS,
                 'type' => EnumNanotechOperationType::IN,
-                'brokerage_fee' => $brokerageFee
+                'brokerage_fee' => 0
             ];
 
-            if (EnumNanotechOperationType::IN == $request->operation_type) {
-                //verificar se possui saldo suficiente para deposito
-                $wallet = UserWallet::where(['user_id' => auth()->user()->id, 'coin_id' => 3, 'type' => EnumUserWalletType::WALLET])->first();
-                if ($wallet->balance < $request->amount) {
-                    throw new \Exception(trans('messages.wallet.insuficient_balance'));
-                }
-
-                //criar transaction e decrementar balance
-                $transaction = Transaction::create([
-                    'user_id' => $wallet->user_id,
-                    'coin_id' => $wallet->coin_id,
-                    'wallet_id' => $wallet->id,
-                    'toAddress' => '',
-                    'amount' => $operation['amount'],
-                    'status' => EnumTransactionsStatus::SUCCESS,
-                    'type' => EnumTransactionType::OUT,
-                    'category' => EnumTransactionCategory::ARBITRAGE,
-                    'fee' => 0,
-                    'tax' => $operation['brokerage_fee'],
-                    'tx' => Uuid::uuid4()->toString(),
-                    'info' => trans('info.arbitrage_investment'),
-                    'error' => '',
-                ]);
-
-                $this->balanceService::decrements($transaction);
-            }
-
             if (EnumNanotechOperationType::PROFIT_IN == $request->operation_type) {
-                if ($request->coin != 3) {
-                    throw new \Exception(trans('messages.coin.not_compatible_with_investment'));
-                }
                 //verificar se o valor de lucro é valido
-                $profit = $this->profit($request->type);
+                $profit = $this->profit($type->id);
                 if ($request->amount > $profit) {
                     throw new \Exception(trans('messages.products.insuficient_profit'));
                 }
@@ -251,8 +219,8 @@ class NanotechController extends Controller
 
             //increment investment
             $operation = NanotechOperation::create($operation);
-            $operation->type_id = $request->type;
-            $operation->coin_id = 3;
+            $operation->type_id = $type->id;
+            $operation->coin_id = $type->coin_id;
 
             Nanotech::increments($operation);
 
@@ -264,41 +232,15 @@ class NanotechController extends Controller
     }
 
     /**
-     * @param $amount
-     * @param $coin
-     * @return bool
-     * @throws \Exception
-     */
-    private function _calc_amount($amount, $coin)
-    {
-        if ($coin == 3) {
-            return $amount;
-        }
-
-        $request['amount'] = $amount;
-        $request['quote'] = 'BTC';
-
-        if ($coin == 2 AND auth()->user()->country_id == 31) {
-            if (!$this->balanceService->verifyBalance($amount, 'BRL')) {
-                throw new \Exception(trans('messages.wallet.insuficient_balance'));
-            }
-
-            $request['base'] = 'BRL';
-            $result = $this->conversorService::BRL2BTCSMAX($amount);
-            return $this->convertCoin($request, $result);
-        }
-
-        throw new \Exception(trans('messages.coin.not_compatible_with_investment'));
-    }
-
-    /**
      * @param Request $request
      * @param float amount
      * @param type EnumNanotechOperationType
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function draft(Request $request)
+    public function withdrawal(Request $request)
     {
+        $type = NanotechType::findOrFail($request->type);
+
         if ($request->operation_type != EnumNanotechOperationType::TOTAL_WITHDRAWAL) {
             if (!is_numeric($request->amount) OR $request->amount <= 0) {
                 return response(['message' => trans('messages.invalid_value_request')], Response::HTTP_BAD_REQUEST);
@@ -312,7 +254,7 @@ class NanotechController extends Controller
         }
 
         //verificar se o usuario ja possui investimento
-        $investment = $this->checkNanotech(auth()->user()->id, $request->type, 3);
+        $investment = $this->checkNanotech(auth()->user()->id, $type->id, $type->coin_id);
         if (!$investment) {
             return response(['message' => trans('messages.products.error_creating_investment')], Response::HTTP_BAD_REQUEST);
         }
@@ -336,8 +278,8 @@ class NanotechController extends Controller
                 }
                 //solicitar saque de acordo com valor digitado
                 $operation = NanotechOperation::create($operation);
-                $operation->type_id = $request->type;
-                $operation->coin_id = 3;
+                $operation->type_id = $type->id;
+                $operation->coin_id = $type->coin_id;
                 Nanotech::increments($operation);
             }
 
@@ -355,7 +297,7 @@ class NanotechController extends Controller
                 //solicitar saque do investimento total
                 $operation = NanotechOperation::create([
                     'user_id' => auth()->user()->id,
-                    'coin_id' => 3,
+                    'coin_id' => $type->coin_id,
                     'investment_id' => $investment,
                     'amount' => 0 - $this->start($request->type),
                     'status' => EnumNanotechOperationStatus::PENDING,
@@ -365,14 +307,14 @@ class NanotechController extends Controller
                 //solicitar saque do lucro total
                 NanotechOperation::create([
                     'user_id' => auth()->user()->id,
-                    'coin_id' => 3,
+                    'coin_id' => $type->coin_id,
                     'investment_id' => $investment,
                     'amount' => 0 - $this->profit($request->type),
                     'status' => EnumNanotechOperationStatus::PENDING,
                     'type' => EnumNanotechOperationType::PROFIT_WITHDRAWAL,
                 ]);
                 $operation->type_id = $request->type;
-                $operation->coin_id = 3;
+                $operation->coin_id = $type->coin_id;
                 Nanotech::increments($operation);
             }
 
@@ -403,69 +345,5 @@ class NanotechController extends Controller
             ]);
         }
         return $investment->id;
-    }
-
-    private function convertCoin($request, $result)
-    {
-        try {
-            $uuid = Uuid::uuid4();
-            $coin_out = Coin::getByAbbr($request['base'])->id;
-            $coin_in = Coin::getByAbbr($request['quote'])->id;
-
-            $wallet_out = UserWallet::where(['coin_id' => $coin_out, 'user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET])->first()->id;
-            $wallet_in = UserWallet::where(['coin_id' => $coin_in, 'user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET])->first()->id;
-
-            $transaction_out = Transaction::create([
-                'user_id' => auth()->user()->id,
-                'coin_id' => $coin_out,
-                'wallet_id' => $wallet_out,
-                'amount' => $request['amount'],
-                'status' => EnumTransactionsStatus::SUCCESS,
-                'type' => EnumTransactionType::OUT,
-                'category' => EnumTransactionCategory::CONVERSION,
-                'fee' => 0,
-                'tax' => 0,
-                'tx' => $uuid->toString(),
-                'info' => trans('info.automatic_investment_conversion'),
-                'error' => '',
-                'price' => $result['current'],
-                'market' => $result['quote']
-            ]);
-
-            TransactionStatus::create([
-                'status' => $transaction_out->status,
-                'transaction_id' => $transaction_out->id,
-            ]);
-
-            $this->balanceService::decrements($transaction_out);
-
-            $transaction_in = Transaction::create([
-                'user_id' => auth()->user()->id,
-                'coin_id' => $coin_in,
-                'wallet_id' => $wallet_in,
-                'amount' => $result['amount'],
-                'status' => EnumTransactionsStatus::SUCCESS,
-                'type' => EnumTransactionType::IN,
-                'category' => EnumTransactionCategory::CONVERSION,
-                'fee' => 0,
-                'tax' => 0,
-                'tx' => $uuid->toString(),
-                'info' => trans('info.automatic_investment_conversion'),
-                'error' => '',
-                'price' => $result['current'],
-                'market' => $result['quote']
-            ]);
-
-            TransactionStatus::create([
-                'status' => $transaction_in->status,
-                'transaction_id' => $transaction_in->id,
-            ]);
-
-            $this->balanceService::increments($transaction_in);
-            return $result['amount'];
-
-        } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
-        }
     }
 }

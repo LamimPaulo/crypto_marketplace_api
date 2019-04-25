@@ -303,51 +303,29 @@ class UserController extends Controller
     public function dashboard()
     {
         try {
-            $conversor = new ConversorService();
-            //nanotech btc
-            $nanotech_btc = Nanotech::where([
-                'user_id' => auth()->user()->id,
-                'type_id' => 1
-            ]);
-
-            $nanotech_btc_to_brl = $conversor::CRYPTO2FIAT_MIN($nanotech_btc->sum('amount'), "BTC");
-            $nanotech_brl_to_lqx = $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX");
-
-            //nanotech qlx
-            $nanotech_lqx = Nanotech::where([
-                'user_id' => auth()->user()->id,
-                'type_id' => 2
-            ]);
-
-            $nanotech_lqx_to_brl = $conversor::CRYPTO2FIAT_MIN($nanotech_lqx->sum('amount'), "LQX");
-
-            //masternode
-            $masternode = Nanotech::where([
-                'user_id' => auth()->user()->id,
-                'type_id' => 3
-            ]);
-
-            $masternode_to_brl = $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX");
+            $nanotech_btc = $this->nanotechBTC();
+            $nanotech_lqx = $this->nanotechLQX();
+            $masternode = $this->nanotechMasternode();
 
             $products = [
                 [
                     'name' => "Nanotech BTC",
-                    'value_lqx' => $nanotech_brl_to_lqx['amount'],
-                    'value_brl' => $nanotech_btc_to_brl['amount'],
+                    'value_lqx' => $nanotech_btc['value_lqx'],
+                    'value_brl' => $nanotech_btc['value_brl'],
                 ],
                 [
                     'name' => "Nanotech LQX",
-                    'value_lqx' => $nanotech_lqx->sum('amount'),
-                    'value_brl' => $nanotech_lqx_to_brl['amount'],
+                    'value_lqx' => $nanotech_lqx['value_lqx'],
+                    'value_brl' => $nanotech_lqx['value_brl'],
                 ],
                 [
                     'name' => "Masternode",
-                    'value_lqx' => $masternode->sum('amount'),
-                    'value_brl' => $masternode_to_brl['amount'],
+                    'value_lqx' => $masternode['value_lqx'],
+                    'value_brl' => $masternode['value_brl'],
                 ],
             ];
-
             //total
+
             $products_total['value_lqx'] = 0;
             $products_total['value_brl'] = 0;
 
@@ -357,17 +335,23 @@ class UserController extends Controller
             }
 
             //chart
-            $total = $nanotech_brl_to_lqx['amount'] + $nanotech_lqx->sum('amount') + $nanotech_lqx->sum('amount');
+            $total = $nanotech_btc['value_lqx'] + $nanotech_lqx['value_lqx'] + $masternode['value_brl'];
+
+            $chart = [0,0,0];
+
+            if($total>0){
+                $chart = [
+                    (float)round($nanotech_btc['value_lqx'] * 100 / $total, 3),
+                    (float)round($nanotech_lqx['value_lqx'] * 100 / $total, 3),
+                    (float)round($masternode['value_brl'] * 100 / $total, 3)
+                ];
+            }
 
             return response([
                 'message' => trans('messages.general.success'),
                 'products' => $products,
                 'product_total' => $products_total,
-                'chart' => [
-                    (float)round($nanotech_brl_to_lqx['amount'] * 100 / $total,3),
-                    (float)round($nanotech_lqx->sum('amount') * 100 / $total,3),
-                    (float)round($masternode->sum('amount') * 100 / $total,3)
-                ]
+                'chart' => $chart
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
@@ -375,6 +359,79 @@ class UserController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
+    private function nanotechBTC()
+    {
+        $conversor = new ConversorService();
+        $nanotech_btc = Nanotech::where([
+            'user_id' => auth()->user()->id,
+            'type_id' => 2
+        ]);
+
+        $total = $nanotech_btc->sum('amount');
+
+        if ($total == 0) {
+            return [
+                'value_brl' => 0,
+                'value_lqx' => 0
+            ];
+        }
+
+        $nanotech_btc_to_brl = $conversor::CRYPTO2FIAT_MIN($total, "BTC");
+
+        return [
+            'value_brl' => $nanotech_btc_to_brl['amount'],
+            'value_lqx' => $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX")['amount']
+        ];
+    }
+
+    private function nanotechLQX()
+    {
+        $conversor = new ConversorService();
+        $nanotech_lqx = Nanotech::where([
+            'user_id' => auth()->user()->id,
+            'type_id' => 1
+        ]);
+
+        $total = $nanotech_lqx->sum('amount');
+
+        if ($total == 0) {
+            return [
+                'value_brl' => 0,
+                'value_lqx' => 0
+            ];
+        }
+
+        return [
+            'value_brl' => $conversor::CRYPTO2FIAT_MIN($total, "LQX")['amount'],
+            'value_lqx' => $total
+        ];
+    }
+
+    private function nanotechMasternode()
+    {
+        $conversor = new ConversorService();
+
+        $masternode = Nanotech::where([
+            'user_id' => auth()->user()->id,
+            'type_id' => 3
+        ]);
+
+        $total = $masternode->sum('amount');
+
+        if ($total == 0) {
+            return [
+                'value_brl' => 0,
+                'value_lqx' => 0
+            ];
+        }
+
+        return [
+            'value_brl' => $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX")['amount'],
+            'value_lqx' => $total
+        ];
+    }
+
 
     public function funds()
     {

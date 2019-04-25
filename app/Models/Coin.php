@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Nanotech\Nanotech;
+use App\Models\Nanotech\NanotechType;
 use App\Models\User\UserWallet;
 use Illuminate\Database\Eloquent\Model;
 
@@ -62,5 +63,10 @@ class Coin extends Model
     public function masternodes()
     {
         return $this->hasMany(Masternode::class, 'coin_id');
+    }
+
+    public function nanotech_types()
+    {
+        return $this->hasMany(NanotechType::class, 'coin_id');
     }
 }

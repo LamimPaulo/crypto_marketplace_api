@@ -14,11 +14,20 @@ class NanotechTypesSeeder extends Seeder
         $types = [
             [
                 'id' => 1,
-                'type' => 'Nanotech',
-                'brokerage_fee' => 1,
-                'montly_return' => 5,
-
-            ]
+                'type' => 'Nanotech LQX',
+                'montly_return' => 1,
+                'coin_id' => 3
+            ], [
+                'id' => 2,
+                'type' => 'Nanotech LQX',
+                'montly_return' => 2,
+                'coin_id' => 1
+            ], [
+                'id' => 3,
+                'type' => 'Masternodes',
+                'montly_return' => 3,
+                'coin_id' => 3
+            ],
         ];
         foreach ($types as $type) {
             \App\Models\Nanotech\NanotechType::create($type);

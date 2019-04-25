@@ -11,7 +11,7 @@ abstract class EnumNanotechOperationType {
     const TOTAL_WITHDRAWAL = 6;
     const PROFIT_REFERRAL = 7;
 
-    const STATUS = [
+    const TYPES = [
         self::IN => 'Investimento',
         self::PROFIT => 'Lucro',
         self::PROFIT_REFERRAL => 'Lucro Afiliado',

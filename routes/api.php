@@ -270,6 +270,14 @@ Route::get('/time', function () {
 
 Route::post('operation', 'OperationController@index');
 
+//credminer products
+Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
+    function () {
+        Route::get('/nanotech', 'Credminer\NanotechController@index');
+        Route::post('/nanotech/info', 'Credminer\NanotechController@info');
+        Route::post('/nanotech/invest', 'Credminer\NanotechController@invest');
+    });
+
 //gateway de saques credminer
 Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
     function () {
