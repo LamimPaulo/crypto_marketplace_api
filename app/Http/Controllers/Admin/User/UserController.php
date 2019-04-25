@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Admin\User;
 
+use App\Enum\EnumNanotechOperationType;
 use App\Enum\EnumStatusDocument;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
 use App\Models\Funds\FundBalances;
+use App\Models\Nanotech\Nanotech;
+use App\Models\Nanotech\NanotechOperation;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserAccount;
@@ -54,7 +57,7 @@ class UserController extends Controller
     {
         try {
             $users = User::whereNull('email_verified_at')
-                        ->orderBy('created_at', 'DESC')->paginate(10);
+                ->orderBy('created_at', 'DESC')->paginate(10);
             return response($users, Response::HTTP_OK);
 
         } catch (\Exception $e) {
@@ -93,15 +96,19 @@ class UserController extends Controller
             $user = User::with(['level'])->where('email', $request->email)->firstOrFail();
             $wallets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::WALLET])->get();
             $accounts = UserAccount::with(['bank'])->where(['user_id' => $user->id])->get();
-            $assets = UserWallet::with(['coin'])->where(['user_id' => $user->id, 'type' => EnumUserWalletType::PRODUCT])->get();
 
-            $funds = FundBalances::with(['fund'])->where('user_id', $user->id)->orderBy('fund_id')->get();
+            $funds = FundBalances::with([
+                'fund' => function ($fund) {
+                    return $fund->with('coin');
+                }
+            ])->where('user_id', $user->id)->orderBy('fund_id')->get();
 
             return response([
                 'user' => $user,
                 'wallets' => $wallets,
                 'accounts' => $accounts,
-                'assets' => $assets,
+                'nanotech' => $this->nanotech($user->id),
+                'masternodes' => $this->masternode($user->id),
                 'funds' => $funds,
                 'documents' => $this->documents($user->id)
             ], Response::HTTP_OK);
@@ -112,19 +119,71 @@ class UserController extends Controller
         }
     }
 
-    public function mining(Request $request)
+    public function nanotech($user_id)
     {
-        $request->validate(['email' => 'required|exists:users,email']);
-
         try {
-            $user = User::with(['level'])->where('email', $request->email)->firstOrFail();
-            $quotas = MiningQuota::with(['plan'])->where(['user_id' => $user->id])->get();
-            $profits = MiningQuotaProfit::with(['block_info'])->where(['user_id' => $user->id])->get()->take(10);
+            $nanotech = Nanotech::with(['coin', 'type'])
+                ->where('user_id', $user_id)
+                ->where('type_id', '<>', 3)
+                ->get();
 
+            $array = [];
+
+            foreach ($nanotech as $n) {
+                $array[] = [
+                    'coin' => $n->coin->abbr,
+                    'name' => $n->type->type,
+                    'balance' => $n->amount,
+                    'profit' => NanotechOperation::whereIn('type',
+                        [
+                            EnumNanotechOperationType::PROFIT,
+                            EnumNanotechOperationType::PROFIT_WITHDRAWAL,
+                            EnumNanotechOperationType::PROFIT_IN
+                        ])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
+                        ->sum('amount')
+                ];
+            }
+
+            return $array;
+
+        } catch (\Exception $e) {
             return response([
-                'quotas' => $quotas,
-                'profits' => $profits,
-            ], Response::HTTP_OK);
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function masternode($user_id)
+    {
+        try {
+            $nanotech = Nanotech::with(['coin', 'type'])
+                ->where('user_id', $user_id)
+                ->where('type_id', 3)
+                ->get();
+
+            $array = [];
+
+            foreach ($nanotech as $n) {
+                $array[] = [
+                    'coin' => $n->coin->abbr,
+                    'name' => $n->type->type,
+                    'balance' => $n->amount,
+                    'profit' => NanotechOperation::whereIn('type',
+                        [
+                            EnumNanotechOperationType::PROFIT,
+                            EnumNanotechOperationType::PROFIT_WITHDRAWAL,
+                            EnumNanotechOperationType::PROFIT_IN
+                        ])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
+                        ->sum('amount')
+                ];
+            }
+
+            return $array;
+
         } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
@@ -179,7 +238,7 @@ class UserController extends Controller
 
         try {
             $user = User::where('email', $request->email)->firstOrFail();
-            $transactions =  Transaction::with([
+            $transactions = Transaction::with([
                 'user' => function ($user) {
                     return $user->with(['level', 'country']);
                 },

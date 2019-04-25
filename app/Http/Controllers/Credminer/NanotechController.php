@@ -139,7 +139,7 @@ class NanotechController extends Controller
                     'amount' => $operation['amount'],
                     'status' => EnumTransactionsStatus::SUCCESS,
                     'type' => EnumTransactionType::OUT,
-                    'category' => EnumTransactionCategory::NANOTECH_CREDMINER,
+                    'category' => $type->id== 3 ? EnumTransactionCategory::MASTERNODE_CREDMINER : EnumTransactionCategory::NANOTECH_CREDMINER,
                     'fee' => 0,
                     'tax' => $operation['brokerage_fee'],
                     'tx' => Uuid::uuid4()->toString(),

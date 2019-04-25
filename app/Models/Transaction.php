@@ -91,7 +91,9 @@ class Transaction extends Model
         'priceRounded',
         'timestamp',
         'file',
-        'fileExt'];
+        'fileExt',
+        'totalRounded'
+    ];
 
     public function getCategoryNameAttribute()
     {
@@ -227,6 +229,12 @@ class Transaction extends Model
             ->where('transactions.id', '=', $id)
             ->select(DB::raw('transactions.*, user_wallets.address'))
             ->first();
+    }
+
+    public function getTotalRoundedAttribute()
+    {
+        $total = $this->amount + $this->fee + $this->tax;
+        return sprintf("%.{$this->coin->decimal}f", $total);
     }
 
     public function getAmountRoundedAttribute()
