@@ -2,6 +2,8 @@
 
 namespace App\Models\Nanotech;
 
+use App\Enum\EnumNanotechOperationStatus;
+use App\Enum\EnumNanotechOperationType;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,13 +20,42 @@ class NanotechOperation extends Model
         'status'
     ];
 
+    protected $appends = ['createdLocal', 'updatedLocal', 'amountLocal', 'statusName', 'typeName'];
+
+    //Appends
+    public function getCreatedLocalAttribute()
+    {
+        return $this->created_at->format("d/m/Y H:i");
+    }
+
+    public function getUpdatedLocalAttribute()
+    {
+        return $this->updated_at->format("d/m/Y H:i");
+    }
+
+    public function getAmountLocalAttribute()
+    {
+        return abs($this->amount);
+    }
+
+    public function getStatusNameAttribute()
+    {
+        return EnumNanotechOperationStatus::STATUS[$this->status];
+    }
+
+    public function getTypeNameAttribute()
+    {
+        return EnumNanotechOperationType::TYPES[$this->type];
+    }
+
+    //Relations
     public function investment()
     {
-        $this->belongsTo(Nanotech::class, 'investment_id');
+        return $this->belongsTo(Nanotech::class, 'investment_id');
     }
 
     public function user()
     {
-        $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

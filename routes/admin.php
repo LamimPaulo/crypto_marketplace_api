@@ -34,6 +34,14 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/process', 'DraftController@process');
         });
 
+        //saques nanotech
+        Route::group(['prefix' => 'nanotech/withdrawals'], function () {
+            Route::get('/list', 'NanotechController@index');
+            Route::get('/list/{status}', 'NanotechController@list');
+            Route::post('/reject', 'NanotechController@reject');
+            Route::post('/accept', 'NanotechController@accept');
+        });
+
         Route::group(['prefix' => 'transactions'], function () {
             //transactions list
             Route::get('/by-status/{status}', 'TransactionsController@byStatus');
