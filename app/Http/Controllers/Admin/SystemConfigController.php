@@ -26,7 +26,7 @@ class SystemConfigController extends Controller
     public function update(Request $request)
     {
         try {
-            $days = $request->withdrawalDaysStr;
+            $days = $request->withdrawalDaysArr;
             $wdays = [];
 
             foreach ($days as $d) {

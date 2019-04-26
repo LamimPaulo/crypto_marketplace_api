@@ -74,6 +74,7 @@ class Kernel extends HttpKernel
         'allowbuywithfiat' => Middleware\AllowBuyWithFiat::class,
         'allowsellforfiat' => Middleware\AllowSellForFiat::class,
         'credminer' => Middleware\Credminer::class,
+        'withdrawalallowed' => Middleware\WithdrawalAllowed::class,
     ];
 
     /**

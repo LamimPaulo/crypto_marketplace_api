@@ -115,7 +115,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::post('depositPaypal/send', 'DepositController@storePaypal');
 
     //solicitar saque
-    Route::post('draft/send', 'DraftController@store')->middleware(['tokencheck', 'pincheck']);
+    Route::post('draft/send', 'DraftController@store')->middleware(['tokencheck', 'pincheck', 'withdrawalallowed']);
     //cancelar saque
     Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
     //estimar taxas de saque

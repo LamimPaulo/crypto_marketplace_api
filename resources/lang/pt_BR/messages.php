@@ -131,6 +131,7 @@ return [
         'canceled_by_user' => 'Saque Cancelado pelo Usuário.',
         'canceled' => 'Saque Cancelado com sucesso.',
         'done' => 'Saque efetuado.',
+        'day_off' => 'Não é possível solicitar saques no momento, fora de horário ou dia não permitido.',
         'processing' => 'Saque em processamento.',
         'success' => 'Saque solicitado com sucesso.',
         'requested' => 'Saque solicitado.',

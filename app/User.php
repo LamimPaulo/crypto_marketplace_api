@@ -7,6 +7,7 @@ use App\Models\Gateway;
 use App\Models\GatewayApiKey;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
+use App\Models\SysConfig;
 use App\Models\User\Document;
 use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
@@ -25,6 +26,8 @@ class User extends Authenticatable implements MustVerifyEmail
     use Notifiable, HasApiTokens;
 
     public $incrementing = false;
+
+    private $default_time = -3;
 
     public static function boot()
     {
@@ -80,7 +83,28 @@ class User extends Authenticatable implements MustVerifyEmail
         'password', 'remember_token', 'id', 'pin', 'is_admin', 'google2fa_secret'
     ];
 
-    protected $appends = ['createdLocal', 'time'];
+    protected $appends = ['createdLocal', 'time', 'timezoneSettings'];
+
+    public function getTimezoneSettingsAttribute()
+    {
+        $config = SysConfig::first();
+        $country = Country::find($this->country_id);
+        $days = explode(',', $config->withdrawal_days);
+
+        $now = strtotime(Carbon::now()->addHours($this->default_time));
+
+        $min_hour = strtotime($config->min_withdrawal_hour);
+        $max_hour = strtotime($config->max_withdrawal_hour);
+
+        return [
+            'min_withdrawal_hour' => Carbon::parse($config->min_withdrawal_hour)->addHours($country->timezone)->format("H:i"),
+            'max_withdrawal_hour' => Carbon::parse($config->max_withdrawal_hour)->addHours($country->timezone)->format("H:i"),
+            'withdrawal_days' => $config->withdrawalDaysStr,
+
+            'withdrawal_time' => ($now >= $min_hour AND $now <= $max_hour) ? 1 : 0,
+            'withdrawal_day' => in_array(date('w'), $days) ? 1 : 0,
+        ];
+    }
 
     public function getCreatedLocalAttribute()
     {

@@ -4,7 +4,7 @@ use App\Models\CoinQuote;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 
-class CoinQuoteSeeder extends Seeder
+class CoinQuotesSeeder extends Seeder
 {
     /**
      * Run the database seeds.

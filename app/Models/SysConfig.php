@@ -20,7 +20,7 @@ class SysConfig extends Model
         'withdrawal_days',
     ];
 
-    protected $appends = ['withdrawalDaysStr'];
+    protected $appends = ['withdrawalDaysStr','withdrawalDaysArr'];
 
     //Acessors
     public function getMinWithdrawalHourAttribute($value)
@@ -34,7 +34,7 @@ class SysConfig extends Model
     }
 
     //Appends
-    public function getWithdrawalDaysStrAttribute()
+    public function getWithdrawalDaysArrAttribute()
     {
         $days = explode(",", $this->withdrawal_days);
         $strdays = [];
@@ -42,6 +42,16 @@ class SysConfig extends Model
             array_push($strdays, EnumWeekdays::STR[$d]);
         }
         return $strdays;
+    }
+
+    public function getWithdrawalDaysStrAttribute()
+    {
+        $days = explode(",", $this->withdrawal_days);
+        $strdays = '';
+        foreach ($days as $d) {
+            $strdays .= EnumWeekdays::STR[$d]. ", ";
+        }
+        return substr($strdays, 0, -2);
     }
 
 

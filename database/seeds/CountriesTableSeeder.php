@@ -19,9 +19,11 @@ class CountriesTableSeeder extends Seeder
         $data = json_decode($json);
         foreach ($data as $obj) {
             Country::create([
+                'id' => $obj->id,
                 'name' => $obj->name,
                 'dial_code' => $obj->dial_code,
-                'code' => $obj->code
+                'code' => $obj->code,
+                'timezone' => $obj->timezone
             ]);
         }
     }

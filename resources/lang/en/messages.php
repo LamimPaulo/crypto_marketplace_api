@@ -132,6 +132,7 @@ return [
         'canceled_by_user' => 'Withdrawal Canceled by User.',
         'canceled' => 'Cashout Successfully canceled.',
         'done' => 'Withdrawal Done.',
+        'day_off' => 'It is not possible to request withdrawals at the moment, out of hours or day not allowed.',
         'processing' => 'Withdrawal Processing.',
         'success' => 'Withdrawal Success.',
         'requested' => 'Withdrawal Requested.',
