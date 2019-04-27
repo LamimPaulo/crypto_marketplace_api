@@ -41,7 +41,7 @@ class UserController extends Controller
         try {
             $users = User::with(['level'])
                 ->where('email_verified_at', '<>', '')
-                //->where('is_admin', 0)
+                ->where('is_admin', 0)
                 ->orderBy('created_at', 'DESC')->paginate(10);
 
             return response($users

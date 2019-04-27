@@ -15,6 +15,7 @@ class AddConversionPriorityToUserWalletsTable extends Migration
     {
         Schema::table('user_wallets', function (Blueprint $table) {
             $table->tinyInteger('conversion_priority')->default(0);
+            $table->boolean('sync')->default(false);
         });
     }
 
@@ -26,7 +27,7 @@ class AddConversionPriorityToUserWalletsTable extends Migration
     public function down()
     {
         Schema::table('user_wallets', function (Blueprint $table) {
-            $table->dropColumn(['conversion_priority']);
+            $table->dropColumn(['conversion_priority','sync']);
         });
     }
 }

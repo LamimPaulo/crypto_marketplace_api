@@ -51,7 +51,7 @@ class TransactionsConfirmation extends Command {
     }
 
     private function gateway() {
-        GatewayController::confirmation();
+       // GatewayController::confirmation();
     }
 
 }

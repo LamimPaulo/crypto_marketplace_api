@@ -15,9 +15,7 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            $transactions = Transaction::whereHas('wallet', function ($wallet){
-                return $wallet->where('type', EnumUserWalletType::WALLET);
-            })->get();
+            $transactions = Transaction::all();
 
             $deposits = $transactions->where('category', EnumTransactionCategory::DEPOSIT);
             $deposits_pending = $deposits->where('status', EnumTransactionsStatus::PENDING);

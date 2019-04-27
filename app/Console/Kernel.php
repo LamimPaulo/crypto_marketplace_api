@@ -24,12 +24,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-//        $schedule->command('estimate:fee')->everyMinute();
-//        $schedule->command('get:btcquote')->everyFiveMinutes();
-//        $schedule->command('update:fundquotes')->everyMinute();
+        $schedule->command('estimate:fee')->everyMinute();
+        $schedule->command('get:btcquote')->everyFiveMinutes();
         $schedule->command('trade:execute')->everyMinute()->withoutOverlapping();
-//        $schedule->command('get:marketcapquotes')->everyTenMinutes();
-        $schedule->command('gateway:expirepayments')->everyTenMinutes();
+        $schedule->command('get:marketcapquotes')->everyTenMinutes();
+        //$schedule->command('gateway:expirepayments')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute();
         $schedule->command('transactions:confirmation')->everyMinute();
         $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');

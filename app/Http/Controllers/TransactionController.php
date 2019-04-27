@@ -376,15 +376,20 @@ class TransactionsController extends Controller
     public function listByWallet($abbr, $address)
     {
         try {
+            $wallet_id = UserWallet::where('address', $address)->firstOrFail();
+
             $transactions = Transaction::with('coin', 'user_account')
-                ->whereHas('wallet', function ($wallet) use ($address) {
-                    return $wallet->where('type', EnumUserWalletType::WALLET)
-                        ->where('address', $address);
-                })
-                ->whereHas('coin', function ($coin) use ($abbr) {
-                    return $coin->where('abbr', $abbr);
-                })
-                ->where('user_id', auth()->user()->id)
+//                ->whereHas('wallet', function ($wallet) use ($address) {
+//                    return $wallet->where('address', $address);
+//                })
+//                ->whereHas('coin', function ($coin) use ($abbr) {
+//                    return $coin->where('abbr', $abbr);
+//                })
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'coin_id' => Coin::getByAbbr($abbr),
+                    'wallet_id' => $wallet_id->id,
+                ])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
             return response($transactions, Response::HTTP_OK);

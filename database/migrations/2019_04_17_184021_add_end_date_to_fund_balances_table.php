@@ -18,7 +18,7 @@ class AddEndDateToFundBalancesTable extends Migration
         });
 
         Schema::table('fund_balances', function (Blueprint $table) {
-            //$table->date('end_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->decimal('balance_blocked', 28,18)->default(0);
             $table->decimal('balance_free', 28,18)->default(0);
         });

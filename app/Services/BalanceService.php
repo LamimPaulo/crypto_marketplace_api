@@ -101,7 +101,7 @@ class BalanceService
                 ->where('id', '=', $transaction->wallet_id);
 
             if ($wallet->first()->coin->is_crypto) {
-//                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.18f", $transaction->amount)], $wallet->first()->coin->abbr);
+                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.18f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
             return $wallet->increment('balance', sprintf("%.18f", $transaction->amount));
@@ -125,7 +125,7 @@ class BalanceService
                 ->where('id', '=', $transaction->wallet_id);
 
             if ($wallet->first()->coin->is_crypto) {
-//                OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
+                OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
             return $wallet->decrement('balance', (string)$total);

@@ -258,6 +258,7 @@ Route::post('/payments/check-key', 'GatewayController@checkKey');
 
 Route::get('/uuid', function () {
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
+
     return response([
         'uuid' => $id,
         'key' => str_replace("-", "", $id)

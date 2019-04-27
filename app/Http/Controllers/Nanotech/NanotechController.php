@@ -169,12 +169,22 @@ class NanotechController extends Controller
 
     public function chart($type)
     {
-        return NanotechProfitPercent::select("percent","day")
+        $profits = NanotechProfitPercent::select("percent","day")
             ->where('day', '>', Carbon::now()->subMonths(1))
             ->where('day', '<', Carbon::now()->addMonths(1))
             ->where('type_id', $type)
             ->orderBy('day')
             ->get();
+
+        $chart = [];
+
+        foreach($profits as $profit){
+            $chart[] = [
+              $profit->day,
+              $profit->percent
+            ];
+        }
+        return $chart;
     }
 
     /**

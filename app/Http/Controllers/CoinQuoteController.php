@@ -52,7 +52,7 @@ class CoinQuoteController extends Controller
 
     public function MARKETCAP_CRYPTO_QUOTES()
     {
-        $coins = Coin::whereIn('abbr', ['DASH', 'XMR'])->where('is_wallet', true)->where('is_crypto', true)->get();
+        $coins = Coin::whereIn('abbr', ['DASH'])->where('is_crypto', true)->get();
 
         try {
 

@@ -3,14 +3,13 @@
 namespace App\Models\User;
 
 use App\Models\Coin;
-use App\Models\CoinCurrentPrice;
 use App\Models\Model;
 use App\Models\Transaction;
 use App\User;
 
 class UserWallet extends Model
 {
-    protected $fillable = ['balance', 'address', 'user_id', 'coin_id', 'type', 'conversion_priority'];
+    protected $fillable = ['balance', 'address', 'user_id', 'coin_id', 'type', 'conversion_priority', 'sync'];
 
     protected $hidden = ['created_at', 'updated_at', 'user_id', 'coin_id'];
 
@@ -29,11 +28,6 @@ class UserWallet extends Model
     public function coin()
     {
         return $this->belongsTo(Coin::class, 'coin_id');
-    }
-
-    public function price()
-    {
-        return $this->belongsTo(CoinCurrentPrice::class, 'coin_id');
     }
 
     public function transactions()

@@ -10,7 +10,7 @@ abstract class EnumTransactionCategory
     const DRAFT = 4;
     const GATEWAY = 5;
     const CONVERSION = 6;
-    const MINING = 7;
+    const LQX_SUBMIT = 7;
     const TRANSFER = 8;
     const ARBITRAGE = 9;
     const FUND = 10;
@@ -27,7 +27,7 @@ abstract class EnumTransactionCategory
         self::DRAFT => 'Saque',
         self::GATEWAY => 'Gateway',
         self::CONVERSION => 'Conversão',
-        self::MINING => 'Mineração',
+        self::LQX_SUBMIT => 'Envio de LQX',
         self::TRANSFER => 'Transferência',
         self::ARBITRAGE => 'Nanotech',
         self::NANOTECH_CREDMINER => 'Nanotech Credminer',
