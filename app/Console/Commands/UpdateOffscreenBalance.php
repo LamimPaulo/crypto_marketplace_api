@@ -50,10 +50,11 @@ class UpdateOffscreenBalance extends Command
             foreach ($wallets as $wallet) {
                 $result = OffScreenController::post(EnumOperationType::IMPORT_ADDRESS, ['address' => $wallet->address, 'amount' => $wallet->balance], 'BTC');
 
-                if (isset($result['wallet']) AND $result['wallet'] == $wallet->address) {
-                    $wallet->sync = true;
-                    $wallet->save();
+                if ($result != 200) {
+                    throw new \Exception("Erro na syncronização. [{$wallet->address}]");
                 }
+                $wallet->sync = true;
+                $wallet->save();
             }
 
         } catch (\Exception $e) {
