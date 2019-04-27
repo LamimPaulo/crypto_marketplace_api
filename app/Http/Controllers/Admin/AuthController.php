@@ -19,6 +19,7 @@ class AuthController extends Controller
             'username' => 'required',
             'password' => 'required',
             'recaptcha' => 'required|captcha',
+            'code_2fa' => 'required'
         ]);
 
         try {
