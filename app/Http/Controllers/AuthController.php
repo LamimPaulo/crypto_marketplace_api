@@ -87,6 +87,8 @@ class AuthController extends Controller
                 throw new \Exception($response['error']);
             }
 
+            $this->checkWallets($user);
+
             $user['ip'] = $request->ip();
             $user['created'] = Carbon::now('America/Sao_Paulo')->format('d/m/Y \à\s H:i:s');
             $user['agent'] = $request->header('User-Agent');
