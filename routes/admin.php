@@ -126,6 +126,7 @@ Route::group(['namespace' => 'Admin'], function () {
 
     Route::group(['prefix' => 'config'], function () {
         //coins
+        Route::get('/dashboard', 'DashboardController@index');
         Route::group(['prefix' => 'coins'], function () {
             //listagem de moedas
             Route::get('/', 'CoinsController@index');
