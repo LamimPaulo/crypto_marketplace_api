@@ -151,6 +151,8 @@ class UserController extends Controller
             $user->pin_filled = true;
             $user->save();
 
+            ActivityLogger::log(trans('messages.auth.pin_updated'), auth()->user()->id, User::class);
+
             return response([
                 'message' => trans('messages.auth.pin_updated'),
                 'user' => $user
