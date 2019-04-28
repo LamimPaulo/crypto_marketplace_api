@@ -14,17 +14,16 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            $transactions = Transaction::all();
 
-            $deposits = $transactions->where('category', EnumTransactionCategory::DEPOSIT);
-            $deposits_pending = $deposits->where('status', EnumTransactionsStatus::PENDING);
-            $deposits_paid = $deposits->where('status', EnumTransactionsStatus::SUCCESS);
-            $drafts = $transactions->where('category', EnumTransactionCategory::DRAFT);
-            $drafts_pending = $drafts->where('status', EnumTransactionsStatus::PENDING);
-            $drafts_paid = $drafts->where('status', EnumTransactionsStatus::SUCCESS);
+            $deposits = Transaction::where('category', EnumTransactionCategory::DEPOSIT);
+            $deposits_pending = Transaction::where('category', EnumTransactionCategory::DEPOSIT)->where('status', EnumTransactionsStatus::PENDING);
+            $deposits_paid = Transaction::where('category', EnumTransactionCategory::DEPOSIT)->where('status', EnumTransactionsStatus::SUCCESS);
+
+            $drafts = Transaction::where('category', EnumTransactionCategory::DRAFT);
+            $drafts_pending = Transaction::where('category', EnumTransactionCategory::DRAFT)->where('status', EnumTransactionsStatus::PENDING);
+            $drafts_paid = Transaction::where('category', EnumTransactionCategory::DRAFT)->where('status', EnumTransactionsStatus::SUCCESS);
 
             return [
-                'total' => $transactions->count(),
                 'deposits' => $deposits->count(),
                 'deposits_amount' => $deposits->sum('amount'),
                 'deposits_pending' => $deposits_pending->count(),
