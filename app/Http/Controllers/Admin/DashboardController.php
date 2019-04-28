@@ -23,7 +23,7 @@ class DashboardController extends Controller
             $drafts_pending = $drafts->where('status', EnumTransactionsStatus::PENDING);
             $drafts_paid = $drafts->where('status', EnumTransactionsStatus::SUCCESS);
 
-            return response([
+            return [
                 'total' => $transactions->count(),
                 'deposits' => $deposits->count(),
                 'deposits_amount' => $deposits->sum('amount'),
@@ -38,7 +38,7 @@ class DashboardController extends Controller
                 'drafts_paid' => $drafts_paid->count(),
                 'drafts_paid_amount' => $drafts_paid->sum('amount'),
 
-            ], Response::HTTP_OK);
+            ];
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),

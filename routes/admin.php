@@ -15,7 +15,40 @@ Route::group(['namespace' => 'Admin'], function () {
 
     //dados dashboard
     Route::get('/dashboard', 'DashboardController@index');
+    Route::get('/home', function () {
+        try {
+            $transactions = \App\Models\Transaction::all();
 
+            $deposits = $transactions->where('category', \App\Enum\EnumTransactionCategory::DEPOSIT);
+            $deposits_pending = $deposits->where('status', \App\Enum\EnumTransactionsStatus::PENDING);
+            $deposits_paid = $deposits->where('status', \App\Enum\EnumTransactionsStatus::SUCCESS);
+            $drafts = $transactions->where('category', \App\Enum\EnumTransactionCategory::DRAFT);
+            $drafts_pending = $drafts->where('status', \App\Enum\EnumTransactionsStatus::PENDING);
+            $drafts_paid = $drafts->where('status', \App\Enum\EnumTransactionsStatus::SUCCESS);
+
+            return [
+                'total' => $transactions->count(),
+                'deposits' => $deposits->count(),
+                'deposits_amount' => $deposits->sum('amount'),
+                'deposits_pending' => $deposits_pending->count(),
+                'deposits_pending_amount' => $deposits_pending->sum('amount'),
+                'deposits_paid' => $deposits_paid->count(),
+                'deposits_paid_amount' => $deposits_paid->sum('amount'),
+                'drafts' => $drafts->count(),
+                'drafts_amount' => $drafts->sum('amount'),
+                'drafts_pending' => $drafts_pending->count(),
+                'drafts_pending_amount' => $drafts_pending->sum('amount'),
+                'drafts_paid' => $drafts_paid->count(),
+                'drafts_paid_amount' => $drafts_paid->sum('amount'),
+
+            ];
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], \Symfony\Component\HttpFoundation\Response::HTTP_BAD_REQUEST);
+        }
+    });
 
     Route::group(['namespace' => 'Operations'], function () {
         //depositos
@@ -126,7 +159,7 @@ Route::group(['namespace' => 'Admin'], function () {
 
     Route::group(['prefix' => 'config'], function () {
         //coins
-        Route::get('/dashboard', 'DashboardController@index');
+
         Route::group(['prefix' => 'coins'], function () {
             //listagem de moedas
             Route::get('/', 'CoinsController@index');
