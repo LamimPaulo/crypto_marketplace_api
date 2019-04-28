@@ -387,7 +387,7 @@ class TransactionsController extends Controller
 //                })
                 ->where([
                     'user_id' => auth()->user()->id,
-                    'coin_id' => Coin::getByAbbr($abbr),
+                    'coin_id' => Coin::getByAbbr($abbr)->id,
                     'wallet_id' => $wallet_id->id,
                 ])
                 ->orderBy('created_at', 'DESC')

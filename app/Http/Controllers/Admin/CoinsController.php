@@ -76,7 +76,7 @@ class CoinsController extends Controller
             $coin->update($request->all());
 
             Artisan::call("get:btcquote");
-            
+
             return response([
                 'status' => 'success',
                 'message' => 'Moeda atualiza com sucesso.'
