@@ -256,12 +256,15 @@ Route::post('/gateway/update-tx', 'GatewayApiKeyController@updatePayment');
 //verificar validade da api key
 Route::post('/payments/check-key', 'GatewayController@checkKey');
 
-Route::get('/uuid', function () {
+Route::post('/uuid', function (\Illuminate\Http\Request $request) {
+    $address = \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::CREATE_ADDRESS, NULL, $request->abbr);
+
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
 
     return response([
         'uuid' => $id,
-        'key' => str_replace("-", "", $id)
+        'key' => str_replace("-", "", $id),
+        'address' => $address
     ], 200);
 });
 

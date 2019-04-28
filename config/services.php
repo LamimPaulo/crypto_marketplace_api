@@ -56,8 +56,7 @@ return [
         'BTC' => env('OFFSCREEN_BTC'),
         'BCH' => env('OFFSCREEN_BCH'),
         'LTC' => env('OFFSCREEN_LTC'),
-        'DASH' => env('OFFSCREEN_DASH'),
-        'XMR' => env('OFFSCREEN_XMR'),
+        'DASH' => env('OFFSCREEN_DASH')
     ],
     'recaptcha' => [
         'key' => env('GOOGLE_RECAPTCHA_KEY'),
