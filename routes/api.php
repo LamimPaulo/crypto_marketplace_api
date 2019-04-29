@@ -268,6 +268,25 @@ Route::post('/uuid', function (\Illuminate\Http\Request $request) {
     ], 200);
 });
 
+Route::post('/estimateFee', function (\Illuminate\Http\Request $request) {
+    $coin = \App\Models\Coin::where([
+        'is_crypto' => true,
+        'is_wallet' => true,
+        'is_active' => true,
+        'id' => \App\Models\Coin::getByAbbr($request->abbr)->id
+    ])->first();
+
+    $fee_1 = \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 1, $coin->abbr);
+    $fee_3 = \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 3, $coin->abbr);
+    $fee_6 = \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 6, $coin->abbr);
+
+    return [
+        'fee_low' => is_numeric($fee_6) ? $fee_6 : 0.00001,
+        'fee_avg' => is_numeric($fee_3) ? $fee_3 : 0.00001,
+        'fee_high' => is_numeric($fee_1) ? $fee_1 : 0.00001
+    ];
+});
+
 Route::get('/time', function () {
     return response(['time' => \Carbon\Carbon::now()->toIso8601ZuluString()], 200);
 });

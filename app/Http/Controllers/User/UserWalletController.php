@@ -17,8 +17,7 @@ class UserWalletController extends Controller
     {
         try {
 
-            $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
-            $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
+            $fiat_coin = Coin::with('quote')->where('abbr', 'BRL')->first();
 
             $wallets = Coin::where('is_active', 1)
                 ->with([

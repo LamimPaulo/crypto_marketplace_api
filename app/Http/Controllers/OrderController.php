@@ -11,8 +11,6 @@ use App\Enum\EnumUserWalletType;
 use App\Http\Requests\ConvertRequest;
 use App\Http\Requests\OrderRequest;
 use App\Models\Coin;
-use App\Models\CoinCurrentPrice;
-use App\Models\CoinPair;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;

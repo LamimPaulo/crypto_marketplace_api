@@ -34,7 +34,7 @@ class estimateFee extends Command
 
     public function handle()
     {
-        if(env("APP_ENV")!=='local') {
+        if (env("APP_ENV") !== 'local') {
             $this->estimateFeeBTC();
         }
     }
@@ -42,7 +42,12 @@ class estimateFee extends Command
     public function estimateFeeBTC()
     {
         try {
-            $coins = Coin::where('is_crypto', true)->where('is_wallet', true)->where('is_active', true)->get();
+            $coins = Coin::where([
+                'is_crypto' => true,
+                'is_wallet' => true,
+                'is_active' => true
+            ])
+                ->where('id', '<>', Coin::getByAbbr('LQX')->id)->get();
 
             foreach ($coins as $coin) {
                 $fee_1 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 1, $coin->abbr);
