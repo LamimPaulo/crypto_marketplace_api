@@ -473,7 +473,7 @@ class OrderController extends Controller
         ]);
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
+        $user_fiat_abbr = 'BRL';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         if ($request->base === $user_fiat_abbr) {
@@ -509,7 +509,7 @@ class OrderController extends Controller
             'base.required' => 'A moeda base é obrigatória',
         ]);
 
-        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
+        $user_fiat_abbr = 'BRL';
 
         if ($request->base === $user_fiat_abbr) {
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
@@ -518,15 +518,6 @@ class OrderController extends Controller
         $amount = (float)$request->amount;
 
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
-
-        if (
-            (($request->base === 'USD' OR $user_fiat_abbr === 'USD') AND auth()->user()->country_id === 31) OR
-            (($request->base === 'BRL' OR $user_fiat_abbr === 'BRL') AND auth()->user()->country_id !== 31)
-        ) {
-            return response([
-                'message' => trans('messages.coin.incompatible')
-            ], Response::HTTP_BAD_REQUEST);
-        }
 
         $base_coin = Coin::with([
             'quote' => function ($coin) use ($fiat_coin) {
@@ -616,7 +607,7 @@ class OrderController extends Controller
         }
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
+        $user_fiat_abbr = 'BRL';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         $base_coin = Coin::with([
@@ -630,7 +621,6 @@ class OrderController extends Controller
                 return $coin->with('quote_coin')->where('quote_coin_id', $fiat_coin->id);
             }
         ])->where('abbr', $request->quote)->first();
-
 
         if ($base_coin->is_crypto AND $quote_coin->is_crypto) {
             $result_sell = $base_coin->quote[0]->sell_quote * $amount;
@@ -661,15 +651,14 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function convertAmount(ConvertRequest $request)
+    public function convertAmount(ConvertRequest $request)
     {
         if ($request->base === $request->quote) {
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
+        $user_fiat_abbr = 'BRL';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         $base_coin = Coin::with([
@@ -684,15 +673,6 @@ class OrderController extends Controller
             }
         ])->where('abbr', $request->quote)->first();
 
-
-        if (
-            (($base_coin->abbr === 'USD' OR $quote_coin->abbr === 'USD') AND auth()->user()->country_id === 31) OR
-            (($base_coin->abbr === 'BRL' OR $quote_coin->abbr === 'BRL') AND auth()->user()->country_id !== 31)
-        ) {
-            return response([
-                'message' => trans('messages.coin.incompatible')
-            ], Response::HTTP_BAD_REQUEST);
-        }
 
         if (!$base_coin->is_crypto AND !$quote_coin->is_crypto) {
             return response([
@@ -807,8 +787,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function conversionList()
+    public function conversionList()
     {
         try {
             $transactions = Transaction::with('coin')
@@ -829,8 +808,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function conversion($tx)
+    public function conversion($tx)
     {
         try {
             $transactions = Transaction::with('coin')
@@ -853,8 +831,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function myCoinsList()
+    public function myCoinsList()
     {
         $coins = Coin::whereHas('wallets', function ($wallets) {
             return $wallets->where('user_id', auth()->user()->id)->where('type', EnumUserWalletType::WALLET);
@@ -863,8 +840,7 @@ class OrderController extends Controller
     }
 
 
-    public
-    function testOrder($quantity)
+    public function testOrder($quantity)
     {
         try {
             $api = new \GuzzleHttp\Client();
@@ -897,8 +873,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function allOrders()
+    public function allOrders()
     {
         try {
             $api = new \GuzzleHttp\Client();
@@ -928,8 +903,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function profile()
+    public function profile()
     {
         try {
             $api = new \GuzzleHttp\Client();
@@ -955,8 +929,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function getOrder($clientId)
+    public function getOrder($clientId)
     {
         try {
             $order = Order::where('client_order_id', $clientId)->firstOrFail();
@@ -984,8 +957,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function command()
+    public function command()
     {
         try {
             $transactions = Transaction::where('status', EnumTransactionsStatus::PENDING)
@@ -1034,6 +1006,5 @@ class OrderController extends Controller
             return $ex->getMessage();
         }
     }
-
 
 }
