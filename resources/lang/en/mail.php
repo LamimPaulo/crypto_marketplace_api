@@ -22,6 +22,13 @@ return [
             'message' => 'Please access the platform and carry out the withdrawal process again, if necessary.',
         ]
     ],
+    'withdrawal' => [
+        'reject' => [
+            'subject' => 'Withdrawal Confirmation',
+            'main_message' => 'Your Withdrawal request has been reversed:',
+            'message' => 'Please go to the platform and request again if necessary.',
+        ]
+    ],
     'transaction' => [
         'reject' => [
             'subject' => 'Transaction Confirmation',

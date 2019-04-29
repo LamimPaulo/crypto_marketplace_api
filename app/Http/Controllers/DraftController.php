@@ -45,7 +45,7 @@ class DraftController extends Controller
     public function store(DraftRequest $request)
     {
         try {
-            $draft = Transaction::where(['type'=>EnumTransactionType::OUT, 'category' => EnumTransactionCategory::DRAFT, 'status'=> EnumTransactionsStatus::PENDING, 'user_id'=> auth()->user()->id])->first();
+            $draft = Transaction::where(['type'=>EnumTransactionType::OUT, 'category' => EnumTransactionCategory::WITHDRAWAL, 'status'=> EnumTransactionsStatus::PENDING, 'user_id'=> auth()->user()->id])->first();
             if($draft){
                 throw new \Exception(trans('messages.withdrawal.already_pending'));
             }
@@ -83,7 +83,7 @@ class DraftController extends Controller
                 throw new \Exception(trans('messages.transaction.value_exceeds_balance'));
             }
 
-            $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::DRAFT);
+            $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::WITHDRAWAL);
             $valorDiario = floatval($valorDiario);
 
             if ($from->coin_id == 2) {
@@ -107,7 +107,7 @@ class DraftController extends Controller
                 'amount' => $amount,
                 'status' => EnumTransactionsStatus::PENDING,
                 'type' => EnumTransactionType::OUT,
-                'category' => EnumTransactionCategory::DRAFT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
                 'confirmation' => 0,
                 'fee' => $fee['fee'],
                 'tax' => $fee['tax'],
@@ -152,7 +152,7 @@ class DraftController extends Controller
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
+            $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->transaction)
                 ->where('user_id', auth()->user()->id)
                 ->where('status', EnumTransactionsStatus::PENDING)

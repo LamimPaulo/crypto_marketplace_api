@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Admin\Operations;
 
+use App\Enum\EnumNanotechOperationStatus;
 use App\Enum\EnumNanotechOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumTransactionType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
-use App\Mail\DepositoReject;
+use App\Mail\NanotechWithdrawalReject;
+use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
+use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\User;
 use Illuminate\Http\Request;
@@ -85,32 +89,61 @@ class NanotechController extends Controller
     public function accept(Request $request)
     {
         $request->validate([
-            'draft' => 'required|exists:transactions,id',
-            'category' => ['required', Rule::in([EnumTransactionCategory::DRAFT])]
+            'id' => 'required|exists:nanotech_operations,id',
+            'type' => [
+                'required',
+                Rule::in([
+                    EnumNanotechOperationType::WITHDRAWAL,
+                    EnumNanotechOperationType::PROFIT_WITHDRAWAL,
+                ])
+            ],
         ], [
-            'draft.required' => 'O identificador da transação é obrigatório.',
-            'draft.exists' => 'A transação não existe',
-            'category.required' => 'Você deve informar a categoria da transação.',
-            'category.in' => 'A categoria da transação não corresponde.'
+            'id.required' => 'O identificador da transação é obrigatório.',
+            'id.exists' => 'A solicitação não existe',
+            'type.required' => 'Você deve informar a categoria da transação.',
+            'type.in' => 'A categoria da transação não corresponde.',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
-                ->where('id', $request->draft)
-                ->whereIn('status', [EnumTransactionsStatus::PENDING, EnumTransactionsStatus::PROCESSING])
+            $operation = NanotechOperation::where('type', $request->type)
+                ->where('id', $request->id)
+                ->where('status', EnumNanotechOperationStatus::PENDING)
                 ->firstOrFail();
 
-            $transaction->status = EnumTransactionsStatus::SUCCESS;
-            $transaction->save();
+            $operation->status = EnumTransactionsStatus::SUCCESS;
+            $operation->save();
 
-            TransactionStatus::create([
-                'status' => $transaction->status,
-                'transaction_id' => $transaction->id,
+            $wallet = UserWallet::where([
+                'coin_id' => $operation->investment->coin_id,
+                'user_id' => $operation->user_id,
+            ])->first();
+
+            $transaction = Transaction::create([
+                'user_id' => $operation->user_id,
+                'coin_id' => $wallet->coin_id,
+                'wallet_id' => $wallet->id,
+                'toAddress' => $wallet->address,
+                'amount' => abs($operation->amount),
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'type' => EnumTransactionType::IN,
+                'category' => $operation->investment->id == 3 ? EnumTransactionCategory::MASTERNODE : EnumTransactionCategory::NANOTECH,
+                'fee' => 0,
+                'tax' => 0,
+                'tx' => '',
+                'info' => 'Saque - ' . $operation->investment->type->type,
+                'error' => '',
             ]);
 
-            ActivityLogger::log(trans('message.withdrawal.done'), $transaction->user_id);
+            TransactionStatus::create([
+                'transaction_id' => $transaction->id,
+                'status' => $transaction->status
+            ]);
+
+            $this->balanceService::increments($transaction);
+
+            ActivityLogger::log(trans('message.withdrawal.done'), $operation->user_id);
 
             DB::commit();
             return response([
@@ -128,45 +161,61 @@ class NanotechController extends Controller
     public function reject(Request $request)
     {
         $request->validate([
-            'draft' => 'required|exists:transactions,id',
-            'category' => ['required', Rule::in([EnumTransactionCategory::DRAFT])],
+            'id' => 'required|exists:nanotech_operations,id',
+            'type' => [
+                'required',
+                Rule::in([
+                    EnumNanotechOperationType::WITHDRAWAL,
+                    EnumNanotechOperationType::PROFIT_WITHDRAWAL,
+                ])
+            ],
             'reason' => 'required|min:3'
         ], [
-            'draft.required' => 'O identificador da transação é obrigatório.',
-            'draft.exists' => 'A transação não existe',
-            'category.required' => 'Você deve informar a categoria da transação.',
-            'category.in' => 'A categoria da transação não corresponde.',
+            'id.required' => 'O identificador da transação é obrigatório.',
+            'id.exists' => 'A solicitação não existe',
+            'type.required' => 'Você deve informar a categoria da transação.',
+            'type.in' => 'A categoria da transação não corresponde.',
             'reason.required' => 'Você deve informar o motivo da reprovação.',
         ]);
 
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
-                ->where('id', $request->draft)
-                ->where('status', EnumTransactionsStatus::PENDING)
+            $operation = NanotechOperation::where('type', $request->type)
+                ->where('id', $request->id)
+                ->where('status', EnumNanotechOperationStatus::PENDING)
                 ->firstOrFail();
 
-            $transaction->status = EnumTransactionsStatus::REVERSED;
-            $transaction->save();
+            $operation->status = EnumTransactionsStatus::REVERSED;
+            $operation->save();
 
-            TransactionStatus::create([
-                'status' => $transaction->status,
-                'transaction_id' => $transaction->id,
-            ]);
+            if (EnumNanotechOperationType::WITHDRAWAL == $operation->type) {
+                $operation->amount = abs($operation->amount);
+                Nanotech::increments($operation);
+            }
 
-            $user = User::findOrFail($transaction->user_id);
+            if (EnumNanotechOperationType::PROFIT_WITHDRAWAL == $operation->type) {
+                NanotechOperation::create([
+                    'user_id' => $operation->user_id,
+                    'amount' => abs($operation->amount),
+                    'status' => EnumNanotechOperationStatus::SUCCESS,
+                    'type' => EnumNanotechOperationType::PROFIT,
+                    'created_at' => $operation->created_at,
+                    'investment_id' => $operation->investment_id,
+                    'profit_percent' => $operation->profit_percent,
+                ]);
+            }
+
+            $user = User::findOrFail($operation->user_id);
 
             Localization::setLocale($user);
-            Mail::to($user->email)->send(new DepositoReject($user, $request->reason));
+            Mail::to($user->email)->send(new NanotechWithdrawalReject($user, $request->reason));
 
-            $this->balanceService::reverse($transaction);
-
-            ActivityLogger::log(trans('messages.withdrawal.reversed', ['reason' => $request->reason]), $transaction->user_id);
+            ActivityLogger::log(trans('messages.withdrawal.reversed', ['reason' => $request->reason]), $operation->user_id);
 
             DB::commit();
             return response([
-                'message' => 'O saque foi reprovado com sucesso.',
+                'message' => 'A retirada foi reprovada com sucesso.',
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {

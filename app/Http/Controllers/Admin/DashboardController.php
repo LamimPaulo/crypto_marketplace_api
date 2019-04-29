@@ -34,21 +34,21 @@ class DashboardController extends Controller
                 'status' => EnumTransactionsStatus::SUCCESS
             ]);
 
-            $withdrawals = Transaction::where('category', EnumTransactionCategory::DRAFT);
+            $withdrawals = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL);
             $withdrawals_pending = Transaction::where([
-                'category' => EnumTransactionCategory::DRAFT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
                 'status' => EnumTransactionsStatus::PENDING
             ]);
             $withdrawals_processing = Transaction::where([
-                'category' => EnumTransactionCategory::DRAFT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
                 'status' => EnumTransactionsStatus::PROCESSING
             ]);
             $withdrawals_reversed = Transaction::where([
-                'category' => EnumTransactionCategory::DRAFT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
                 'status' => EnumTransactionsStatus::REVERSED
             ]);
             $withdrawals_paid = Transaction::where([
-                'category' => EnumTransactionCategory::DRAFT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
                 'status' => EnumTransactionsStatus::SUCCESS
             ]);
 

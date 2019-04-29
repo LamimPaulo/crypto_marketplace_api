@@ -22,6 +22,13 @@ return [
             'message' => 'Por favor acesse a plataforma e realize o processo de saque novamente, caso necessário.',
         ]
     ],
+    'withdrawal' => [
+        'reject' => [
+            'subject' => 'Confirmação de Retirada',
+            'main_message' => 'Sua solicitação de Retirada foi estornada:',
+            'message' => 'Por favor acesse a plataforma e realize a solicitação novamente, caso necessário.',
+        ]
+    ],
     'transaction' => [
         'reject' => [
             'subject' => 'Confirmação de Transação',

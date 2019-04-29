@@ -219,7 +219,7 @@ class UserController extends Controller
             $user = User::where('email', $request->email)->firstOrFail();
             $transactions = Transaction::with('coin', 'user_account')
                 ->where('user_id', $user->id)
-                ->whereNotIn('category', [EnumTransactionCategory::DRAFT, EnumTransactionCategory::DEPOSIT])
+                ->whereNotIn('category', [EnumTransactionCategory::WITHDRAWAL, EnumTransactionCategory::DEPOSIT])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
@@ -247,7 +247,7 @@ class UserController extends Controller
                     return $account->with('bank');
                 }])
                 ->where('user_id', $user->id)
-                ->where('category', EnumTransactionCategory::DRAFT)
+                ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 

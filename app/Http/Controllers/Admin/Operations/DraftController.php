@@ -6,7 +6,7 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
-use App\Mail\DepositoReject;
+use App\Mail\DraftReject;
 use App\Helpers\ActivityLogger;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
@@ -38,7 +38,7 @@ class DraftController extends Controller
                 'user_account' => function ($account) {
                     return $account->with('bank');
                 }])
-                ->where('category', EnumTransactionCategory::DRAFT)
+                ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('status', EnumTransactionsStatus::PENDING)
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
@@ -63,7 +63,7 @@ class DraftController extends Controller
                 'user_account' => function ($account) {
                     return $account->with('bank');
                 }])
-                ->where('category', EnumTransactionCategory::DRAFT)
+                ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('status', $status)
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
@@ -81,7 +81,7 @@ class DraftController extends Controller
     {
         $request->validate([
             'draft' => 'required|exists:transactions,id',
-            'category' => ['required', Rule::in([EnumTransactionCategory::DRAFT])]
+            'category' => ['required', Rule::in([EnumTransactionCategory::WITHDRAWAL])]
         ], [
             'draft.required' => 'O identificador da transação é obrigatório.',
             'draft.exists' => 'A transação não existe',
@@ -92,7 +92,7 @@ class DraftController extends Controller
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
+            $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->draft)
                 ->whereIn('status', [EnumTransactionsStatus::PENDING, EnumTransactionsStatus::PROCESSING])
                 ->firstOrFail();
@@ -124,7 +124,7 @@ class DraftController extends Controller
     {
         $request->validate([
             'draft' => 'required|exists:transactions,id',
-            'category' => ['required', Rule::in([EnumTransactionCategory::DRAFT])]
+            'category' => ['required', Rule::in([EnumTransactionCategory::WITHDRAWAL])]
         ], [
             'draft.required' => 'O identificador da transação é obrigatório.',
             'draft.exists' => 'A transação não existe',
@@ -135,7 +135,7 @@ class DraftController extends Controller
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
+            $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->draft)
                 ->where('status', EnumTransactionsStatus::PENDING)
                 ->firstOrFail();
@@ -167,7 +167,7 @@ class DraftController extends Controller
     {
         $request->validate([
             'draft' => 'required|exists:transactions,id',
-            'category' => ['required', Rule::in([EnumTransactionCategory::DRAFT])],
+            'category' => ['required', Rule::in([EnumTransactionCategory::WITHDRAWAL])],
             'reason' => 'required|min:3'
         ], [
             'draft.required' => 'O identificador da transação é obrigatório.',
@@ -180,7 +180,7 @@ class DraftController extends Controller
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::DRAFT)
+            $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->draft)
                 ->where('status', EnumTransactionsStatus::PENDING)
                 ->firstOrFail();
@@ -196,7 +196,7 @@ class DraftController extends Controller
             $user = User::findOrFail($transaction->user_id);
 
             Localization::setLocale($user);
-            Mail::to($user->email)->send(new DepositoReject($user, $request->reason));
+            Mail::to($user->email)->send(new DraftReject($user, $request->reason));
 
             $this->balanceService::reverse($transaction);
 

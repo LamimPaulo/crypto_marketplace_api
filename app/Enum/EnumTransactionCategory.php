@@ -7,7 +7,7 @@ abstract class EnumTransactionCategory
     const TRANSACTION = 1;
     const ORDER = 2;
     const DEPOSIT = 3;
-    const DRAFT = 4;
+    const WITHDRAWAL = 4;
     const GATEWAY = 5;
     const CONVERSION = 6;
     const LQX_SUBMIT = 7;
@@ -19,12 +19,14 @@ abstract class EnumTransactionCategory
     const NANOTECH_CREDMINER = 13;
     const MASTERNODE_CREDMINER = 14;
     const FUND_CREDMINER = 15;
+    const NANOTECH = 16;
+    const MASTERNODE = 17;
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
         self::ORDER => 'Ordem',
         self::DEPOSIT => 'Depósito',
-        self::DRAFT => 'Saque',
+        self::WITHDRAWAL => 'Saque',
         self::GATEWAY => 'Gateway',
         self::CONVERSION => 'Conversão',
         self::LQX_SUBMIT => 'Envio de LQX',
@@ -36,5 +38,7 @@ abstract class EnumTransactionCategory
         self::BUY_LEVEL => 'Compra de Nível',
         self::FUND_CREDMINER => 'Fundos Credminer',
         self::MASTERNODE_CREDMINER => 'Masternode Credminer',
+        self::NANOTECH=> 'Nanotech',
+        self::MASTERNODE => 'Masternode',
     ];
 }

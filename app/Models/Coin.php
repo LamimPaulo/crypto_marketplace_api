@@ -28,7 +28,9 @@ class Coin extends Model
         'wallet_order',
         'core_limit_balance',
         'core_limit_percent',
-        'withdrawal_address'
+        'withdrawal_address',
+        'core_balance',
+        'core_status'
     ];
 
     protected $hidden = ['id', 'created_at', 'updated_at'];

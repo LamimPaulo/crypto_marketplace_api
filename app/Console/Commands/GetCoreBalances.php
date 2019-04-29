@@ -50,9 +50,13 @@ class GetCoreBalances extends Command
         foreach ($coins as $coin) {
             try {
                 $balance = OffScreenController::post(EnumOperationType::GET_BALANCE, [], $coin->abbr);
-                $coin->update(['core_balance' => $balance, 'core_status' => 1]);
+                $coin->core_balance = $balance;
+                $coin->core_status = 1;
+                $coin->save();
             } catch (\Exception $exception) {
-                $coin->update(['core_status' => 0]);
+                $coin->core_status = 0;
+                $coin->save();
+
                 $this->sendNotification($coin->abbr);
             }
         }
@@ -66,10 +70,17 @@ class GetCoreBalances extends Command
         ])->first();
 
         if (!$alert) {
+            $message = "Core $coin " . env("APP_NAME") . " Offline, favor reiniciar o serviço.";
+            SystemNotification::create([
+                'email' => 'cristianovelkan@gmail.com',
+                'status' => false,
+                'description' => $message
+            ]);
+
             Mail::to([
                 'cristianovelkan@gmail.com',
                 'vendasnavi@hotmail.com'
-            ])->send(new AlertsMail("Core $coin " . env("APP_NAME") . " Offline, favor reiniciar o serviço."));
+            ])->send(new AlertsMail($message));
         }
     }
 }

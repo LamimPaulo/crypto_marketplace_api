@@ -100,7 +100,7 @@ class BalanceService
                 ->where('coin_id', '=', $transaction->coin_id)
                 ->where('id', '=', $transaction->wallet_id);
 
-            if ($wallet->first()->coin->is_crypto) {
+            if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.18f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
@@ -124,7 +124,7 @@ class BalanceService
                 ->where('coin_id', '=', $transaction->coin_id)
                 ->where('id', '=', $transaction->wallet_id);
 
-            if ($wallet->first()->coin->is_crypto) {
+            if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
