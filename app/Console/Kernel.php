@@ -36,7 +36,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:profits')->monthlyOn(10, '00:30');
         $schedule->command('funds:expiration')->dailyAt('01:00');
         $schedule->command('masternode:update')->everyFifteenMinutes();
-        $schedule->command('update:offscreenbalance')->everyMinute();
+        $schedule->command('update:corebalances')->everyFifteenMinutes();
+        //$schedule->command('update:offscreenbalance')->everyMinute();
     }
 
     /**

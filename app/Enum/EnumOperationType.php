@@ -27,4 +27,5 @@ abstract class EnumOperationType
     const DECREMENT_BALANCE = 'DECREMENT BALANCE';
     const CORE_WITHDRAWAL_LIMIT = 'CORE WITHDRAWAL LIMIT';
     const IMPORT_ADDRESS = 'IMPORT ADDRESS';
+    const SYNC_ADDRESS = 'SYNC ADDRESS';
 }
