@@ -30,7 +30,7 @@
                                                 <td style="font-family:'Helvetica Neue','Helvetica','Roboto','Calibri','Arial',sans-serif;text-align:left"
                                                     width="120" height="60">
 
-                                                    <img src="https://s3.amazonaws.com/navi-public/api/navicapital.png"
+                                                    <img src="https://s3.amazonaws.com/navi-public/api/clients/3/cbed47c0-5323-4873-baf7-0284f80bbf0a.png"
                                                          width="120"/>
 
                                                 </td>
