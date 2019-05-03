@@ -36,7 +36,7 @@ class TransactionsController extends Controller
                 },
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
@@ -58,7 +58,7 @@ class TransactionsController extends Controller
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('status', $status)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
@@ -81,7 +81,7 @@ class TransactionsController extends Controller
                 ->where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('type', $type)
                 ->whereNotIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT, EnumTransactionsStatus::REVERSED])
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
