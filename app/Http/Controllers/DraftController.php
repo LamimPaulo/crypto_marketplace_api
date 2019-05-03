@@ -45,8 +45,16 @@ class DraftController extends Controller
     public function store(DraftRequest $request)
     {
         try {
-            $draft = Transaction::where(['type'=>EnumTransactionType::OUT, 'category' => EnumTransactionCategory::WITHDRAWAL, 'status'=> EnumTransactionsStatus::PENDING, 'user_id'=> auth()->user()->id])->first();
-            if($draft){
+            $draft = Transaction::where([
+                'type' => EnumTransactionType::OUT,
+                'category' => EnumTransactionCategory::WITHDRAWAL,
+                'user_id' => auth()->user()->id,
+            ])
+                ->whereIn(
+                    'status', [EnumTransactionsStatus::PENDING, EnumTransactionsStatus::PROCESSING]
+                )->first();
+
+            if ($draft) {
                 throw new \Exception(trans('messages.withdrawal.already_pending'));
             }
 
@@ -145,8 +153,8 @@ class DraftController extends Controller
         $request->validate([
             'transaction' => 'required|exists:transactions,id',
         ], [
-            'transaction.required'  => trans('validation.draft.cancel.transaction_required'),
-            'transaction.exists'    => trans('validation.draft.cancel.transaction_exists'),
+            'transaction.required' => trans('validation.draft.cancel.transaction_required'),
+            'transaction.exists' => trans('validation.draft.cancel.transaction_exists'),
         ]);
 
         try {
