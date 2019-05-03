@@ -40,7 +40,7 @@ class DepositController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::DEPOSIT)
                 ->where('status', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
@@ -65,7 +65,7 @@ class DepositController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::DEPOSIT)
                 ->where('status', '<>', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);

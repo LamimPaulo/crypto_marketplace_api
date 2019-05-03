@@ -40,7 +40,7 @@ class DraftController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('status', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
@@ -65,7 +65,7 @@ class DraftController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('status', $status)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('created_at')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
