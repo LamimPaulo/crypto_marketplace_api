@@ -34,18 +34,16 @@ class PaymentController extends Controller
             $user = User::where('api_key', '=', $request->get('api_key'))->first();
 
             if (is_null($user)) {
-                throw new \Exception('Keycode inválido');
+                throw new \Exception('Api Key is invalid!');
             }
 
             return response([
-                'message' => 'Keycode Válido',
-                'status' => 1,
+                'message' => 'Api Key is valid',
                 'user' => $user->name
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             return response([
-                'message' => $ex->getMessage(),
-                'status' => 0
+                'error' => $ex->getMessage()
             ], Response::HTTP_OK);
         }
     }
