@@ -96,13 +96,15 @@ class PaymentController extends Controller
         }
     }
 
-    public function withdrawal(Request $request) {
+    public function withdrawal(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'api_key' => 'required|exists:users,api_key',
+            'coin' => 'required|exists:coins,abbr'
+        ]);
+
         try {
-            $request->validate([
-                'amount'    => 'required|numeric',
-                'api_key'   => 'required|exists:users,api_key',
-                'coin'      => 'required|exists:coins,abbr'
-            ]);
 
             $user = User::where('api_key', '=', $request->get('api_key'))->firstOrFail();
             $coin = Coin::getByAbbr($request->coin);
@@ -151,13 +153,13 @@ class PaymentController extends Controller
                 'tx' => $transaction->tx,
                 'created' => $transaction->created_at,
                 'status' => EnumTransactionsStatus::STATUS[$transaction->status]
-                    ], Response::HTTP_CREATED);
+            ], Response::HTTP_CREATED);
         } catch (\Exception $ex) {
 
             DB::rollBack();
             return response([
                 'error' => $ex->getMessage()
-                    ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
