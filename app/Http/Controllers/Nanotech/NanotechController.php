@@ -171,7 +171,7 @@ class NanotechController extends Controller
     {
         $profits = NanotechProfitPercent::select("percent","day")
             ->where('day', '>', Carbon::now()->subMonths(1))
-            ->where('day', '<', Carbon::now()->addMonths(1))
+            ->where('day', '<', Carbon::now())
             ->where('type_id', $type)
             ->orderBy('day')
             ->get();
