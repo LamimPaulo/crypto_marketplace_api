@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Credminer;
 
+use App\Enum\EnumCalcType;
 use App\Enum\EnumGatewayStatus;
 use App\Enum\EnumGatewayType;
+use App\Enum\EnumOperations;
+use App\Enum\EnumOperationType;
+use App\Enum\EnumTaxType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
@@ -31,7 +35,8 @@ class PaymentController extends Controller
         ]);
 
         try {
-            $user = User::where('api_key', '=', $request->get('api_key'))->first();
+            $user = User::with('level')
+                ->where('api_key', '=', $request->get('api_key'))->first();
 
             if (is_null($user)) {
                 throw new \Exception('Api Key is invalid!');
@@ -39,7 +44,20 @@ class PaymentController extends Controller
 
             return response([
                 'message' => 'Api Key is valid',
-                'user' => $user->name
+                'user' => $user->name,
+                'level' => [
+                    'name' => $user->level->name,
+                    'nanotech_lqx_fee' => $user->level->nanotech_lqx_fee,
+                    'nanotech_btc_fee' => $user->level->nanotech_btc_fee,
+                    'masternode_fee' => $user->level->masternode_fee,
+                    'tax_crypto' => $user->level->tax_crypto->makeHidden(['id','coin_id','user_level_id','created_at','updated_at','description']),
+                    'tax_brl' => $user->level->tax_brl->makeHidden(['id','coin_id','user_level_id','created_at','updated_at','description']),
+                ],
+                'dictionary' => [
+                    'tax_types' => EnumTaxType::OPERATIONS,
+                    'calc_types' => EnumCalcType::TYPE,
+                    'operation_types' => EnumOperations::OPERATIONS,
+                ]
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             return response([
