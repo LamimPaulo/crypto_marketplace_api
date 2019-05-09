@@ -14,7 +14,7 @@ class CreateUserAccountsTable extends Migration
     public function up()
     {
         Schema::create('user_accounts', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->integer('bank_id')->unsigned()->nullable();
             $table->string('agency')->nullable();

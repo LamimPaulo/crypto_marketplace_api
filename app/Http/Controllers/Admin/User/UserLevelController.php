@@ -77,7 +77,7 @@ class UserLevelController extends Controller
 
             return response([
                 'status' => 'success',
-                'message' => 'Nível Criado com sucesso.'
+                'message' => 'Keycode Criado com sucesso.'
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -142,7 +142,7 @@ class UserLevelController extends Controller
             DB::commit();
             return response([
                 'status' => 'success',
-                'message' => 'Nível Atualizado com sucesso.'
+                'message' => 'Keycode Atualizado com sucesso.'
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();

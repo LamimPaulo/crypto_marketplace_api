@@ -77,7 +77,7 @@ return [
         'invalid_data' => 'Dados Inválidos.',
         'invalid_id' => 'Cpf inválido.',
         'invalid_operation_type' => 'Tipo de operação incorreto.',
-        'level_up' => 'Subiu de Nível!',
+        'level_up' => 'Subiu de Keycode!',
         'status_updated' => 'Status Atualizado.',
         'success' => 'Sucesso!',
     ],

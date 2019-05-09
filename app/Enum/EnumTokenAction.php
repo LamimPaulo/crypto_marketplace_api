@@ -41,6 +41,6 @@ abstract class EnumTokenAction
         self::INDEX_FUNDS_IN => 'Aquisição de Investimento',
         self::INDEX_FUNDS_OUT => 'Saque de Investimentos',
         self::CANCEL_DRAFT => 'Cancelamento de Saque',
-        self::BUY_LEVEL => 'Compra de Nível',
+        self::BUY_LEVEL => 'Compra de Keycode',
     ];
 }

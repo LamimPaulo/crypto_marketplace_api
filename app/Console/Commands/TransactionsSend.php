@@ -111,8 +111,6 @@ class TransactionsSend extends Command
                 'toAddress' => $pending->toAddress,
                 'fee' => $pending->fee,
                 'amount' => $pending->amount,
-                //get coin abbr to attach at end of pub key
-                'scriptPubKey' => env("PUB_KEY_$coin_abbr"),
                 'balance' => sprintf("%.18f", $wallet->balance)
             ];
 

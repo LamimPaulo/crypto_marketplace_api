@@ -35,7 +35,7 @@ abstract class EnumTransactionCategory
         self::NANOTECH_CREDMINER => 'Nanotech Credminer',
         self::FUND => 'Fundos de Investimento',
         self::CREDMINER => 'Saque Credminer',
-        self::BUY_LEVEL => 'Compra de Nível',
+        self::BUY_LEVEL => 'Compra de Keycode',
         self::FUND_CREDMINER => 'Fundos Credminer',
         self::MASTERNODE_CREDMINER => 'Masternode Credminer',
         self::NANOTECH=> 'Nanotech',
