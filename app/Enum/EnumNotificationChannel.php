@@ -2,13 +2,13 @@
 
 namespace App\Enum;
 
-abstract class EnumFundType {
-    const LIMITED = 1;
-    const UNLIMITED = 2;
+abstract class EnumNotificationChannel {
+    const GENERAL = 1;
+    const USER = 2;
 
-    const TYPE = [
-        self::LIMITED => 'Limitado',
-        self::UNLIMITED => 'Ilimitado',
+    const CHANNEL = [
+        self::GENERAL   => 'General',
+        self::USER      => 'Usuário',
     ];
 
 }
