@@ -52,6 +52,7 @@ class LevelRequest extends FormRequest
 
             'product.value' => 'required|numeric',
             'product.value_lqx' => 'required|numeric',
+            'product.bonus_percent' => 'required|numeric',
 
             'tax_crypto' => 'nullable|array',
             'tax_brl' => 'nullable|array',
@@ -145,6 +146,9 @@ class LevelRequest extends FormRequest
 
             'product.value.numeric' => 'O valor do produto em R$ deve ser informado corretamente (somente pontos e números).',
             'product.value_lqx.numeric' => 'O valor do produto em LQX deve ser informado corretamente (somente pontos e números).',
+
+            'product.bonus_percent.required' => 'O percentual de bônus deve ser informado.',
+            'product.bonus_percent.numeric' => 'O percentual de bônus deve ser informado corretamente (somente pontos e números).',
         ];
     }
 }

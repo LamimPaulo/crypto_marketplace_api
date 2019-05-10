@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\User;
 
+use App\Enum\EnumUserLevelType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LevelRequest;
 use App\Models\Product;
@@ -110,6 +111,7 @@ class UserLevelController extends Controller
             $product = Product::findOrFail($request->product_id);
             $product->value = $request->product['value'];
             $product->value_lqx = $request->product['value_lqx'];
+            $product->bonus_percent = $request->product['bonus_percent'];
             $product->save();
 
             //tax coins update
@@ -128,15 +130,18 @@ class UserLevelController extends Controller
                 ]);
             }
 
-            foreach ($request->tax_brl as $tax) {
-                TaxCoin::create([
-                    'coin_id' => 2,
-                    'user_level_id' => $request->id,
-                    'coin_tax_type' => $tax['coin_tax_type'],
-                    'value' => $tax['value'],
-                    'operation' => $tax['operation'],
-                    'calc_type' => $tax['calc_type']
-                ]);
+            if ($level->type == EnumUserLevelType::NACIONAL) {
+
+                foreach ($request->tax_brl as $tax) {
+                    TaxCoin::create([
+                        'coin_id' => 2,
+                        'user_level_id' => $request->id,
+                        'coin_tax_type' => $tax['coin_tax_type'],
+                        'value' => $tax['value'],
+                        'operation' => $tax['operation'],
+                        'calc_type' => $tax['calc_type']
+                    ]);
+                }
             }
 
             DB::commit();

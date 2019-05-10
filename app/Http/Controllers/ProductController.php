@@ -7,6 +7,7 @@ use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Requests\BuyLevelRequest;
 use App\Models\Coin;
+use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
@@ -25,15 +26,17 @@ class ProductController extends Controller
             $coin = Coin::getByAbbr($request->abbr);
             $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();
 
-            $amount = $level->product->value;
+            $bonus = Product::find(auth()->user()->user_level_id)->first()->bonus_percent;
+
+            $amount = $level->product->value - ($level->product->value * $bonus / 100);
+
             if ($coin->abbr == 'LQX') {
-                $amount = $level->product->value_lqx;
+                $amount = $level->product->value_lqx - ($level->product->value_lqx * $bonus / 100);
             }
 
             if (!(abs($amount) <= abs($wallet->balance))) {
                 throw new \Exception(trans('messages.transaction.value_exceeds_balance') . " ($amount) <= {$wallet->balance}");
             }
-
 
             $user = User::where('id', auth()->user()->id)->first();
 
@@ -59,12 +62,11 @@ class ProductController extends Controller
                 'fee' => 0,
                 'tax' => 0,
                 'tx' => Uuid::uuid4()->toString(),
-                'info' => 'Compra de Nível: ' . $level->name,
+                'info' => 'Compra de Keycode: ' . $level->name,
                 'error' => '',
             ]);
 
             BalanceService::decrements($transaction);
-
 
             $user->user_level_id = $request->level_id;
             $user->save();

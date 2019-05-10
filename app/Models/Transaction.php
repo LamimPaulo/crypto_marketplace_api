@@ -63,7 +63,8 @@ class Transaction extends Model
         'file_path',
         'tax',
         'price',
-        'market'
+        'market',
+        'payment_at'
     ];
 
 
@@ -84,6 +85,7 @@ class Transaction extends Model
         'statusClass',
         'dateLocal',
         'updatedLocal',
+        'paymentDateLocal',
         'amountRounded',
         'feeRounded',
         'taxRounded',
@@ -118,6 +120,11 @@ class Transaction extends Model
     public function getDateLocalAttribute()
     {
         return $this->created_at->format('d/m/Y H:i');
+    }
+
+    public function getPaymentDateLocalAttribute()
+    {
+        return !is_null($this->payment_at) ? Carbon::parse($this->payment_at)->format('d/m/Y') : '-';
     }
 
     public function getUpdatedLocalAttribute()

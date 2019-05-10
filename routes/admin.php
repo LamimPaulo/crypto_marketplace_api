@@ -43,8 +43,8 @@ Route::group(['namespace' => 'Admin'], function () {
 
         Route::group(['prefix' => 'transactions'], function () {
             //transactions list
-            Route::get('/by-status/{status}', 'TransactionsController@byStatus');
-            Route::get('/by-type/{type}', 'TransactionsController@byType');
+            Route::post('/by-status', 'TransactionsController@byStatus');
+            Route::post('/by-type', 'TransactionsController@byType');
             //transaction reject
             Route::post('/reject', 'TransactionsController@reject');
             //transaction accept

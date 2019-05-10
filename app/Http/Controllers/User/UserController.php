@@ -34,7 +34,11 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $user = User::with('level')->findOrFail(auth()->user()->id);
+            $user = User::with([
+                'level' => function ($level) {
+                    return $level->with('product');
+                }
+            ])->findOrFail(auth()->user()->id);
             return response([
                 'message' => trans('messages.general.success'),
                 'user' => $user
@@ -339,9 +343,9 @@ class UserController extends Controller
             //chart
             $total = $nanotech_btc['value_lqx'] + $nanotech_lqx['value_lqx'] + $masternode['value_brl'];
 
-            $chart = [0,0,0];
+            $chart = [0, 0, 0];
 
-            if($total>0){
+            if ($total > 0) {
                 $chart = [
                     (float)round($nanotech_btc['value_lqx'] * 100 / $total, 3),
                     (float)round($nanotech_lqx['value_lqx'] * 100 / $total, 3),

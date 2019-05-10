@@ -77,6 +77,8 @@ class UserController extends Controller
             $users = User::with(['level'])
                 ->where('email_verified_at', '<>', '')
                 ->where('name', 'like', "%{$request->name}%")
+                ->orWhere('email', 'like', "%{$request->name}%")
+                ->orWhere('document', 'like', "%{$request->name}%")
                 ->orderBy('name', 'ASC')->get();
 
             return response(['data' => $users]

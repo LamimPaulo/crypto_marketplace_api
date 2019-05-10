@@ -17,6 +17,7 @@ class Product extends Model
         'value',
         'value_lqx',
         'name',
+        'bonus_percent',
         'description',
         'is_active'
     ];

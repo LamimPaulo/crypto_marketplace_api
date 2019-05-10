@@ -48,7 +48,7 @@ class TransactionsController extends Controller
         }
     }
 
-    public function byStatus($status)
+    public function byStatus(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -57,11 +57,16 @@ class TransactionsController extends Controller
                 },
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
-                ->where('status', $status)
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->where('status', $request->status)
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -70,7 +75,7 @@ class TransactionsController extends Controller
         }
     }
 
-    public function byType($type)
+    public function byType(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -79,12 +84,17 @@ class TransactionsController extends Controller
                 },
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
-                ->where('type', $type)
+                ->where('type', $request->type)
                 ->whereNotIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT, EnumTransactionsStatus::REVERSED])
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
