@@ -55,7 +55,8 @@ class NanotechController extends Controller
                 'user_profit' => $this->profit($type->id),
                 'total_user_investment' => $this->totalSum($type->id),
                 'coin' => $type->coin->abbr,
-                'chart_data' => $this->chart($type->id)
+                'chart_data' => $this->chart($type->id),
+                'name' => $type->type
             ];
         } catch (\Exception $e) {
             return \response([

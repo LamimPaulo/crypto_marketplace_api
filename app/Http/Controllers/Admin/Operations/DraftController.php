@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin\Operations;
 
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
+use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
 use App\Mail\DraftReject;
-use App\Helpers\ActivityLogger;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Services\BalanceService;
@@ -27,7 +27,7 @@ class DraftController extends Controller
         $this->balanceService = $balance;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -40,10 +40,15 @@ class DraftController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('status', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -52,7 +57,7 @@ class DraftController extends Controller
         }
     }
 
-    public function list($status=1)
+    public function list(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -64,11 +69,17 @@ class DraftController extends Controller
                     return $account->with('bank');
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
-                ->where('status', $status)
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->where('status', $request->status)
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),

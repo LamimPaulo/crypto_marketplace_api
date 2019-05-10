@@ -27,7 +27,7 @@ class DepositController extends Controller
         $this->balanceService = $balance;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -40,10 +40,15 @@ class DepositController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::DEPOSIT)
                 ->where('status', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -52,7 +57,7 @@ class DepositController extends Controller
         }
     }
 
-    public function list()
+    public function list(Request $request)
     {
         try {
             $transactions = Transaction::with([
@@ -65,10 +70,15 @@ class DepositController extends Controller
                 }])
                 ->where('category', EnumTransactionCategory::DEPOSIT)
                 ->where('status', '<>', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at')
-                ->paginate(10);
+                ->orderBy('created_at');
 
-            return response($transactions, Response::HTTP_OK);
+            if (!empty($request->term)) {
+                $transactions->whereHas('user', function ($user) use ($request) {
+                    return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
+                });
+            }
+
+            return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -157,7 +167,7 @@ class DepositController extends Controller
             Localization::setLocale($user);
             Mail::to($user->email)->send(new DepositoReject($user, $request->reason));
 
-            $this->activity($transaction,  trans('messages.deposit.rejected', ['reason' => $request->reason]));
+            $this->activity($transaction, trans('messages.deposit.rejected', ['reason' => $request->reason]));
 
             DB::commit();
             return response([

@@ -39,7 +39,9 @@ class UserLevel extends Model
         'is_allowed_buy_with_fiat',
         'nanotech_lqx_fee',
         'nanotech_btc_fee',
-        'masternode_fee'
+        'masternode_fee',
+        'info',
+        'type'
     ];
 
     protected $hidden = [];

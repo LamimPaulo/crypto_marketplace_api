@@ -19,15 +19,15 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::group(['namespace' => 'Operations'], function () {
         //depositos
         Route::group(['prefix' => 'deposits'], function () {
-            Route::get('/pending', 'DepositController@index');
-            Route::get('/list', 'DepositController@list');
+            Route::post('/pending', 'DepositController@index');
+            Route::post('/list', 'DepositController@list');
             Route::post('/reject', 'DepositController@reject');
             Route::post('/accept', 'DepositController@accept');
         });
 
         //saques
         Route::group(['prefix' => 'drafts'], function () {
-            Route::get('/list/{status}', 'DraftController@list');
+            Route::post('/list', 'DraftController@list');
             Route::post('/reject', 'DraftController@reject');
             Route::post('/accept', 'DraftController@accept');
             Route::post('/process', 'DraftController@process');
