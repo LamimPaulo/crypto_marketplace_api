@@ -3,6 +3,7 @@
 namespace App\Models\User;
 
 use App\Models\Product;
+use App\Models\SysConfig;
 use App\Models\TaxCoin;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
@@ -53,12 +54,26 @@ class UserLevel extends Model
         'nanotechLqxPercent',
         'nanotechBtcPercent',
         'masternodePercent',
+        'minWithdrawal',
+        'minCryptoSubmission',
     ];
 
     //Appends
     public function getBtcDiaryAttribute()
     {
         return sprintf('%.5f', $this->limit_btc_diary);
+    }
+
+    public function getMinWithdrawalAttribute()
+    {
+        $sysConfig = SysConfig::first();
+        return number_format($sysConfig->deposit_min_valor,2 , ',', '.');
+    }
+
+    public function getMinCryptoSubmissionAttribute()
+    {
+        $sysConfig = SysConfig::first();
+        return sprintf('%.5f', $sysConfig->send_min_btc);
     }
 
     public function getBrlDiaryAttribute()
@@ -83,7 +98,7 @@ class UserLevel extends Model
 
     public function getMasternodePercentAttribute()
     {
-        return sprintf('%.2f', $this->nanotech_masternode_fee);
+        return sprintf('%.2f', $this->masternode_fee);
     }
 
     //Relations

@@ -13,10 +13,8 @@ class UserLevelController extends Controller
     public function index()
     {
         try {
-
             $type = auth()->user()->country_id == 31 ? EnumUserLevelType::NACIONAL : EnumUserLevelType::INTERNACIONAL;
-
-            $levels = UserLevel::with('product')
+            $levels = UserLevel::with(['product','tax_crypto','tax_brl'])
                 ->whereHas('product', function ($product){
                     return $product->where('is_active', true);
                 })
