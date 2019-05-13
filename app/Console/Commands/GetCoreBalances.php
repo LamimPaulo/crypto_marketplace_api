@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Enum\EnumOperationType;
 use App\Http\Controllers\OffScreenController;
 use App\Mail\AlertsMail;
-use App\Models\Admin\SystemNotification;
+use App\Models\Admin\CoreNotification;
 use App\Models\Coin;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -65,13 +65,13 @@ class GetCoreBalances extends Command
 
     private function sendNotification($coin)
     {
-        $alert = SystemNotification::where([
+        $alert = CoreNotification::where([
             'status' => false
         ])->first();
 
         if (!$alert) {
             $message = "Core $coin " . env("APP_NAME") . " Offline, favor reiniciar o serviço.";
-            SystemNotification::create([
+            CoreNotification::create([
                 'email' => 'cristianovelkan@gmail.com',
                 'status' => false,
                 'description' => $message
