@@ -11,6 +11,7 @@ use App\Models\AdminDashboard;
 use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\Document;
+use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -109,6 +110,7 @@ class DashboardController extends Controller
                 'withdrawals_processing_amount' => $withdrawals_processing->sum('amount'),
                 'withdrawals_reversed' => $withdrawals_reversed->count(),
                 'withdrawals_reversed_amount' => $withdrawals_reversed->sum('amount'),
+                'balance_brl' => UserWallet::where('coin_id', 2)->sum('balance'),
                 'crypto_operations' => $this->crypto_operations(),
 
             ];
@@ -164,7 +166,7 @@ class DashboardController extends Controller
             $report[] = [
                 'coin' => $coin->abbr,
 
-                'balance' => $coin->abbr,
+                'balance' => UserWallet::where('coin_id', $coin->id)->sum('balance'),
 
                 'buy' => $buy_orders->count(),
                 'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
