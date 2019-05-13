@@ -82,6 +82,7 @@ class Transaction extends Model
         'categoryName',
         'typeName',
         'statusName',
+        'statusClient',
         'statusClass',
         'dateLocal',
         'updatedLocal',
@@ -110,6 +111,11 @@ class Transaction extends Model
     public function getStatusNameAttribute()
     {
         return EnumTransactionsStatus::STATUS[$this->status];
+    }
+
+    public function getStatusClientAttribute()
+    {
+        return EnumTransactionsStatus::STATUS_CLIENT[$this->status];
     }
 
     public function getStatusClassAttribute()

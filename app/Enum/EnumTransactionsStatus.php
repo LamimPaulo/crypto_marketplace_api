@@ -24,6 +24,17 @@ abstract class EnumTransactionsStatus {
         self::REVERSED => 'Estornada',
     ];
 
+    const STATUS_CLIENT = [
+        self::PENDING => 'Pendente',
+        self::PROCESSING => 'Processando',
+        self::SUCCESS => 'Sucesso',
+        self::CANCELED => 'Cancelada',
+        self::INSUFICIENT => 'Fundos Insuficientes',
+        self::ABOVELIMIT => 'Pendente',
+        self::ERROR => 'Pendente',
+        self::REVERSED => 'Estornada',
+    ];
+
     const STATUS_DRAFT = [
         self::PENDING => 'EFETUADO',
         self::PROCESSING => 'PROCESSANDO',
