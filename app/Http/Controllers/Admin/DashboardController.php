@@ -11,6 +11,7 @@ use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\User;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class DashboardController extends Controller
@@ -114,16 +115,41 @@ class DashboardController extends Controller
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::IN,
                 'coin_id' => $coin->id
-            ]);
+            ])->whereNull('sender_user_id');
 
             $transactions_out = Transaction::where([
                 'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $transactions_out_internal = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $buy_orders = Transaction::where([
+                'category' => EnumTransactionCategory::CONVERSION,
+                'type' => EnumTransactionType::IN,
+                'coin_id' => $coin->id
+            ]);
+
+            $sell_orders = Transaction::where([
+                'category' => EnumTransactionCategory::CONVERSION,
                 'type' => EnumTransactionType::OUT,
                 'coin_id' => $coin->id
             ]);
 
             $report[] = [
                 'coin' => $coin->abbr,
+
+                'buy' => $buy_orders->count(),
+                'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
+
+                'sell' => $sell_orders->count(),
+                'sell_amount' => $sell_orders->sum('amount') + $sell_orders->sum('tax') + $sell_orders->sum('fee'),
+
                 'in' => $transactions_in->count(),
                 'in_amount' => $transactions_in->sum('amount') + $transactions_in->sum('tax') + $transactions_in->sum('fee'),
                 'out' => $transactions_out->count(),
@@ -132,6 +158,14 @@ class DashboardController extends Controller
                 'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
                                         + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
                                         + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+
+                'out_internal' => $transactions_out_internal->count(),
+                'out_amount_internal' => $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee'),
+                'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
+                'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
+                                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+                                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+
                 'core_balance' => $coin->core_balance,
                 'core_status' => $coin->core_status,
             ];

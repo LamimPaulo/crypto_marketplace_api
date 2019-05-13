@@ -24,7 +24,7 @@ class CreateTransactionsTable extends Migration
             $table->tinyInteger('status');
             $table->tinyInteger('type');
             $table->tinyInteger('category');
-            $table->string('tx')->nullable();
+            $table->string('tx',255)->nullable();
             $table->integer('confirmation')->default(0);
             $table->text('info')->nullable();
             $table->text('error')->nullable();
