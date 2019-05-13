@@ -126,7 +126,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
-        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck']);
+        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck','checkkeycodelevel']);
         //retorna o valor transacionado do usuario no dia
         Route::get('/sum-day/{user}', 'TransactionsController@getValueByDayUser');
         //verifica se o usuário pode efetuar a transação

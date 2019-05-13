@@ -13,7 +13,6 @@ use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserWallet;
 use App\User;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class DashboardController extends Controller
@@ -36,7 +35,6 @@ class DashboardController extends Controller
     public function general()
     {
         try {
-
             $deposits = Transaction::where('category', EnumTransactionCategory::DEPOSIT);
             $deposits_pending = Transaction::where([
                 'category' => EnumTransactionCategory::DEPOSIT,
@@ -112,10 +110,9 @@ class DashboardController extends Controller
                 'withdrawals_reversed_amount' => $withdrawals_reversed->sum('amount'),
                 'balance_brl' => UserWallet::where('coin_id', 2)->sum('balance'),
                 'crypto_operations' => $this->crypto_operations(),
-
             ];
 
-            $dash = AdminDashboard::firstOrNew(['id'=>1]);
+            $dash = AdminDashboard::firstOrNew(['id' => 1]);
             $dash->general_json = json_encode($json);
             $dash->save();
 
@@ -132,7 +129,7 @@ class DashboardController extends Controller
         $coins = Coin::where(['is_wallet' => true, 'is_crypto' => true])->get();
         $report = [];
 
-        foreach($coins as $coin){
+        foreach ($coins as $coin) {
             $transactions_in = Transaction::where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::IN,
@@ -180,15 +177,15 @@ class DashboardController extends Controller
                 'out_amount' => $transactions_out->sum('amount') + $transactions_out->sum('tax') + $transactions_out->sum('fee'),
                 'above_limit' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
                 'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                                        + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                                        + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
 
                 'out_internal' => $transactions_out_internal->count(),
                 'out_amount_internal' => $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee'),
                 'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
                 'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
 
                 'core_balance' => $coin->core_balance,
                 'core_status' => $coin->core_status,

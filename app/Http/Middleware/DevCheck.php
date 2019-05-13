@@ -18,7 +18,7 @@ class DevCheck
     public function handle($request, Closure $next)
     {
 
-        if(!Auth::guard('web')->user()->dev){
+        if(!auth()->user()->dev){
             return abort(404);
         }
         
