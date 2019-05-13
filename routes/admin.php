@@ -26,7 +26,7 @@ Route::group(['namespace' => 'Admin'], function () {
         });
 
         //saques
-        Route::group(['prefix' => 'drafts'], function () {
+        Route::group(['prefix' => 'withdrawals'], function () {
             Route::post('/list', 'DraftController@list');
             Route::post('/reject', 'DraftController@reject');
             Route::post('/accept', 'DraftController@accept');
@@ -51,7 +51,11 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'TransactionsController@accept');
         });
 
+    });
 
+    Route::group(['prefix' => 'withdrawals'], function () {
+        Route::get('/deadlines', 'WithdrawalDeadlineController@index');
+        Route::post('/deadlines', 'WithdrawalDeadlineController@update');
     });
 
     Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {

@@ -28,8 +28,9 @@ class DraftRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount'            => 'required',
-            'user_account_id'   => 'required|exists:user_accounts,id'
+            'amount'          => 'required',
+            'user_account_id' => 'required|exists:user_accounts,id',
+            'tax_id'          => 'required|exists:withdrawal_deadlines,id',
         ];
     }
 

@@ -102,6 +102,9 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //lista de bancos padrões
     Route::get('banks', 'BankController@index');
+    //taxas de saque
+    Route::get('withdrawal/deadlines', 'WithdrawalDeadlineController@index');
+    Route::post('withdrawal/calc', 'WithdrawalDeadlineController@calc');
     //provedores de pagamentos online
     Route::get('providers', 'BankController@providers');
 

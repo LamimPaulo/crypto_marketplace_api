@@ -11,6 +11,7 @@ use App\Enum\EnumTransactionType;
 use App\Helpers\ActivityLogger;
 use App\Http\Requests\DraftRequest;
 use App\Models\Coin;
+use App\Models\System\WithdrawalDeadline;
 use App\Models\TaxCoin;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
@@ -20,6 +21,7 @@ use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\TaxCoinService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -119,6 +121,7 @@ class DraftController extends Controller
                 'confirmation' => 0,
                 'fee' => $fee['fee'],
                 'tax' => $fee['tax'],
+                'payment_at' => $fee['payment_at'],
                 'tx' => $uuid->toString(),
                 'info' => '',
                 'error' => '',
@@ -135,7 +138,7 @@ class DraftController extends Controller
 
             DB::commit();
             return response([
-                'message' => trans('messages.transaction.sent_success'),
+                'message' => trans('messages.withdraw.requested'),
                 'transaction' => $transaction,
                 'transactionStatus' => $transactionStatus
             ], Response::HTTP_CREATED);
@@ -223,23 +226,27 @@ class DraftController extends Controller
                 $tedTax = $amount * ($ted->value / 100);
             }
 
-            $fee = TaxCoin::where([
-                'coin_id' => Coin::getByAbbr('BRL')->id,
-                'user_level_id' => auth()->user()->user_level_id,
-                'coin_tax_type' => EnumTaxType::OPERACAO,
-                'operation' => EnumOperations::FIAT_WITHDRAW
-            ])->first();
+            $deadline = WithdrawalDeadline::findOrFail($request->tax_id);
+            $tax = $amount * $deadline->tax / 100;
 
-            $feeTax = $fee->value ?? 0;
-            if ($fee->calc_type == EnumCalcType::PERCENT) {
-                $feeTax = $amount * ($fee->value / 100);
-            }
+//            $fee = TaxCoin::where([
+//                'coin_id' => Coin::getByAbbr('BRL')->id,
+//                'user_level_id' => auth()->user()->user_level_id,
+//                'coin_tax_type' => EnumTaxType::OPERACAO,
+//                'operation' => EnumOperations::FIAT_WITHDRAW
+//            ])->first();
+//
+//            $feeTax = $fee->value ?? 0;
+//            if ($fee->calc_type == EnumCalcType::PERCENT) {
+//                $feeTax = $amount * ($fee->value / 100);
+//            }
 
             return [
                 'amount' => sprintf("%.2f", $amount),
-                'fee' => sprintf("%.2f", $feeTax),
+                'fee' => sprintf("%.2f", $tax),
                 'tax' => sprintf("%.2f", $tedTax),
-                'total' => sprintf("%.2f", ($amount + $feeTax + $tedTax))
+                'total' => sprintf("%.2f", ($amount + $tax + $tedTax)),
+                'payment_at' => Carbon::now()->addDays($deadline->deadline)
             ];
 
         } catch (\Exception $e) {
