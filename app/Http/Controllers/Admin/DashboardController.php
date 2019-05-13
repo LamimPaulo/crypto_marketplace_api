@@ -7,6 +7,7 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
+use App\Models\AdminDashboard;
 use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\Document;
@@ -18,6 +19,20 @@ class DashboardController extends Controller
 {
 
     public function index()
+    {
+        try {
+
+            $dashboard = AdminDashboard::first();
+            return $dashboard->general_json;
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function general()
     {
         try {
 
@@ -65,7 +80,7 @@ class DashboardController extends Controller
                 'coin_id' => Coin::getByAbbr('LQX')->id
             ]);
 
-            return [
+            $json = [
                 'users' => User::whereNotNull('email_verified_at')->count(),
                 'incomplete_users' => User::whereNull('email_verified_at')->count(),
                 'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->count(),
@@ -97,6 +112,11 @@ class DashboardController extends Controller
                 'crypto_operations' => $this->crypto_operations(),
 
             ];
+
+            $dash = AdminDashboard::firstOrNew(['id'=>1]);
+            $dash->general_json = json_encode($json);
+            $dash->save();
+
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -143,6 +163,8 @@ class DashboardController extends Controller
 
             $report[] = [
                 'coin' => $coin->abbr,
+
+                'balance' => $coin->abbr,
 
                 'buy' => $buy_orders->count(),
                 'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
