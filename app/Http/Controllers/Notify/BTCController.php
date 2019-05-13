@@ -52,7 +52,7 @@ class BTCController extends Controller
             'status' => EnumTransactionsStatus::PENDING,
             'type' => EnumTransactionType::IN,
             'category' => EnumTransactionCategory::TRANSACTION,
-            'confirmation' => $data['confirmations'],
+            'confirmation' => $data['confirmations'] ?? 0,
             'tax' => 0
         ];
 
@@ -99,7 +99,7 @@ class BTCController extends Controller
     {
         $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx], Coin::find($transaction->coin_id)->abbr);
 
-        $data['confirmation'] = $result['confirmations'];
+        $data['confirmation'] = $result['confirmations'] ?? 0;
 
         if ($data['confirmation'] >= 6) {
             $data['status'] = EnumTransactionsStatus::SUCCESS;
