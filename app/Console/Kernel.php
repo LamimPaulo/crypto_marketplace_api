@@ -27,22 +27,20 @@ class Kernel extends ConsoleKernel
         $schedule->command('estimate:fee')->everyMinute();
         $schedule->command('get:btcquote')->everyFiveMinutes();
         $schedule->command('trade:execute')->everyMinute()->withoutOverlapping();
-        $schedule->command('get:marketcapquotes')->everyTenMinutes();
-        //$schedule->command('gateway:expirepayments')->everyTenMinutes();
-        $schedule->command('transactions:send')->everyMinute();
-        $schedule->command('transactions:confirmation')->everyMinute();
+        $schedule->command('get:marketcapquotes')->everyTenMinutes()->withoutOverlapping();
+        $schedule->command('transactions:send')->everyMinute()->withoutOverlapping();
+        $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
         $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
         $schedule->command('nanotech:profits')->dailyAt('01:00');
         $schedule->command('funds:profits')->monthlyOn(10, '00:30');
         $schedule->command('funds:expiration')->dailyAt('01:00');
-        $schedule->command('masternode:update')->everyFifteenMinutes();
-        $schedule->command('update:corebalances')->everyFiveMinutes();
-        $schedule->command('dashboardup:general')->everyFiveMinutes();
-        $schedule->command('dashboardup:withdrawals')->everyMinute();
-        $schedule->command('dashboardup:deposits')->everyMinute();
-        $schedule->command('dashboardup:nanotech')->everyMinute();
-        $schedule->command('dashboardup:cryptooperations')->everyMinute();
-        //$schedule->command('update:offscreenbalance')->everyMinute();
+        $schedule->command('masternode:update')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('update:corebalances')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('dashboardup:general')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('dashboardup:withdrawals')->everyMinute()->withoutOverlapping();
+        $schedule->command('dashboardup:deposits')->everyMinute()->withoutOverlapping();
+        $schedule->command('dashboardup:nanotech')->everyMinute()->withoutOverlapping();
+        $schedule->command('dashboardup:cryptooperations')->everyMinute()->withoutOverlapping();
     }
 
     /**
