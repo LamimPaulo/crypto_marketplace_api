@@ -9,6 +9,7 @@ use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
 use App\Models\AdminDashboard;
 use App\Models\Coin;
+use App\Models\Nanotech\Nanotech;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserWallet;
@@ -79,7 +80,15 @@ class DashboardController extends Controller
                 'coin_id' => Coin::getByAbbr('LQX')->id
             ]);
 
+            $nanotech_lqx = Nanotech::where('type_id', 1)->sum('amount');
+            $nanotech_btc = Nanotech::where('type_id', 2)->sum('amount');
+            $masternode = Nanotech::where('type_id', 3)->sum('amount');
+
             $json = [
+                'nanotech_lqx' => (string)sprintf("%.8f", $nanotech_lqx),
+                'nanotech_btc' => (string)sprintf("%.8f", $nanotech_btc),
+                'masternode' => (string)sprintf("%.8f", $masternode),
+
                 'users' => User::whereNotNull('email_verified_at')->count(),
                 'incomplete_users' => User::whereNull('email_verified_at')->count(),
                 'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->count(),

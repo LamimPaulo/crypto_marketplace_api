@@ -26,12 +26,12 @@ class ProductController extends Controller
             $coin = Coin::getByAbbr($request->abbr);
             $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();
 
-            $bonus = Product::find(auth()->user()->user_level_id)->first()->bonus_percent;
+            $actualLevelValue = Product::find(auth()->user()->user_level_id);
 
-            $amount = $level->product->value - ($level->product->value * $bonus / 100);
+            $amount = $level->product->value - ($actualLevelValue->value * $level->product->bonus_percent / 100);
 
             if ($coin->abbr == 'LQX') {
-                $amount = $level->product->value_lqx - ($level->product->value_lqx * $bonus / 100);
+                $amount = $level->product->value_lqx - ($actualLevelValue->value_lqx * $level->product->bonus_percent / 100);
             }
 
             if (!(abs($amount) <= abs($wallet->balance))) {
