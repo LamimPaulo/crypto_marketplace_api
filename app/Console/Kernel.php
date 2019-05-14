@@ -40,7 +40,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('dashboardup:withdrawals')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:deposits')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:nanotech')->everyMinute()->withoutOverlapping();
-        $schedule->command('dashboardup:cryptooperations')->everyMinute()->withoutOverlapping();
+        $schedule->command('dashboardup:cryptooperations')->everyFiveMinutes()->withoutOverlapping();
     }
 
     /**
