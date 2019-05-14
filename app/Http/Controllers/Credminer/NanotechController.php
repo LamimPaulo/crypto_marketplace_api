@@ -9,6 +9,7 @@ use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NanotechInfoRequest;
 use App\Http\Requests\NanotechRequest;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
@@ -65,13 +66,8 @@ class NanotechController extends Controller
         }
     }
 
-    public function info(Request $request)
+    public function info(NanotechInfoRequest $request)
     {
-        $request->validate([
-            'type' => 'required|exists:nanotech_types,id',
-            'api_key' => 'required|exists:users,api_key'
-        ]);
-
         try {
             $user = User::where('api_key', '=', $request->api_key)->first();
             $type = NanotechType::with('coin')->findOrFail($request->type);

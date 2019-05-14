@@ -12,6 +12,8 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckKeyRequest;
+use App\Http\Requests\WithdrawalCredminerRequest;
 use App\Models\Coin;
 use App\Models\CoinQuote;
 use App\Models\Gateway;
@@ -28,12 +30,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
 {
-    public function checkKey(Request $request)
+    public function checkKey(CheckKeyRequest $request)
     {
-        $request->validate([
-            'api_key' => 'required'
-        ]);
-
         try {
             $user = User::with('level')
                 ->where('api_key', '=', $request->get('api_key'))->first();
@@ -114,14 +112,8 @@ class PaymentController extends Controller
         }
     }
 
-    public function withdrawal(Request $request)
+    public function withdrawal(WithdrawalCredminerRequest $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric',
-            'api_key' => 'required|exists:users,api_key',
-            'coin' => 'required|exists:coins,abbr'
-        ]);
-
         try {
 
             $user = User::where('api_key', '=', $request->get('api_key'))->firstOrFail();

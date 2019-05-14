@@ -7,6 +7,7 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckKeyRequest;
 use App\Http\Requests\FundRequest;
 use App\Models\Funds\FundBalances;
 use App\Models\Funds\FundBalancesHists;
@@ -194,7 +195,7 @@ class InvestmentController extends Controller
         }
     }
 
-    public function acquired(Request $request)
+    public function acquired(CheckKeyRequest $request)
     {
         $request->validate([
             'api_key' => 'required|exists:users,api_key'
