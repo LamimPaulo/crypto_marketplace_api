@@ -37,7 +37,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:expiration')->dailyAt('01:00');
         $schedule->command('masternode:update')->everyFifteenMinutes();
         $schedule->command('update:corebalances')->everyFiveMinutes();
-        $schedule->command('dashboard:update')->everyMinute();
+        $schedule->command('dashboardup:general')->everyFiveMinutes();
+        $schedule->command('dashboardup:withdrawals')->everyMinute();
+        $schedule->command('dashboardup:deposits')->everyMinute();
+        $schedule->command('dashboardup:nanotech')->everyMinute();
+        $schedule->command('dashboardup:cryptooperations')->everyMinute();
         //$schedule->command('update:offscreenbalance')->everyMinute();
     }
 

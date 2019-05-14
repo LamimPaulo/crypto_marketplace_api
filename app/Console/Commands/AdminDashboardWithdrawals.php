@@ -5,21 +5,21 @@ namespace App\Console\Commands;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Console\Command;
 
-class AdminDashboard extends Command
+class AdminDashboardWithdrawals extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'dashboard:update';
+    protected $signature = 'dashboardup:withdrawals';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'withdrawals Data Update';
 
     /**
      * Create a new command instance.
@@ -39,6 +39,6 @@ class AdminDashboard extends Command
     public function handle()
     {
         $dashboard = new DashboardController();
-        $dashboard->general();
+        $dashboard->withdrawals();
     }
 }

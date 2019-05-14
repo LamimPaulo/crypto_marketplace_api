@@ -24,7 +24,7 @@ class DashboardController extends Controller
         try {
 
             $dashboard = AdminDashboard::first();
-            return $dashboard->general_json;
+            return $dashboard;
 
         } catch (\Exception $e) {
             return response([
@@ -36,20 +36,45 @@ class DashboardController extends Controller
     public function general()
     {
         try {
-            $deposits = Transaction::where('category', EnumTransactionCategory::DEPOSIT);
-            $deposits_pending = Transaction::where([
-                'category' => EnumTransactionCategory::DEPOSIT,
-                'status' => EnumTransactionsStatus::PENDING
-            ]);
-            $deposits_rejected = Transaction::where('category', EnumTransactionCategory::DEPOSIT)
-                ->whereIn('status', [
-                    EnumTransactionsStatus::CANCELED, EnumTransactionsStatus::ERROR, EnumTransactionsStatus::REVERSED
-                ]);
-            $deposits_paid = Transaction::where([
-                'category' => EnumTransactionCategory::DEPOSIT,
-                'status' => EnumTransactionsStatus::SUCCESS
+            $levels = Transaction::where([
+                'category' => EnumTransactionCategory::BUY_LEVEL,
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'coin_id' => Coin::getByAbbr('BRL')->id
             ]);
 
+            $levels_lqx = Transaction::where([
+                'category' => EnumTransactionCategory::BUY_LEVEL,
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'coin_id' => Coin::getByAbbr('LQX')->id
+            ]);
+
+            $data = [
+                'users' => User::whereNotNull('email_verified_at')->count(),
+                'incomplete_users' => User::whereNull('email_verified_at')->count(),
+                'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->count(),
+
+                'levels' => $levels->count(),
+                'levels_sold' => $levels->sum('amount'),
+
+                'levels_lqx' => $levels_lqx->count(),
+                'levels_lqx_sold' => $levels_lqx->sum('amount'),
+
+                'balance_brl' => UserWallet::where('coin_id', 2)->sum('balance'),
+            ];
+
+            $dash = AdminDashboard::firstOrNew(['id' => 1]);
+            $dash->update($data);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function withdrawals()
+    {
+        try {
             $withdrawals = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL);
             $withdrawals_pending = Transaction::where([
                 'category' => EnumTransactionCategory::WITHDRAWAL,
@@ -68,45 +93,7 @@ class DashboardController extends Controller
                 'status' => EnumTransactionsStatus::SUCCESS
             ]);
 
-            $levels = Transaction::where([
-                'category' => EnumTransactionCategory::BUY_LEVEL,
-                'status' => EnumTransactionsStatus::SUCCESS,
-                'coin_id' => Coin::getByAbbr('BRL')->id
-            ]);
-
-            $levels_lqx = Transaction::where([
-                'category' => EnumTransactionCategory::BUY_LEVEL,
-                'status' => EnumTransactionsStatus::SUCCESS,
-                'coin_id' => Coin::getByAbbr('LQX')->id
-            ]);
-
-            $nanotech_lqx = Nanotech::where('type_id', 1)->sum('amount');
-            $nanotech_btc = Nanotech::where('type_id', 2)->sum('amount');
-            $masternode = Nanotech::where('type_id', 3)->sum('amount');
-
-            $json = [
-                'nanotech_lqx' => (string)sprintf("%.8f", $nanotech_lqx),
-                'nanotech_btc' => (string)sprintf("%.8f", $nanotech_btc),
-                'masternode' => (string)sprintf("%.8f", $masternode),
-
-                'users' => User::whereNotNull('email_verified_at')->count(),
-                'incomplete_users' => User::whereNull('email_verified_at')->count(),
-                'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->count(),
-
-                'levels' => $levels->count(),
-                'levels_sold' => $levels->sum('amount'),
-
-                'levels_lqx' => $levels_lqx->count(),
-                'levels_lqx_sold' => $levels_lqx->sum('amount'),
-
-                'deposits' => $deposits->count(),
-                'deposits_amount' => $deposits->sum('amount'),
-                'deposits_pending' => $deposits_pending->count(),
-                'deposits_pending_amount' => $deposits_pending->sum('amount'),
-                'deposits_rejected' => $deposits_rejected->count(),
-                'deposits_rejected_amount' => $deposits_rejected->sum('amount'),
-                'deposits_paid' => $deposits_paid->count(),
-                'deposits_paid_amount' => $deposits_paid->sum('amount'),
+            $data = [
                 'withdrawals' => $withdrawals->count(),
                 'withdrawals_amount' => $withdrawals->sum('amount'),
                 'withdrawals_pending' => $withdrawals_pending->count(),
@@ -117,90 +104,152 @@ class DashboardController extends Controller
                 'withdrawals_processing_amount' => $withdrawals_processing->sum('amount'),
                 'withdrawals_reversed' => $withdrawals_reversed->count(),
                 'withdrawals_reversed_amount' => $withdrawals_reversed->sum('amount'),
-                'balance_brl' => UserWallet::where('coin_id', 2)->sum('balance'),
-                'crypto_operations' => $this->crypto_operations(),
             ];
 
             $dash = AdminDashboard::firstOrNew(['id' => 1]);
-            $dash->general_json = json_encode($json);
-            $dash->save();
+            $dash->update($data);
 
         } catch (\Exception $e) {
             return response([
-                'message' => $e->getMessage(),
-                'transactions' => null
+                'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
 
-    private function crypto_operations()
+    public function deposits()
     {
-        $coins = Coin::where(['is_wallet' => true, 'is_crypto' => true])->get();
-        $report = [];
-
-        foreach ($coins as $coin) {
-            $transactions_in = Transaction::where([
-                'category' => EnumTransactionCategory::TRANSACTION,
-                'type' => EnumTransactionType::IN,
-                'coin_id' => $coin->id
-            ])->whereNull('sender_user_id');
-
-            $transactions_out = Transaction::where([
-                'category' => EnumTransactionCategory::TRANSACTION,
-                'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
-
-            $transactions_out_internal = Transaction::where([
-                'category' => EnumTransactionCategory::TRANSACTION,
-                'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
-
-            $buy_orders = Transaction::where([
-                'category' => EnumTransactionCategory::CONVERSION,
-                'type' => EnumTransactionType::IN,
-                'coin_id' => $coin->id
+        try {
+            $deposits = Transaction::where('category', EnumTransactionCategory::DEPOSIT);
+            $deposits_pending = Transaction::where([
+                'category' => EnumTransactionCategory::DEPOSIT,
+                'status' => EnumTransactionsStatus::PENDING
+            ]);
+            $deposits_rejected = Transaction::where('category', EnumTransactionCategory::DEPOSIT)
+                ->whereIn('status', [
+                    EnumTransactionsStatus::CANCELED, EnumTransactionsStatus::ERROR, EnumTransactionsStatus::REVERSED
+                ]);
+            $deposits_paid = Transaction::where([
+                'category' => EnumTransactionCategory::DEPOSIT,
+                'status' => EnumTransactionsStatus::SUCCESS
             ]);
 
-            $sell_orders = Transaction::where([
-                'category' => EnumTransactionCategory::CONVERSION,
-                'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
-            ]);
-
-            $report[] = [
-                'coin' => $coin->abbr,
-
-                'balance' => UserWallet::where('coin_id', $coin->id)->sum('balance'),
-
-                'buy' => $buy_orders->count(),
-                'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
-
-                'sell' => $sell_orders->count(),
-                'sell_amount' => $sell_orders->sum('amount') + $sell_orders->sum('tax') + $sell_orders->sum('fee'),
-
-                'in' => $transactions_in->count(),
-                'in_amount' => $transactions_in->sum('amount') + $transactions_in->sum('tax') + $transactions_in->sum('fee'),
-                'out' => $transactions_out->count(),
-                'out_amount' => $transactions_out->sum('amount') + $transactions_out->sum('tax') + $transactions_out->sum('fee'),
-                'above_limit' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
-                'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
-
-                'out_internal' => $transactions_out_internal->count(),
-                'out_amount_internal' => $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee'),
-                'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
-                'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
-
-                'core_balance' => $coin->core_balance,
-                'core_status' => $coin->core_status,
+            $data = [
+                'deposits' => $deposits->count(),
+                'deposits_amount' => $deposits->sum('amount'),
+                'deposits_pending' => $deposits_pending->count(),
+                'deposits_pending_amount' => $deposits_pending->sum('amount'),
+                'deposits_rejected' => $deposits_rejected->count(),
+                'deposits_rejected_amount' => $deposits_rejected->sum('amount'),
+                'deposits_paid' => $deposits_paid->count(),
+                'deposits_paid_amount' => $deposits_paid->sum('amount'),
             ];
-        }
 
-        return $report;
+            $dash = AdminDashboard::firstOrNew(['id' => 1]);
+            $dash->update($data);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function nanotech()
+    {
+        try {
+            $nanotech_lqx = Nanotech::where('type_id', 1)->sum('amount');
+            $nanotech_btc = Nanotech::where('type_id', 2)->sum('amount');
+            $masternode = Nanotech::where('type_id', 3)->sum('amount');
+
+            $data = [
+                'nanotech_lqx' => (string)sprintf("%.8f", $nanotech_lqx),
+                'nanotech_btc' => (string)sprintf("%.8f", $nanotech_btc),
+                'masternode' => (string)sprintf("%.8f", $masternode),
+            ];
+
+            $dash = AdminDashboard::firstOrNew(['id' => 1]);
+            $dash->update($data);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_operations()
+    {
+        try {
+            $coins = Coin::where(['is_wallet' => true, 'is_crypto' => true])->get();
+            $report = [];
+
+            foreach ($coins as $coin) {
+                $transactions_in = Transaction::where([
+                    'category' => EnumTransactionCategory::TRANSACTION,
+                    'type' => EnumTransactionType::IN,
+                    'coin_id' => $coin->id
+                ])->whereNull('sender_user_id');
+
+                $transactions_out = Transaction::where([
+                    'category' => EnumTransactionCategory::TRANSACTION,
+                    'type' => EnumTransactionType::OUT,
+                    'coin_id' => $coin->id
+                ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+                $transactions_out_internal = Transaction::where([
+                    'category' => EnumTransactionCategory::TRANSACTION,
+                    'type' => EnumTransactionType::OUT,
+                    'coin_id' => $coin->id
+                ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+                $buy_orders = Transaction::where([
+                    'category' => EnumTransactionCategory::CONVERSION,
+                    'type' => EnumTransactionType::IN,
+                    'coin_id' => $coin->id
+                ]);
+
+                $sell_orders = Transaction::where([
+                    'category' => EnumTransactionCategory::CONVERSION,
+                    'type' => EnumTransactionType::OUT,
+                    'coin_id' => $coin->id
+                ]);
+
+                $report[] = [
+                    'coin' => $coin->abbr,
+                    'balance' => UserWallet::where('coin_id', $coin->id)->sum('balance'),
+                    'buy' => $buy_orders->count(),
+                    'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
+                    'sell' => $sell_orders->count(),
+                    'sell_amount' => $sell_orders->sum('amount') + $sell_orders->sum('tax') + $sell_orders->sum('fee'),
+                    'in' => $transactions_in->count(),
+                    'in_amount' => $transactions_in->sum('amount') + $transactions_in->sum('tax') + $transactions_in->sum('fee'),
+                    'out' => $transactions_out->count(),
+                    'out_amount' => $transactions_out->sum('amount') + $transactions_out->sum('tax') + $transactions_out->sum('fee'),
+                    'above_limit' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
+                    'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
+                        + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+                        + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+
+                    'out_internal' => $transactions_out_internal->count(),
+                    'out_amount_internal' => $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee'),
+                    'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
+                    'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
+                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+                        + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+
+                    'core_balance' => $coin->core_balance,
+                    'core_status' => $coin->core_status,
+                ];
+            }
+
+            $dash = AdminDashboard::firstOrNew(['id' => 1]);
+            $dash->crypto_operations = json_encode($report);
+            $dash->save();
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }
