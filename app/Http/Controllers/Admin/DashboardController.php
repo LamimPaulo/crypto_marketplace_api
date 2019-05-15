@@ -51,7 +51,7 @@ class DashboardController extends Controller
             $data = [
                 'users' => User::whereNotNull('email_verified_at')->count(),
                 'incomplete_users' => User::whereNull('email_verified_at')->count(),
-                'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->where('type', 1)->count(),
+                'unverified_docs' => Document::where('status', EnumStatusDocument::PENDING)->where('document_type_id', 1)->count(),
 
                 'levels' => $levels->count(),
                 'levels_sold' => $levels->sum('amount'),
