@@ -151,6 +151,109 @@ class DraftController extends Controller
         }
     }
 
+    public function sendBrlCredminer(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->user_account_id])->first();
+
+            $coin = Coin::getByAbbr('BRL')->id;
+
+            $amount = abs($request->amount);
+
+            if ($amount <= 0) {
+                throw new \Exception(trans('messages.transaction.value_must_be_greater_than_zero'));
+            }
+
+            $from = UserWallet::where(['user_id' => auth()->user()->id, 'coin_id' => $coin])->first();
+
+            if (!$from) {
+                throw new \Exception(trans('messages.wallet.invalid'));
+            }
+
+            if (!$from->is_active) {
+                throw new \Exception(trans('messages.wallet.inactive'));
+            }
+
+            if (!$from->coin->is_active) {
+                throw new \Exception(trans('messages.coin.inactive'));
+            }
+
+            if (!(abs($amount) <= abs($from->balance))) {
+                throw new \Exception(trans('messages.transaction.value_exceeds_balance'));
+            }
+
+            $api = new \GuzzleHttp\Client(['http_errors' => false]);
+
+            $response = $api->post('https://api.credminer.com/v1/liquidex/reais', [
+                'form_params' => [
+                    'login' => $request->toAddress,
+                    'real_value' => $request->amount,
+                ],
+                'headers' => [
+                    'Authorization' => 'Bearer XLjYwLEU9G2GsHO5or%87bc093cnIOHdgvi987in8nd98nij2%KIHpTnjW$yVogSUrVd2szJT!LHE@fpHV#ly%xLcJ9FX'
+                ]
+            ]);
+
+            $statuscode = $response->getStatusCode();
+
+            if (401 === $statuscode) {
+                throw new \Exception('Key Inválida.');
+            }
+
+            if (422 === $statuscode) {
+                throw new \Exception('Login não encontrado.');
+            }
+
+            if (200 !== $statuscode) {
+                throw new \Exception('Erro desconhecido ['.$statuscode.']');
+            }
+
+            $result = $response->getBody()->getContents();
+
+            $uuid = Uuid::uuid4();
+            $transaction = Transaction::create([
+                'user_id' => $from->user_id,
+                'user_account_id' => $request->user_account_id,
+                'coin_id' => $from->coin_id,
+                'wallet_id' => $from->id,
+                'amount' => $amount,
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'type' => EnumTransactionType::OUT,
+                'category' => EnumTransactionCategory::BRL_SUBMIT,
+                'confirmation' => 0,
+                'fee' => 0,
+                'tax' => 0,
+                'payment_at' => Carbon::now(),
+                'tx' => $uuid->toString(),
+                'info' => "Envio pra Login: '{$request->toAddress}'",
+                'error' => '',
+            ]);
+
+            $transactionStatus = TransactionStatus::create([
+                'status' => $transaction->status,
+                'transaction_id' => $transaction->id,
+            ]);
+
+            $this->balanceService::decrements($transaction);
+
+            ActivityLogger::log(trans('messages.withdraw.requested'), $transaction->id, Transaction::class, $transaction);
+
+            DB::commit();
+            return response([
+                'message' => trans('messages.withdraw.requested'),
+                'transaction' => $transaction,
+                'transactionStatus' => $transactionStatus
+            ], Response::HTTP_CREATED);
+
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response([
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function cancel(Request $request)
     {
         $request->validate([

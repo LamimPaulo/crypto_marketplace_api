@@ -119,6 +119,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //solicitar saque
     Route::post('draft/send', 'DraftController@store')->middleware(['tokencheck', 'pincheck', 'withdrawalallowed']);
+    //Envia R$ para Credminer
+    Route::post('draft/credminer', 'DraftController@sendBrlCredminer')->middleware(['tokencheck', 'pincheck']);
     //cancelar saque
     Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
     //estimar taxas de saque
