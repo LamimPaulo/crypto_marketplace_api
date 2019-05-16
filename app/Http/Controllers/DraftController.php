@@ -205,7 +205,7 @@ class DraftController extends Controller
                 throw new \Exception('Login não encontrado.');
             }
 
-            if (200 !== $statuscode) {
+            if (200 !== $statuscode && 201 !==$statuscode) {
                 throw new \Exception('Erro desconhecido ['.$statuscode.']');
             }
 

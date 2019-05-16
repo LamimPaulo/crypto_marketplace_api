@@ -22,6 +22,7 @@ abstract class EnumTokenAction
     const INDEX_FUNDS_IN = 16;
     const INDEX_FUNDS_OUT = 17;
     const CANCEL_DRAFT = 18;
+    const BRL_SUBMISSION = 19;
 
     const ACTION = [
         self::DRAFT => 'Saque',
@@ -42,5 +43,6 @@ abstract class EnumTokenAction
         self::INDEX_FUNDS_OUT => 'Saque de Investimentos',
         self::CANCEL_DRAFT => 'Cancelamento de Saque',
         self::BUY_LEVEL => 'Compra de Keycode',
+        self::BRL_SUBMISSION => 'Envio de R$ Credminer',
     ];
 }
