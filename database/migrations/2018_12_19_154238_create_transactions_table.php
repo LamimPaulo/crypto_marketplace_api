@@ -20,7 +20,7 @@ class CreateTransactionsTable extends Migration
             $table->uuid('wallet_id');
             $table->string('toAddress')->nullable();
             $table->decimal('amount', 28, 18);
-            $table->decimal('fee', 28,18)->default(0);
+            $table->decimal('fee', 28, 18)->default(0);
             $table->tinyInteger('status');
             $table->tinyInteger('type');
             $table->tinyInteger('category');
@@ -35,10 +35,10 @@ class CreateTransactionsTable extends Migration
             $table->integer('system_account_id')->unsigned()->nullable();
             $table->uuid('user_account_id')->nullable();
             $table->text('file_path')->nullable();
-            $table->decimal('tax', 28,18)->default(0);
+            $table->decimal('tax', 28, 18)->default(0);
 
-            $table->decimal('price', 28,18)->nullable();
-            $table->decimal('market', 28,18)->nullable();
+            $table->decimal('price', 28, 18)->nullable();
+            $table->decimal('market', 28, 18)->nullable();
 
             $table->timestamps();
         });

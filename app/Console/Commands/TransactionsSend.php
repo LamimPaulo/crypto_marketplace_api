@@ -111,7 +111,7 @@ class TransactionsSend extends Command
                 'toAddress' => $pending->toAddress,
                 'fee' => $pending->fee,
                 'amount' => $pending->amount,
-                'balance' => sprintf("%.18f", $wallet->balance)
+                'balance' => sprintf("%.8f", $wallet->balance)
             ];
 
             $tx = OffScreenController::post(EnumOperationType::FIRST_SIGN_TRANSACTION, $data, $coin_abbr);
@@ -159,3 +159,4 @@ class TransactionsSend extends Command
     }
 
 }
+

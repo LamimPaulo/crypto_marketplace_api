@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Enum\EnumOperationType;
-use App\Http\Controllers\OffScreenController;
 use App\Models\User\UserWallet;
 use Illuminate\Console\Command;
 
@@ -41,24 +39,60 @@ class UpdateOffscreenBalance extends Command
      */
     public function handle()
     {
-        try {
-            $wallets = UserWallet::where([
-                'coin_id' => 1,
-                'sync' => 0
-            ])->get();
+//        try {
+//            $wallets = UserWallet::where([
+//                'coin_id' => 6,
+//                'sync' => 0,
+//            ])
+//                ->where('balance', '>', 0)
+//                ->with(['user', 'coin'])->get();
+//
+//            foreach ($wallets as $wallet) {
+//                $client = new \GuzzleHttp\Client();
+//
+//                $response = $client->post(env("OFFSCREEN_URL_".$wallet->coin->abbr), [
+//                    \GuzzleHttp\RequestOptions::JSON => [
+//                        "amount" => $wallet->balance,
+//                        "address" => $wallet->address,
+//                        "key" => env("ADM_KEY")
+//                    ]
+//                ]);
+//
+//                $statusCode = $response->getStatusCode();
+//                if ($statusCode != 200) {
+//                    throw new \Exception("Erro na syncronização. [{$wallet->address}] [$statusCode]");
+//                }
+//
+//                $wallet->sync = true;
+//                $wallet->save();
+//
+//                $wallet->user->is_under_analysis = false;
+//                $wallet->save();
+//            }
+//
+//        } catch (\Exception $e) {
+//            throw new \Exception($e->getMessage());
+//        }
 
-            foreach ($wallets as $wallet) {
-                $result = OffScreenController::post(EnumOperationType::IMPORT_ADDRESS, ['address' => $wallet->address, 'amount' => $wallet->balance], 'BTC');
 
-                if ($result != 200) {
-                    throw new \Exception("Erro na syncronização. [{$wallet->address}]");
-                }
-                $wallet->sync = true;
-                $wallet->save();
-            }
-
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+//        try {
+//            $wallets = UserWallet::where([
+//                'coin_id' => 1,
+//                'sync' => 0
+//            ])->get();
+//
+//            foreach ($wallets as $wallet) {
+//                $result = OffScreenController::post(EnumOperationType::IMPORT_ADDRESS, ['address' => $wallet->address, 'amount' => $wallet->balance], 'BTC');
+//
+//                if ($result != 200) {
+//                    throw new \Exception("Erro na syncronização. [{$wallet->address}]");
+//                }
+//                $wallet->sync = true;
+//                $wallet->save();
+//            }
+//
+//        } catch (\Exception $e) {
+//            throw new \Exception($e->getMessage());
+//        }
     }
 }

@@ -716,6 +716,7 @@ class OrderController extends Controller
             ];
         }
 
+
         if (!$this->balanceService->verifyBalance($amount, $base_coin->abbr)) {
             return response(['message' => trans('messages.wallet.insuficient_balance')], Response::HTTP_BAD_REQUEST);
         }

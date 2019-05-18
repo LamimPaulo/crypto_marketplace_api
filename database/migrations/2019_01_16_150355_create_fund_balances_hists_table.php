@@ -17,7 +17,7 @@ class CreateFundBalancesHistsTable extends Migration
             $table->increments('id');
             $table->uuid('user_id');
             $table->integer('fund_id')->unsigned();
-            $table->decimal('balance', 28,18)->default(0);
+            $table->decimal('balance', 28, 18)->default(0);
             $table->enum('type', [0, 1])
                 ->default(0);
             $table->timestamps();

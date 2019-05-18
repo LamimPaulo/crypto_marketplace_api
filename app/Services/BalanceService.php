@@ -101,10 +101,10 @@ class BalanceService
                 ->where('id', '=', $transaction->wallet_id);
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
-                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.18f", $transaction->amount)], $wallet->first()->coin->abbr);
+                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
-            return $wallet->increment('balance', sprintf("%.18f", $transaction->amount));
+            return $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
 
         } catch (\Exception $exception) {
             throw new \Exception($exception);
@@ -118,7 +118,7 @@ class BalanceService
             $amount = floatval($transaction->amount);
             $fee = floatval($transaction->fee);
             $tax = floatval($transaction->tax);
-            $total = sprintf("%.18f", $amount + $fee + $tax);
+            $total = sprintf("%.8f", $amount + $fee + $tax);
 
             $wallet = UserWallet::with('coin')->where('user_id', '=', $transaction->user_id)
                 ->where('coin_id', '=', $transaction->coin_id)
@@ -141,7 +141,7 @@ class BalanceService
             $amount = floatval($transaction->amount);
             $fee = floatval($transaction->fee);
             $tax = floatval($transaction->tax);
-            $total = sprintf("%.18f", $amount + $fee + $tax);
+            $total = sprintf("%.8f", $amount + $fee + $tax);
 
             $wallet = UserWallet::with('coin')->where('user_id', '=', $transaction->user_id)
                 ->where('coin_id', '=', $transaction->coin_id)

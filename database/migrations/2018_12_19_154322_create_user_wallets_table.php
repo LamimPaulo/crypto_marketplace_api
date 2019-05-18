@@ -18,7 +18,7 @@ class CreateUserWalletsTable extends Migration
             $table->uuid('user_id');
             $table->integer('coin_id')->unsigned();
             $table->string('address')->nullable();
-            $table->decimal('balance',28,18)->default(0)->unsigned();
+            $table->decimal('balance',28, 18)->default(0)->unsigned();
             $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
