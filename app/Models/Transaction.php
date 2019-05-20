@@ -287,29 +287,29 @@ class Transaction extends Model
     */
     public function getAmountAttribute($value)
     {
-        return sprintf("%.18f", $value);
+        return sprintf("%.8f", $value);
     }
     public function setAmountAttribute($value)
     {
-        $this->attributes['amount'] = sprintf("%.18f", $value);
+        $this->attributes['amount'] = sprintf("%.8f", $value);
     }
 
     public function getFeeAttribute($value)
     {
-        return sprintf("%.18f", $value);
+        return sprintf("%.8f", $value);
     }
     public function setFeeAttribute($value)
     {
-        $this->attributes['fee'] = sprintf("%.18f", $value);
+        $this->attributes['fee'] = sprintf("%.8f", $value);
     }
 
     public function getTaxAttribute($value)
     {
-        return sprintf("%.18f", $value);
+        return sprintf("%.8f", $value);
     }
     public function setTaxAttribute($value)
     {
-        $this->attributes['tax'] = sprintf("%.18f", $value);
+        $this->attributes['tax'] = sprintf("%.8f", $value);
     }
 
 }
