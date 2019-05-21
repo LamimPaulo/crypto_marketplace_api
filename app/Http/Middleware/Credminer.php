@@ -22,14 +22,14 @@ class Credminer
         try {
             $auth = $request->header('authorization');
             $ip = $request->ip();
-            $config = SysConfig::first();
+            $config = SysConfig::where('ip', $ip)->first();
+
+            if (!$config) {
+                throw new \Exception('IP inválido ['.$ip.']');
+            }
 
             if (is_null($auth)) {
                 throw new \Exception('Acesso negado');
-            }
-
-            if ($ip !== $config->ip) {
-                throw new \Exception('IP inválido ['.$ip.']');
             }
 
             if ($auth !== $config->secret) {
