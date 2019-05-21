@@ -21,7 +21,6 @@ use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\User;
-use Illuminate\Http\Request;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -89,9 +88,29 @@ class NanotechController extends Controller
         }
     }
 
+    private function _info($request)
+    {
+        try {
+            $user = User::where('api_key', '=', $request->api_key)->first();
+            $type = NanotechType::with('coin')->findOrFail($request->type);
+
+            return [
+                'average_profits' => $this->returnPercentage($request->type),
+                'brokerage_fee' => $this->brokerageFee($request->type, $user->user_level_id),
+                'under_managment' => $this->total($request->type),
+                'user_investment' => $this->start($request->type, $user->id),
+                'user_profit' => $this->profit($request->type, $user->id),
+                'total_user_investment' => $this->totalSum($request->type, $user->id),
+                'coin' => $type->coin->abbr
+            ];
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage() . '(' . $e->getLine());
+        }
+    }
+
     public function invest(NanotechRequest $request)
     {
-        $user = User::where('api_key', '=', $request->api_key)->first();
+        $user = User::where('api_key', '=', $request->api_key)->firstOrFail();
         $type = NanotechType::findOrFail($request->type);
 
         if (!is_numeric($request->amount) OR $request->amount <= 0) {
@@ -135,7 +154,7 @@ class NanotechController extends Controller
                     'amount' => $operation['amount'],
                     'status' => EnumTransactionsStatus::SUCCESS,
                     'type' => EnumTransactionType::OUT,
-                    'category' => $type->id== 3 ? EnumTransactionCategory::MASTERNODE_CREDMINER : EnumTransactionCategory::NANOTECH_CREDMINER,
+                    'category' => $type->id == 3 ? EnumTransactionCategory::MASTERNODE_CREDMINER : EnumTransactionCategory::NANOTECH_CREDMINER,
                     'fee' => 0,
                     'tax' => $operation['brokerage_fee'],
                     'tx' => Uuid::uuid4()->toString(),
@@ -168,7 +187,7 @@ class NanotechController extends Controller
 
             Nanotech::increments($operation);
 
-            return response(['message' => trans('messages.products.investment_success')], Response::HTTP_OK);
+            return $this->_info($request);
 
         } catch (\Exception $e) {
             return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);

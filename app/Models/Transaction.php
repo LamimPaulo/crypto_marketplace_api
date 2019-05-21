@@ -67,7 +67,6 @@ class Transaction extends Model
         'payment_at'
     ];
 
-
     protected $hidden = [
         'user_id',
         'coin_id',
@@ -164,12 +163,12 @@ class Transaction extends Model
 
     public function user_account()
     {
-        return $this->belongsTo(UserAccount::class, 'user_account_id');
+        return $this->belongsTo(UserAccount::class, 'user_account_id')->withTrashed();
     }
 
     public function system_account()
     {
-        return $this->belongsTo(SystemAccount::class, 'system_account_id');
+        return $this->belongsTo(SystemAccount::class, 'system_account_id')->withTrashed();
     }
 
     public function coin()
