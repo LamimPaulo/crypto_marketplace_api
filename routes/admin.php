@@ -70,10 +70,13 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/deposits', 'UserController@deposits');
         //busca de usuarios
         Route::post('/search', 'UserController@search');
+        Route::post('/search', 'UserController@search');
         //listagem de usuários que nao completaram o cadastro
         Route::get('/incomplete', 'UserController@incomplete');
         //verificação de documentos
         Route::post('/documents', 'UserController@documents');
+        //remove 2FA
+        Route::get('remove2fa/{email}', 'UserController@remove2fa');
         //levels
         Route::group(['prefix' => 'levels'], function () {
             Route::get('/', 'UserLevelController@index');

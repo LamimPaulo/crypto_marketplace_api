@@ -290,4 +290,26 @@ class UserController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function remove2fa($user_email) {
+        try {
+            $user = User::where('email', $user_email)->first();
+
+            $user->google2fa_secret = null;
+            $user->is_google2fa_active = false;
+            $user->save();
+
+            ActivityLogger::log(trans('messages.2fa.deactivated'), $user->email);
+
+            return response([
+                'message' => trans('messages.2fa.deactivated'),
+                'user' => $user
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
 }
