@@ -168,7 +168,7 @@ class Transaction extends Model
 
     public function system_account()
     {
-        return $this->belongsTo(SystemAccount::class, 'system_account_id')->withTrashed();
+        return $this->belongsTo(SystemAccount::class, 'system_account_id');
     }
 
     public function coin()
