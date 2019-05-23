@@ -132,10 +132,9 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
-
             ActivityLogger::log(trans('messages.withdrawal.requested'), $transaction->id, Transaction::class, $transaction);
 
+            $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
                 'message' => trans('messages.withdrawal.requested'),
@@ -235,10 +234,9 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
-
             ActivityLogger::log('R$ Enviado para Credminer: '.$request->toAddress, $transaction->id, Transaction::class, $transaction);
 
+            $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
                 'message' => 'R$ Enviado para Credminer: '.$request->toAddress,

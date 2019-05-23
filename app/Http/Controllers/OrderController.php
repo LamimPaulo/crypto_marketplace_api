@@ -394,73 +394,6 @@ class OrderController extends Controller
         return $wallet;
     }
 
-    public function estimateBuyTax(Request $request)
-    {
-        $amount = $request->quantity;
-
-        if ($amount <= 0) {
-            return;
-        }
-
-        $pair = CoinPair::where('name', 'LIKE', $request->symbol)->first();
-        $baseCoin = $pair->base_coin_id;
-
-        $brokerageFee = UserLevel::where('id', auth()->user()->user_level_id)->first()->brokerage_fee;
-
-        $quotePrice = CoinCurrentPrice::where('coin_id', $baseCoin)->first()->price;
-        $quoteQuantity = $amount * $quotePrice;
-
-        $is_valid = 0;
-        if ($quoteQuantity >= $pair->min_trade_amount) {
-            $is_valid = 1;
-        }
-        $tax = $quoteQuantity * ($brokerageFee / 100);
-        return
-            response([
-                'quote_price' => sprintf('%.8f', $quotePrice),
-                'quantity' => sprintf('%.8f', $amount),
-                'quantity_quote' => sprintf('%.8f', $quoteQuantity),
-                'tax' => sprintf('%.8f', $tax),
-                'total' => sprintf('%.8f', $quoteQuantity + ($tax)),
-                'is_valid' => $is_valid,
-                'min_trade_amount' => sprintf('%.8f', $pair->min_trade_amount + $tax)
-            ], Response::HTTP_OK);
-    }
-
-    public function estimateSellTax(Request $request)
-    {
-        $amount = $request->quantity;
-
-        if ($amount <= 0) {
-            return;
-        }
-
-        $pair = CoinPair::where('name', 'LIKE', $request->symbol)->first();
-        $baseCoin = $pair->base_coin_id;
-
-        $brokerageFee = UserLevel::where('id', auth()->user()->user_level_id)->first()->brokerage_fee;
-
-        $quotePrice = CoinCurrentPrice::where('coin_id', $baseCoin)->first()->price;
-        $quoteQuantity = $amount * $quotePrice;
-
-        $is_valid = 0;
-        if ($quoteQuantity >= $pair->min_trade_amount) {
-            $is_valid = 1;
-        }
-
-        $tax = $quoteQuantity * ($brokerageFee / 100);
-        return
-            response([
-                'quote_price' => sprintf('%.8f', $quotePrice),
-                'quantity' => sprintf('%.8f', $amount),
-                'quantity_quote' => sprintf('%.8f', $quoteQuantity),
-                'tax' => sprintf('%.8f', $tax),
-                'total' => sprintf('%.8f', $quoteQuantity - $tax),
-                'is_valid' => $is_valid,
-                'min_trade_amount' => sprintf('%.8f', $pair->min_trade_amount + $tax)
-            ], Response::HTTP_OK);
-    }
-
     public function convertBuy(Request $request)
     {
         $request->validate([
@@ -560,8 +493,6 @@ class OrderController extends Controller
                 'transaction_id' => $transaction_out->id,
             ]);
 
-            $this->balanceService::decrements($transaction_out);
-
             $transaction_in = Transaction::create([
                 'user_id' => auth()->user()->id,
                 'coin_id' => $base_coin->id,
@@ -585,6 +516,7 @@ class OrderController extends Controller
             ]);
 
             $this->balanceService::increments($transaction_in);
+            $this->balanceService::decrements($transaction_out);
 
             DB::commit();
             return response([
@@ -749,8 +681,6 @@ class OrderController extends Controller
                 'transaction_id' => $transaction_out->id,
             ]);
 
-            $this->balanceService::decrements($transaction_out);
-
             $transaction_in = Transaction::create([
                 'user_id' => auth()->user()->id,
                 'coin_id' => $quote_coin->id,
@@ -773,6 +703,7 @@ class OrderController extends Controller
                 'transaction_id' => $transaction_in->id,
             ]);
 
+            $this->balanceService::decrements($transaction_out);
             $this->balanceService::increments($transaction_in);
 
             DB::commit();

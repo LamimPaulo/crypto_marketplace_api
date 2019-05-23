@@ -129,10 +129,9 @@ class TransactionsController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
-
             ActivityLogger::log(trans('messages.transaction.crypto_sent'), $transaction->id, Transaction::class, $transaction);
 
+            $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
                 'message' => trans('messages.transaction.sent_success'),
@@ -454,7 +453,7 @@ class TransactionsController extends Controller
                 'transaction_id' => $transaction_out->id,
             ]);
 
-            $this->balanceService::decrements($transaction_out);
+
 
             $transaction_in = Transaction::create([
                 'user_id' => $beneficiary->id,
@@ -479,6 +478,7 @@ class TransactionsController extends Controller
                 'transaction_id' => $transaction_in->id,
             ]);
 
+            $this->balanceService::decrements($transaction_out);
             $this->balanceService::increments($transaction_in);
             DB::commit();
             return response([

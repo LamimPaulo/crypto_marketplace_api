@@ -66,10 +66,10 @@ class ProductController extends Controller
                 'error' => '',
             ]);
 
-            BalanceService::decrements($transaction);
-
             $user->user_level_id = $request->level_id;
             $user->save();
+
+            BalanceService::decrements($transaction);
 
             DB::commit();
 

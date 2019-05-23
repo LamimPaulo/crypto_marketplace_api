@@ -252,8 +252,6 @@ class BalanceService
                 'transaction_id' => $transaction_out->id,
             ]);
 
-            self::decrements($transaction_out);
-
             $wallet_in = UserWallet::where(['user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET, 'coin_id' => $product_coin])->first();
             $transaction_in = Transaction::create([
                 'user_id' => auth()->user()->id,
@@ -274,6 +272,7 @@ class BalanceService
                 'transaction_id' => $transaction_in->id,
             ]);
 
+            self::decrements($transaction_out);
             self::increments($transaction_in);
 
         } catch (\Exception $e) {
