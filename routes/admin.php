@@ -66,6 +66,7 @@ Route::group(['namespace' => 'Admin'], function () {
         //user hist
         Route::post('/hist', 'UserController@hist');
         Route::post('/transactions', 'UserController@transactions');
+        Route::post('/transactions/nanotech', 'UserController@transactionsNanotech');
         Route::post('/drafts', 'UserController@drafts');
         Route::post('/deposits', 'UserController@deposits');
         //busca de usuarios

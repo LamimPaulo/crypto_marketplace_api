@@ -144,6 +144,23 @@ class UserController extends Controller
                         ])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
+                        ->sum('amount'),
+
+                    'profit_generated' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::PROFIT])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
+                        ->sum('amount'),
+                    'profit_withdrawal' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::PROFIT_WITHDRAWAL])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
+                        ->sum('amount'),
+                    'investment' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::IN, EnumNanotechOperationType::PROFIT_IN])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
+                        ->sum('amount'),
+                    'investment_withdrawal' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::WITHDRAWAL])
+                        ->where('user_id', $user_id)
+                        ->where('investment_id', $n->id)
                         ->sum('amount')
                 ];
             }
@@ -224,6 +241,31 @@ class UserController extends Controller
                 ->whereNotIn('category', [EnumTransactionCategory::WITHDRAWAL, EnumTransactionCategory::DEPOSIT])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
+
+            return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function transactionsNanotech(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:users,email']);
+
+        try {
+            $user = User::where('email', $request->email)->firstOrFail();
+
+            $transactions = NanotechOperation::with([
+                'investment' => function ($investment) {
+                    return $investment->with(['type','coin']);
+                }
+            ])
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'DESC')
+                ->get();
 
             return response($transactions, Response::HTTP_OK);
         } catch (\Exception $e) {

@@ -17,7 +17,8 @@ class NanotechOperation extends Model
         'brokerage_fee_percentage',
         'profit_percent',
         'type',
-        'status'
+        'status',
+        'created_at'
     ];
 
     protected $appends = ['createdLocal', 'updatedLocal', 'amountLocal', 'statusName', 'typeName'];

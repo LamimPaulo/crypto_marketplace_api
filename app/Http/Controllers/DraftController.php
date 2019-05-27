@@ -132,10 +132,9 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
-
             ActivityLogger::log(trans('messages.withdrawal.requested'), $transaction->id, Transaction::class, $transaction);
 
+            $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
                 'message' => trans('messages.withdrawal.requested'),
@@ -235,10 +234,9 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            $this->balanceService::decrements($transaction);
-
             ActivityLogger::log('R$ Enviado para Credminer: '.$request->toAddress, $transaction->id, Transaction::class, $transaction);
 
+            $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
                 'message' => 'R$ Enviado para Credminer: '.$request->toAddress,
@@ -308,15 +306,6 @@ class DraftController extends Controller
             $account = UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->user_account_id])->first();
             $amount = abs($request->amount);
 
-            if ($account->type == 2) {
-                return [
-                    'amount' => $amount,
-                    'fee' => 0,
-                    'tax' => 0,
-                    'total' => $amount
-                ];
-            }
-
             $ted = TaxCoin::where([
                 'coin_id' => Coin::getByAbbr('BRL')->id,
                 'user_level_id' => auth()->user()->user_level_id,
@@ -331,18 +320,6 @@ class DraftController extends Controller
 
             $deadline = WithdrawalDeadline::findOrFail($request->tax_id);
             $tax = $amount * $deadline->tax / 100;
-
-//            $fee = TaxCoin::where([
-//                'coin_id' => Coin::getByAbbr('BRL')->id,
-//                'user_level_id' => auth()->user()->user_level_id,
-//                'coin_tax_type' => EnumTaxType::OPERACAO,
-//                'operation' => EnumOperations::FIAT_WITHDRAW
-//            ])->first();
-//
-//            $feeTax = $fee->value ?? 0;
-//            if ($fee->calc_type == EnumCalcType::PERCENT) {
-//                $feeTax = $amount * ($fee->value / 100);
-//            }
 
             return [
                 'amount' => sprintf("%.2f", $amount),
