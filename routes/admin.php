@@ -76,7 +76,7 @@ Route::group(['namespace' => 'Admin'], function () {
         //verificação de documentos
         Route::post('/documents', 'UserController@documents');
         //remove 2FA
-        Route::get('remove2fa/{email}', 'UserController@remove2fa');
+        Route::get('/remove2fa/{email}', 'UserController@remove2fa');
         //levels
         Route::group(['prefix' => 'levels'], function () {
             Route::get('/', 'UserLevelController@index');

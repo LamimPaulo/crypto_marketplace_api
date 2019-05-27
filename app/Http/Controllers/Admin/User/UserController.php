@@ -291,15 +291,14 @@ class UserController extends Controller
         }
     }
 
-    public function remove2fa($user_email) {
+    public function remove2fa($email) {
+
         try {
-            $user = User::where('email', $user_email)->first();
+            $user = User::where('email', $email)->firstOrFail();
 
             $user->google2fa_secret = null;
             $user->is_google2fa_active = false;
             $user->save();
-
-            ActivityLogger::log(trans('messages.2fa.deactivated'), $user->email);
 
             return response([
                 'message' => trans('messages.2fa.deactivated'),

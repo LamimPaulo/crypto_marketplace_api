@@ -215,7 +215,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/chart/{type}', 'NanotechController@chart');
 
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
-        Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
+        Route::post('/withdrawal', 'Nan ,   otechController@withdrawal')->middleware('pincheck');
     });
 
     Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
