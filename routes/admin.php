@@ -56,6 +56,10 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::group(['prefix' => 'withdrawals'], function () {
         Route::get('/deadlines', 'WithdrawalDeadlineController@index');
         Route::post('/deadlines', 'WithdrawalDeadlineController@update');
+
+        Route::get('/holydays', 'WithdrawalDeadlineController@holydays');
+        Route::post('/holydays', 'WithdrawalDeadlineController@storeHolydays');
+        Route::post('/holyday', 'WithdrawalDeadlineController@deleteHolyday');
     });
 
     Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {

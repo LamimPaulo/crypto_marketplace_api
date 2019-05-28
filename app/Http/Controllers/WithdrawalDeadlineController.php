@@ -7,6 +7,7 @@ use App\Enum\EnumOperations;
 use App\Enum\EnumTaxType;
 use App\Models\Coin;
 use App\Models\System\WithdrawalDeadline;
+use App\Models\System\WithdrawalHolyday;
 use App\Models\TaxCoin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -58,7 +59,7 @@ class WithdrawalDeadlineController extends Controller
                 'tax' => number_format($tax, 2, ',', '.'),
                 'ted' => number_format($tedTax, 2, ',', '.'),
                 'total' => number_format($request->amount + $tax + $tedTax, 2, ',', '.'),
-                'deadline' => Carbon::now()->addDays($deadline->deadline)->format('d/m/Y')
+                'deadline' => $this->addWeekDays($deadline->deadline)->format('d/m/Y')
             ];
 
         } catch (\Exception $e) {
@@ -67,5 +68,27 @@ class WithdrawalDeadlineController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
+    }
+
+    public function addWeekDays($days)
+    {
+        $withdrawalHolydays = WithdrawalHolyday::all();
+        $holydays = [];
+        foreach ($withdrawalHolydays as $holyday) {
+            array_push($holydays, $holyday->day);
+        }
+
+        $MyDateCarbon = Carbon::now();
+
+        $MyDateCarbon->addWeekdays($days);
+
+        for ($i = 1; $i <= $days; $i++) {
+
+            if (in_array(Carbon::now()->addWeekdays($i)->toDateString(), $holydays)) {
+                $MyDateCarbon->addDay();
+            }
+        }
+
+        return $MyDateCarbon;
     }
 }

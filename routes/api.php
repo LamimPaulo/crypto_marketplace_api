@@ -260,6 +260,7 @@ Route::post('/gateway/update-tx', 'GatewayApiKeyController@updatePayment');
 
 //verificar validade da api key
 Route::post('/payments/check-key', 'GatewayController@checkKey');
+Route::get('/addWeekDays/{days}', 'DraftController@addWeekDays');
 
 Route::get('/uuid', function () {
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();

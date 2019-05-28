@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class WithdrawalDeadline extends Model
 {
-    protected $fillable = ['deadline', 'tax', 'status'];
+    protected $fillable = [
+        'deadline',
+        'tax',
+        'status'
+    ];
 }

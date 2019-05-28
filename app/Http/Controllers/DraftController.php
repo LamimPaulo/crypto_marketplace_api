@@ -12,6 +12,7 @@ use App\Helpers\ActivityLogger;
 use App\Http\Requests\DraftRequest;
 use App\Models\Coin;
 use App\Models\System\WithdrawalDeadline;
+use App\Models\System\WithdrawalHolyday;
 use App\Models\TaxCoin;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
@@ -204,8 +205,8 @@ class DraftController extends Controller
                 throw new \Exception('Login não encontrado.');
             }
 
-            if (200 !== $statuscode && 201 !==$statuscode) {
-                throw new \Exception('Erro desconhecido ['.$statuscode.']');
+            if (200 !== $statuscode && 201 !== $statuscode) {
+                throw new \Exception('Erro desconhecido [' . $statuscode . ']');
             }
 
             $result = $response->getBody()->getContents();
@@ -234,12 +235,12 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            ActivityLogger::log('R$ Enviado para Credminer: '.$request->toAddress, $transaction->id, Transaction::class, $transaction);
+            ActivityLogger::log('R$ Enviado para Credminer: ' . $request->toAddress, $transaction->id, Transaction::class, $transaction);
 
             $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
-                'message' => 'R$ Enviado para Credminer: '.$request->toAddress,
+                'message' => 'R$ Enviado para Credminer: ' . $request->toAddress,
                 'transaction' => $transaction,
                 'transactionStatus' => $transactionStatus
             ], Response::HTTP_CREATED);
@@ -326,7 +327,7 @@ class DraftController extends Controller
                 'fee' => sprintf("%.2f", $tax),
                 'tax' => sprintf("%.2f", $tedTax),
                 'total' => sprintf("%.2f", ($amount + $tax + $tedTax)),
-                'payment_at' => Carbon::now()->addDays($deadline->deadline)
+                'payment_at' => $this->addWeekDays($deadline->deadline)
             ];
 
         } catch (\Exception $e) {
@@ -337,7 +338,30 @@ class DraftController extends Controller
 
     }
 
-    public function getValueByDayUser($coin_id, $category)
+    public function addWeekDays($days)
+    {
+        $withdrawalHolydays = WithdrawalHolyday::all();
+        $holydays = [];
+        foreach ($withdrawalHolydays as $holyday) {
+            array_push($holydays, $holyday->day);
+        }
+
+        $MyDateCarbon = Carbon::now();
+
+        $MyDateCarbon->addWeekdays($days);
+
+        for ($i = 1; $i <= $days; $i++) {
+
+            if (in_array(Carbon::now()->addWeekdays($i)->toDateString(), $holydays)) {
+                $MyDateCarbon->addDay();
+            }
+        }
+
+        return $MyDateCarbon;
+    }
+
+    public
+    function getValueByDayUser($coin_id, $category)
     {
         $transactions = Transaction::getValueByDayUser($coin_id, $category);
         $value = 0;
@@ -352,7 +376,8 @@ class DraftController extends Controller
         return $value;
     }
 
-    private function _calcBrlLimits($valorDiario, $valorTransaction)
+    private
+    function _calcBrlLimits($valorDiario, $valorTransaction)
     {
         $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
         $limits->limit_brl_diary = floatval($limits->limit_brl_diary);
@@ -367,7 +392,8 @@ class DraftController extends Controller
         return false;
     }
 
-    private function _calcUsdLimits($valorDiario, $valorTransaction)
+    private
+    function _calcUsdLimits($valorDiario, $valorTransaction)
     {
         $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
         $limits->limit_lqx_diary = floatval($limits->limit_lqx_diary);
