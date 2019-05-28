@@ -6,6 +6,7 @@ use App\Enum\EnumNanotechOperationType;
 use App\Enum\EnumStatusDocument;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
+use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\Funds\FundBalances;
 use App\Models\Nanotech\Nanotech;
@@ -336,16 +337,23 @@ class UserController extends Controller
     public function remove2fa($email) {
 
         try {
-            $user = User::where('email', $email)->firstOrFail();
 
-            $user->google2fa_secret = null;
-            $user->is_google2fa_active = false;
-            $user->save();
+            if (auth()->user()->is_google2fa_active) {
+                $user = User::where('email', $email)->firstOrFail();
 
-            return response([
-                'message' => trans('messages.2fa.deactivated'),
-                'user' => $user
-            ], Response::HTTP_OK);
+                $user->google2fa_secret = null;
+                $user->is_google2fa_active = false;
+                $user->save();
+
+                ActivityLogger::log(trans('messages.2fa.deactivated'), $user->id);
+
+                return response([
+                    'message' => trans('messages.2fa.deactivated'),
+                    'user' => $user
+                ], Response::HTTP_OK);
+            }
+
+            throw new \Exception(trans('messages.2fa.not_activated'));
 
         } catch (\Exception $e) {
             return response([
