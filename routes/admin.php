@@ -67,6 +67,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/', 'UserController@index');
         //user list
         Route::get('/list', 'UserController@list');
+        Route::post('/update-email', 'UserController@updateEmail');
         //user hist
         Route::post('/hist', 'UserController@hist');
         Route::post('/transactions', 'UserController@transactions');

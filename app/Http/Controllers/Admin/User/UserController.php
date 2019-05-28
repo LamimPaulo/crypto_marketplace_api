@@ -7,16 +7,23 @@ use App\Enum\EnumStatusDocument;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
 use App\Helpers\ActivityLogger;
+use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyMail;
 use App\Models\Funds\FundBalances;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserAccount;
+use App\Models\User\UserEmailChange;
 use App\Models\User\UserWallet;
 use App\User;
+use App\VerifyUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
@@ -147,19 +154,19 @@ class UserController extends Controller
                         ->where('investment_id', $n->id)
                         ->sum('amount'),
 
-                    'profit_generated' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::PROFIT])
+                    'profit_generated' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::PROFIT])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount'),
-                    'profit_withdrawal' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::PROFIT_WITHDRAWAL])
+                    'profit_withdrawal' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::PROFIT_WITHDRAWAL])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount'),
-                    'investment' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::IN, EnumNanotechOperationType::PROFIT_IN])
+                    'investment' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::IN, EnumNanotechOperationType::PROFIT_IN])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount'),
-                    'investment_withdrawal' => NanotechOperation::whereIn('type',[EnumNanotechOperationType::WITHDRAWAL])
+                    'investment_withdrawal' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::WITHDRAWAL])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount')
@@ -261,7 +268,7 @@ class UserController extends Controller
 
             $transactions = NanotechOperation::with([
                 'investment' => function ($investment) {
-                    return $investment->with(['type','coin']);
+                    return $investment->with(['type', 'coin']);
                 }
             ])
                 ->where('user_id', $user->id)
@@ -334,12 +341,13 @@ class UserController extends Controller
         }
     }
 
-    public function remove2fa($email) {
+    public function remove2fa($email)
+    {
 
         try {
+            $user = User::where('email', $email)->firstOrFail();
 
-            if (auth()->user()->is_google2fa_active) {
-                $user = User::where('email', $email)->firstOrFail();
+            if ($user->is_google2fa_active) {
 
                 $user->google2fa_secret = null;
                 $user->is_google2fa_active = false;
@@ -356,6 +364,58 @@ class UserController extends Controller
             throw new \Exception(trans('messages.2fa.not_activated'));
 
         } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function updateEmail(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = User::where('email', $request->old_email)->firstOrFail();
+
+            if ($request->email === $request->old_email) {
+                throw new \Exception("O novo email é igual ao antigo, nenhuma modificação foi realizada.");
+            }
+
+            $newEmail = User::where('email', $request->email)->first();
+
+            if ($newEmail) {
+                throw new \Exception("O novo email já está registrado com outro usuário da plataforma e não pode ser atribuído.");
+            }
+
+            UserEmailChange::create([
+                'old_email' => $request->old_email,
+                'new_email' => $request->email,
+                'user_id' => $user->id,
+                'creator_id' => auth()->user()->id
+            ]);
+
+            $user->email = $request->email;
+            $user->email_verified_at = null;
+            $user->save();
+
+            DB::statement("DELETE FROM verify_users WHERE user_id = '$user->id'");
+
+            VerifyUser::create([
+                'user_id' => $user->id,
+                'token' => Uuid::uuid4()->toString()
+            ]);
+
+            Localization::setLocale($user);
+            Mail::to($user->email)->send(new VerifyMail($user));
+
+            DB::commit();
+            return response([
+                'message' => trans('messages.general.success') . " Foi enviado um email de confirmação para o usuário.",
+                'user' => $user
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'message' => "Erro: {$e->getMessage()}"
             ], Response::HTTP_BAD_REQUEST);
