@@ -143,7 +143,7 @@ class NanotechController extends Controller
 
             $this->balanceService::increments($transaction);
 
-            ActivityLogger::log(trans('message.withdrawal.done'), $operation->user_id);
+            ActivityLogger::log(trans('messages.withdrawal.done'), $operation->user_id);
 
             DB::commit();
             return response([

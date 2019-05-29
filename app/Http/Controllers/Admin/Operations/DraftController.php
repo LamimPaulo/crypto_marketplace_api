@@ -117,7 +117,7 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            ActivityLogger::log(trans('message.withdrawal.done'), $transaction->user_id);
+            ActivityLogger::log(trans('messages.withdrawal.done'), $transaction->user_id);
 
             DB::commit();
             return response([
