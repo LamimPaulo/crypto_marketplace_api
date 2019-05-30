@@ -146,6 +146,7 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/store', 'CoinsController@store');
             //atualizar moedas
             Route::post('/update', 'CoinsController@update');
+            Route::post('/update/lqx', 'CoinsController@updateLqx');
             //listagem de ordem das carteiras
             Route::get('/wallets-order', 'CoinsController@walletsOrder');
             //gravar order das carteiras

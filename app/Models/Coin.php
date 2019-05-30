@@ -40,6 +40,11 @@ class Coin extends Model
         return $this->hasMany(CoinQuote::class);
     }
 
+    public function quote_brl()
+    {
+        return $this->hasOne(CoinQuote::class)->where(['quote_coin_id' => Coin::getByAbbr("BRL")->id]);
+    }
+
     public static function getByAbbr($abbr)
     {
         return self::where('abbr', '=', $abbr)->first();

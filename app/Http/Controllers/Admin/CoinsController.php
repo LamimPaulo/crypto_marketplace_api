@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CoinRequest;
+use App\Http\Requests\UpdateLqxRequest;
 use App\Models\Coin;
+use App\Models\CoinQuote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +17,7 @@ class CoinsController extends Controller
     public function index()
     {
         try {
-            $coins = Coin::paginate(10);
+            $coins = Coin::with('quote_brl')->paginate(10);
             $data = $coins->getCollection();
             $data->each(function ($item) {
                 $item->makeVisible(['id']);
@@ -57,6 +59,47 @@ class CoinsController extends Controller
             return response([
                 'status' => 'success',
                 'message' => 'Moeda adicionada com sucesso.'
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function updateLqx(UpdateLqxRequest $request)
+    {
+        try {
+
+            $LqxToBrl= CoinQuote::where([
+                'coin_id' => Coin::getByAbbr("LQX")->id,
+                'quote_coin_id' => Coin::getByAbbr("BRL")->id,
+            ])->first();
+
+            $LqxToBrl->sell_quote = $request->sell_quote;
+            $LqxToBrl->buy_quote = $request->buy_quote;
+            $LqxToBrl->average_quote = ($request->sell_quote + $request->buy_quote) / 2;
+            $LqxToBrl->save();
+
+            $LqxToUsd = CoinQuote::where([
+                'coin_id' => Coin::getByAbbr("LQX")->id,
+                'quote_coin_id' => Coin::getByAbbr("USD")->id,
+            ])->first();
+
+            $usd = CoinQuote::where([
+                'coin_id' => Coin::getByAbbr("USD")->id,
+                'quote_coin_id' => Coin::getByAbbr("BRL")->id,
+            ])->first();
+
+            $LqxToUsd->sell_quote = $request->sell_quote / $usd->average_quote;
+            $LqxToUsd->buy_quote = $request->buy_quote / $usd->average_quote;
+            $LqxToUsd->average_quote = ($LqxToUsd->sell_quote + $LqxToUsd->buy_quote) / 2;
+            $LqxToUsd->save();
+
+            return response([
+                'status' => 'success',
+                'message' => 'LQX com sucesso.'
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
