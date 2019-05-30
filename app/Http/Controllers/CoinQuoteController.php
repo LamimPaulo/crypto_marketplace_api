@@ -11,43 +11,52 @@ class CoinQuoteController extends Controller
 {
     public function USDTOBRL_QUOTE()
     {
-        $api = new \GuzzleHttp\Client(['http_errors' => false]);
+        try {
+            $api = new \GuzzleHttp\Client(['http_errors' => false]);
 
-        $response = $api->get('https://api.coinbase.com/v2/exchange-rates?currency=USD');
-        $statuscode = $response->getStatusCode();
+            $response = $api->get('https://api.coinbase.com/v2/exchange-rates?currency=USD');
+            $statuscode = $response->getStatusCode();
 
-        if (200 === $statuscode) {
-            $result = json_decode($response->getBody()->getContents());
-            $last = CoinQuoteHist::where(['coin_id' => Coin::getByAbbr("USD")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id])->orderBy('created_at', 'DESC')->first();
+            if (200 === $statuscode) {
+                $result = json_decode($response->getBody()->getContents());
 
-            $usd_brl = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("USD")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id]);
-            $usd_brl->average_quote = $result->data->rates->BRL;
-            $usd_brl->last_quote = $last->average_quote ?? 0;
-            $usd_brl->buy_quote = $result->data->rates->BRL;
-            $usd_brl->sell_quote = $result->data->rates->BRL;
-            $usd_brl->save();
+                $last = CoinQuoteHist::where(['coin_id' => Coin::getByAbbr("USD")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id])->orderBy('created_at', 'DESC')->first();
 
-            CoinQuoteHist::create([
-                'coin_id' => Coin::getByAbbr("USD")->id,
-                'quote_coin_id' => Coin::getByAbbr("BRL")->id,
-                'average_quote' => $result->data->rates->BRL
-            ]);
+                $usd_brl = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("USD")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id]);
+                $usd_brl->average_quote = $result->data->rates->BRL;
+                $usd_brl->last_quote = $last->average_quote ?? 0;
+                $usd_brl->buy_quote = $result->data->rates->BRL;
+                $usd_brl->sell_quote = $result->data->rates->BRL;
+                $usd_brl->save();
 
-            //BRLTOUSD
-            $last = CoinQuoteHist::where(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id])->orderBy('created_at', 'DESC')->first();
+                CoinQuoteHist::create([
+                    'coin_id' => Coin::getByAbbr("USD")->id,
+                    'quote_coin_id' => Coin::getByAbbr("BRL")->id,
+                    'average_quote' => $result->data->rates->BRL
+                ]);
 
-            $brl_usd = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id]);
-            $brl_usd->average_quote = 1 / $result->data->rates->BRL;
-            $brl_usd->last_quote = $last->average_quote ?? 0;
-            $usd_brl->buy_quote = 1 / $result->data->rates->BRL;
-            $usd_brl->sell_quote = 1 / $result->data->rates->BRL;
-            $brl_usd->save();
+                //BRLTOUSD
+                $last = CoinQuoteHist::where(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id])->orderBy('created_at', 'DESC')->first();
 
-            CoinQuoteHist::create([
-                'coin_id' => Coin::getByAbbr("BRL")->id,
-                'quote_coin_id' => Coin::getByAbbr("USD")->id,
-                'average_quote' => 1 / $result->data->rates->BRL
-            ]);
+                $brl_usd = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id]);
+                $brl_usd->average_quote = $result->data->rates->BRL;
+                $brl_usd->last_quote = $last->average_quote ?? 0;
+                $usd_brl->buy_quote = $result->data->rates->BRL;
+                $usd_brl->sell_quote = $result->data->rates->BRL;
+                $usd_brl->save();
+
+                CoinQuoteHist::create([
+                    'coin_id' => Coin::getByAbbr("BRL")->id,
+                    'quote_coin_id' => Coin::getByAbbr("USD")->id,
+                    'average_quote' => $result->data->rates->BRL
+                ]);
+            }else{
+                throw new \Exception($statuscode);
+            }
+
+
+        } catch(\Exception $e) {
+            return $e->getMessage();
         }
     }
 
