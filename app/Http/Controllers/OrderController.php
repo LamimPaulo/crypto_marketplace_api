@@ -406,7 +406,7 @@ class OrderController extends Controller
         ]);
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = 'BRL';
+        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         if ($request->base === $user_fiat_abbr) {
@@ -442,7 +442,7 @@ class OrderController extends Controller
             'base.required' => 'A moeda base é obrigatória',
         ]);
 
-        $user_fiat_abbr = 'BRL';
+        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
 
         if ($request->base === $user_fiat_abbr) {
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
@@ -539,7 +539,7 @@ class OrderController extends Controller
         }
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = 'BRL';
+        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         $base_coin = Coin::with([
@@ -590,7 +590,7 @@ class OrderController extends Controller
         }
 
         $amount = (float)$request->amount;
-        $user_fiat_abbr = 'BRL';
+        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
 
         $base_coin = Coin::with([

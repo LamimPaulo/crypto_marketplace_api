@@ -19,7 +19,7 @@ class getBtcQuote extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Get Coin Quotes';
 
     /**
      * Create a new command instance.
@@ -40,6 +40,7 @@ class getBtcQuote extends Command
     {
 
         $quoteCoinController = new CoinQuoteController();
+        $quoteCoinController->USDTOBRL_QUOTE();
         $quoteCoinController->CRYPTO_QUOTES();
     }
 }

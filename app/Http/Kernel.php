@@ -78,6 +78,7 @@ class Kernel extends HttpKernel
         'credminer' => Middleware\Credminer::class,
         'withdrawalallowed' => Middleware\WithdrawalAllowed::class,
         'checkkeycodelevel' => Middleware\CheckKeycodeLevel::class,
+        'internationalUserNotAllowed' => Middleware\InternationalUserNotAllowed::class,
     ];
 
     /**

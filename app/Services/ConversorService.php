@@ -11,14 +11,16 @@ class ConversorService
     public static function BTC2BRL($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         return ($value / $cotacao->average_quote);
     }
 
     public static function BRL2BTC($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         return ($cotacao->average_quote / $value);
     }
 
@@ -26,7 +28,8 @@ class ConversorService
     {
 
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->buy_quote));
 
         return [
@@ -40,7 +43,8 @@ class ConversorService
     public static function BRL2BTCMIN($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->sell_quote));
 
         return [
@@ -54,7 +58,8 @@ class ConversorService
     {
 
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->buy_quote * $value));
 
         return [
@@ -68,7 +73,8 @@ class ConversorService
     public static function BTC2BRLMIN($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->sell_quote * $value));
 
         return [
@@ -82,7 +88,8 @@ class ConversorService
     public static function BRLTAX2BTCMIN($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->sell_quote));
 
         return [
@@ -95,7 +102,8 @@ class ConversorService
     public static function BRLTAX2BTCMAX($value)
     {
         $coin = Coin::getByAbbr('BTC');
-        $cotacao = CoinQuote::where(['coin_id' => 1, 'quote_coin_id' => 2])->first();
+        $fiat_coin = Coin::getByAbbr('BRL');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $fiat_coin->id])->first();
         $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->buy_quote));
 
         return [
@@ -165,5 +173,60 @@ class ConversorService
         ];
     }
 
+        public static function BTC2USDMIN($value)
+    {
+        $coin = Coin::getByAbbr('BTC');
+        $usd_coin = Coin::getByAbbr('USD');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $usd_coin->id])->first();
+        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->sell_quote * $value));
+
+        return [
+            'amount' => $cotacao->value,
+            'current' => $cotacao->sell_quote,
+            'quote' => $cotacao->average_quote
+        ];
+    }
+
+    public static function BTC2USDMAX(float $value)
+    {
+        $coin = Coin::getByAbbr('BTC');
+        $usd_coin = Coin::getByAbbr('USD');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $usd_coin->id])->first();
+        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($cotacao->buy_quote * $value));
+
+        return [
+            'amount' => $cotacao->value,
+            'current' => $cotacao->buy_quote,
+            'quote' => $cotacao->average_quote
+        ];
+    }
+
+    public static function USD2BTCMAX($value)
+    {
+        $coin = Coin::getByAbbr('BTC');
+        $usd_coin = Coin::getByAbbr('USD');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $usd_coin->id])->first();
+        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->buy_quote));
+
+        return [
+            'amount' => $cotacao->value,
+            'current' => $cotacao->buy_quote,
+            'quote' => $cotacao->average_quote
+        ];
+    }
+
+    public static function USDTAX2BTCMIN($value)
+    {
+        $coin = Coin::getByAbbr('BTC');
+        $usd_coin = Coin::getByAbbr('USD');
+        $cotacao = CoinQuote::where(['coin_id' => $coin->id, 'quote_coin_id' => $usd_coin->id])->first();
+        $cotacao->value = sprintf('%.' . $coin->decimal . 'f', floatval($value / $cotacao->sell_quote));
+
+        return [
+            'amount' => $cotacao->value,
+            'current' => $cotacao->sell_quote,
+            'quote' => $cotacao->average_quote,
+        ];
+    }
 
 }

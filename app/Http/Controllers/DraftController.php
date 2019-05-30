@@ -64,7 +64,7 @@ class DraftController extends Controller
             DB::beginTransaction();
             $account = UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->user_account_id])->first();
 
-            $coin = auth()->user()->country_id == 31 ? Coin::getByAbbr('BRL')->id : Coin::getByAbbr('USD')->id;
+            $coin = Coin::getByAbbr('BRL')->id;
 
             $amount = abs($request->amount);
 
@@ -360,8 +360,7 @@ class DraftController extends Controller
         return $MyDateCarbon;
     }
 
-    public
-    function getValueByDayUser($coin_id, $category)
+    public function getValueByDayUser($coin_id, $category)
     {
         $transactions = Transaction::getValueByDayUser($coin_id, $category);
         $value = 0;
@@ -376,8 +375,7 @@ class DraftController extends Controller
         return $value;
     }
 
-    private
-    function _calcBrlLimits($valorDiario, $valorTransaction)
+    private function _calcBrlLimits($valorDiario, $valorTransaction)
     {
         $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
         $limits->limit_brl_diary = floatval($limits->limit_brl_diary);

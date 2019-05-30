@@ -190,6 +190,24 @@ class AuthController extends Controller
 
     public function checkWallets($user)
     {
+        if ($user->country_id != 31) {
+            $usd_wallet = UserWallet::with('coin')
+                ->whereHas('coin', function ($coin) {
+                    return $coin->where('abbr', 'LIKE', 'USD');
+                })
+                ->where(['user_id' => $user->id, 'is_active' => 1])->first();
+
+            if (!$usd_wallet) {
+                $uuid4 = Uuid::uuid4();
+                UserWallet::create([
+                    'user_id' => $user->id,
+                    'coin_id' => Coin::getByAbbr('USD')->id,
+                    'address' => $uuid4->toString(),
+                    'balance' => 0
+                ]);
+            }
+        }
+
         if ($user->country_id == 31) {
             $brl_wallet = UserWallet::with('coin')
                 ->whereHas('coin', function ($coin) {

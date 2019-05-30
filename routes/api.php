@@ -55,28 +55,23 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         //ordem de conversão das carteiras
         Route::get('/wallets/conversion-order', 'UserWalletController@walletsConversionOrder');
         Route::post('/wallets/update-conversion-order', 'UserWalletController@walletsUpdateConversionOrder');
-        //contas do usuário
-        Route::get('accountsList', 'UserAccountController@index');
-        //conta especifica do usuário
-        Route::get('account/{account}', 'UserAccountController@show');
-        //criar uma conta
-        Route::post('storeAccount', 'UserAccountController@store');
-        //atualizar uma conta
-        Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
-        //criar uma conta
-        Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
+
+        Route::middleware(['internationalUserNotAllowed'])->group(function () {
+            //contas do usuário
+            Route::get('accountsList', 'UserAccountController@index');
+            //conta especifica do usuário
+            Route::get('account/{account}', 'UserAccountController@show');
+            //criar uma conta
+            Route::post('storeAccount', 'UserAccountController@store');
+            //atualizar uma conta
+            Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
+            //criar uma conta
+            Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
+        });
 
         //lista de níves disponíveis
         Route::get('levels', 'UserLevelController@index');
 
-        //retorna as contas de transaferencia favoritas do usuario
-        Route::get('/fav-accounts', 'UserFavAccountController@index');
-        //cadastra novo favorito
-        Route::post('/fav-account', 'UserFavAccountController@store');
-        //mostra os detalhes do favorito
-        Route::get('/fav-account/{email}', 'UserFavAccountController@show');
-        //busca novo favorito para cadastro
-        Route::post('/search-account', 'UserFavAccountController@search');
         //hist
         Route::get('/hist', 'UserController@hist');
         Route::get('/dashboard', 'UserController@dashboard');
@@ -113,18 +108,22 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('accountsList', 'SystemAccountController@index');
     });
 
+
+Route::middleware(['internationalUserNotAllowed'])->group(function () {
     //solicitar deposito
     Route::post('deposit/send', 'DepositController@store');
-    Route::post('depositPaypal/send', 'DepositController@storePaypal');
+    Route::middleware(['tokencheck', 'pincheck'])->group(function () {
+        //solicitar saque
+        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed']);
+        //Envia R$ para CredminerAu
+        Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
+        //cancelar saque
+        Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
+    });
 
-    //solicitar saque
-    Route::post('draft/send', 'DraftController@store')->middleware(['tokencheck', 'pincheck', 'withdrawalallowed']);
-    //Envia R$ para Credminer
-    Route::post('draft/credminer', 'DraftController@sendBrlCredminer')->middleware(['tokencheck', 'pincheck']);
-    //cancelar saque
-    Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
     //estimar taxas de saque
     Route::post('draft/tax', 'DraftController@estimateTax');
+});
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
@@ -240,10 +239,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/update/{fund}', 'FundsController@updateFund');
 
     });
-
     Route::prefix('admin')->middleware('admin')->group(base_path('routes/admin.php'));
-
-
 });
 
 //gateway de pagamentos

@@ -516,7 +516,7 @@ class TransactionsController extends Controller
             if ($user_in->country_id != 31) {
                 $coin_out = Coin::getByAbbr('BRL')->id;
                 $coin_in = Coin::getByAbbr('USD')->id;
-                $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
+                $dollar = CoinQuote::where(['coin_id' => $coin_in, 'quote_coin_id' => $coin_out])->first()->average_quote;
                 $conversion = [
                     'coin_out' => $coin_out,
                     'wallet_out' => $wallet_out,
@@ -550,7 +550,7 @@ class TransactionsController extends Controller
             if ($user_in->country_id == 31) {
                 $coin_out = Coin::getByAbbr('USD')->id;
                 $coin_in = Coin::getByAbbr('BRL')->id;
-                $dollar = CoinQuote::where(['coin_id' => 3, 'quote_coin_id' => 2])->first()->average_quote;
+                $dollar = CoinQuote::where(['coin_id' => $coin_out, 'quote_coin_id' => $coin_in])->first()->average_quote;
                 $conversion = [
                     'coin_out' => $coin_out,
                     'wallet_out' => $wallet_out,
