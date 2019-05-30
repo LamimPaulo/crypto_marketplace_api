@@ -62,19 +62,11 @@ return [
         'key' => env('GOOGLE_RECAPTCHA_KEY'),
         'secret' => env('GOOGLE_RECAPTCHA_SECRET')
     ],
-    'binance' => [
-        'secret' => env('BINANCE_SECRET'),
-        'key' => env('BINANCE_KEY'),
-    ],
     'marketcap' => [
-        'key' => 'e5ea3914-506d-472a-8cc6-679b99bb3b21',
+        'key' => env('MARKETCAP_DASH_KEY'),
         'DASH' => [
-            'email' => 'dash.marketcap@navi.inf.br',
-            'key' => '4a5c2963-00a5-4d13-a630-779b781a9bab',
-        ],
-        'XMR' => [
-            'email' => 'xmr.marketcap@navi.inf.br',
-            'key' => 'ecbe6f64-e5fd-4fe8-b0f6-451b09330be2',
+            'email' => env('MARKETCAP_DASH_EMAIL'),
+            'key' => env('MARKETCAP_DASH_KEY'),
         ],
     ],
     'masternode' => [

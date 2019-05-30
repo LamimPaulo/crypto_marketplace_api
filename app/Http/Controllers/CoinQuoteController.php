@@ -121,7 +121,6 @@ class CoinQuoteController extends Controller
                     'http_errors' => false,
                     'headers' => ['X-CMC_PRO_API_KEY' => config("services.marketcap.{$coin->abbr}.key")]
                 ]);
-
                 $response = $api->get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol={$coin->abbr}&convert=BRL");
                 $statuscode = $response->getStatusCode();
 
