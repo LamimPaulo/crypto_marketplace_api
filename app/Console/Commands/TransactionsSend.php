@@ -126,18 +126,22 @@ class TransactionsSend extends Command
                 'status' => EnumTransactionsStatus::SUCCESS
             ]);
         } catch (\Exception $ex) {
-            if ($ex->getMessage() == 155) {
-                $user = User::where(['id' => $wallet->user_id, 'is_under_analysis' => false])->first();
 
-                if ($user) {
-                    $user->is_under_analysis = true;
-                    $user->save();
+            if (env('CHECK_WALLETS_BALANCES')) {
 
-                    $user->tokens()->each(function ($token) {
-                        $token->delete();
-                    });
+                if ($ex->getMessage() == 155) {
+                    $user = User::where(['id' => $wallet->user_id, 'is_under_analysis' => false])->first();
 
-                    Mail::to($user->email)->send(new UnderAnalysisMail($user));
+                    if ($user) {
+                        $user->is_under_analysis = true;
+                        $user->save();
+
+                        $user->tokens()->each(function ($token) {
+                            $token->delete();
+                        });
+
+                        Mail::to($user->email)->send(new UnderAnalysisMail($user));
+                    }
                 }
             }
 
