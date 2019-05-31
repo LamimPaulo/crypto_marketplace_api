@@ -131,12 +131,13 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'country_id' => $country->id,
+                'user_level_id' => $country->id === 31 ? 1 : 7,
                 'password' => Hash::make($request->password),
             ]);
 
             $uuid4 = Uuid::uuid4();
 
-            $verifyUser = VerifyUser::create([
+            VerifyUser::create([
                 'user_id' => $user->id,
                 'token' => $uuid4->toString()
             ]);

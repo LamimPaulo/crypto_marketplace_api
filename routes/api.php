@@ -146,6 +146,8 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
 
     Route::group(['prefix' => 'levels', 'as' => 'levels.'], function () {
         Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed']);
+        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck']);
+        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed']);
     });
 
     Route::group(['prefix' => 'coins', 'as' => 'coins.'], function () {

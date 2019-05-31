@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Models\User\UserLevel;
-use App\Services\ConversorService;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -24,7 +23,8 @@ class Product extends Model
 
     protected $appends = [
         'brlValue',
-        'lqxValue'
+        'lqxValue',
+        'value_usd'
     ];
 
     public function type()
@@ -40,6 +40,20 @@ class Product extends Model
     public function getBrlValueAttribute()
     {
         return 'R$ ' . number_format($this->value, 2, ',', '.');
+    }
+
+    public function getValueUsdAttribute()
+    {
+        $quote = CoinQuote::where([
+            'coin_id' => Coin::getByAbbr("USD")->id,
+            'quote_coin_id' => Coin::getByAbbr("BRL")->id
+        ])->first();
+
+        if ($this->value > 0) {
+            return number_format($this->value / $quote->average_quote, 2, '.', '');
+        }
+
+        return $this->value;
     }
 
     public function getLqxValueAttribute()

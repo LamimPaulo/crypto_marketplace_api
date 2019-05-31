@@ -79,6 +79,7 @@ class Kernel extends HttpKernel
         'withdrawalallowed' => Middleware\WithdrawalAllowed::class,
         'checkkeycodelevel' => Middleware\CheckKeycodeLevel::class,
         'internationalUserNotAllowed' => Middleware\InternationalUserNotAllowed::class,
+        'nationalUserNotAllowed' => Middleware\NationalUserNotAllowed::class,
     ];
 
     /**

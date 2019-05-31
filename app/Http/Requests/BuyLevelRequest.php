@@ -28,7 +28,7 @@ class BuyLevelRequest extends FormRequest
             'level_id' => 'required|exists:user_levels,id',
             'abbr' => [
                 'required',
-                Rule::in(['BRL', 'LQX'])
+                Rule::in(['BRL', 'LQX', 'USD'])
             ]
         ];
     }
