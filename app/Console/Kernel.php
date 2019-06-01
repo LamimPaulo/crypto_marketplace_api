@@ -31,12 +31,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:profits')->monthlyOn(10, '00:30');
         $schedule->command('funds:expiration')->dailyAt('01:00');
 
+        $schedule->command('gateway:expirepayments')->everyMinute();
         $schedule->command('estimate:fee')->everyMinute();
         $schedule->command('get:btcquote')->everyFiveMinutes();
-        $schedule->command('trade:execute')->everyMinute()->withoutOverlapping();
-        $schedule->command('get:marketcapquotes')->everyTenMinutes()->withoutOverlapping();
-        $schedule->command('transactions:send')->everyMinute()->withoutOverlapping();
-        $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
+        $schedule->command('trade:execute')->everyMinute();
+        $schedule->command('get:marketcapquotes')->everyTenMinutes();
+        $schedule->command('transactions:send')->everyMinute();
+        $schedule->command('transactions:confirmation')->everyMinute();
 
         $schedule->command('masternode:update')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('update:corebalances')->everyFiveMinutes()->withoutOverlapping();

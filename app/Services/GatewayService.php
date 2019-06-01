@@ -7,9 +7,6 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
-use App\Models\Mining\MiningPlan;
-use App\Models\Mining\MiningQuota;
-use App\Models\CoinQuote;
 use App\Models\GatewayStatus;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
@@ -76,34 +73,6 @@ class GatewayService
         }
     }
 
-    public function updateMining($gateway)
-    {
-        try {
-            $miningQuota = MiningQuota::firstOrNew(['user_id' => auth()->user()->id]);
-
-            $miningPlan = MiningPlan::with(['quotas'])->first();
-
-            $quotas_remaining = $miningPlan->ths_total - $miningPlan->quotas->sum('ths_quota');
-
-            $ths_quantity = $gateway->fiat_amount / $miningPlan->ths_quota_price;
-
-            if ($ths_quantity > $quotas_remaining) {
-                throw new \Exception("Não é possível contratar a quantidade requisitada. No momento possuímos apenas {$quotas_remaining} Th/s disponíveis. Tente contratar um número igual ou menor a este.");
-            }
-
-            if (!$miningQuota->ths_quota) {
-                $miningQuota->ths_quota = $ths_quantity;
-            } else {
-                $miningQuota->increment('ths_quota', $ths_quantity);
-            }
-            $miningQuota->mining_plan_id = 1;
-            $miningQuota->buy_price = $miningPlan->ths_quota_price;
-            $miningQuota->save();
-        } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
-        }
-    }
-
     public function FIAT($gateway)
     {
         try {
@@ -115,11 +84,11 @@ class GatewayService
                 'amount' => $gateway->fiat_amount,
                 'status' => EnumTransactionsStatus::SUCCESS,
                 'type' => EnumTransactionType::IN,
-                'category' => EnumTransactionCategory::GATEWAY,
+                'category' => EnumTransactionCategory::POS,
                 'fee' => 0,
                 'tax' => 0,
                 'tx' => Uuid::uuid4()->toString(),
-                'info' => 'Gateway tx: ' . $gateway->tx,
+                'info' => 'POS tx: ' . $gateway->tx,
                 'error' => '',
             ]);
 
@@ -147,11 +116,11 @@ class GatewayService
                 'amount' => $gateway->amount - $tax,
                 'status' => EnumTransactionsStatus::SUCCESS,
                 'type' => EnumTransactionType::IN,
-                'category' => EnumTransactionCategory::GATEWAY,
+                'category' => EnumTransactionCategory::POS,
                 'fee' => 0,
                 'tax' => $tax,
                 'tx' => Uuid::uuid4()->toString(),
-                'info' => 'Gateway tx: ' . $gateway->tx,
+                'info' => 'POS tx: ' . $gateway->tx,
                 'error' => '',
             ]);
 

@@ -185,24 +185,6 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
     //detalhes da conversao pela tx - retorna as duas transações geradas
     Route::get('/conversion/{tx}', 'OrderController@conversion');
 
-    //gateway de pagamentos
-    Route::group(['prefix' => 'gateway', 'middleware' => 'gatewayelegible'], function () {
-        //listar chave(s)
-        Route::get('/get-key', 'GatewayApiKeyController@index');
-        //gerar api key
-        Route::post('/new-key', 'GatewayApiKeyController@store')->middleware('pincheck');
-        //atualizar informações da chave
-        Route::post('/update-key', 'GatewayApiKeyController@update')->middleware('pincheck');
-        //estimar solicitacao de pagamento
-        Route::post('/estimate-payment', 'GatewayApiKeyController@estimatePayment');
-        //gerar solicitacao de pagamento
-        Route::post('/new-payment', 'GatewayApiKeyController@payment');
-        //lista de pagamentos
-        Route::get('/list-payments', 'GatewayApiKeyController@listPayments');
-        //detalhes do pagamento
-        Route::get('/show/{payment}', 'GatewayApiKeyController@showPayment');
-    });
-
     Route::group(['prefix' => 'exchange', 'namespace' => 'Exchange', 'as' => 'exchange.'], function () {
         Route::get('/', 'ExchangesController@index');
         Route::get('/comparison', 'ExchangesController@comparison');
@@ -249,16 +231,11 @@ Route::group(['prefix' => 'payments', 'middleware' => 'gateway'], function () {
     //gerar solicitação de pagamento
     Route::post('/new', 'GatewayController@store');
     Route::post('/list', 'GatewayController@list');
+    Route::post('/status/{tx}', 'GatewayController@status');
 });
-
-//mostra a tela de pagamento externamente na plataforma
-Route::get('/gateway/tx/{tx}', 'GatewayApiKeyController@showPayment');
-Route::get('/payments/status/{tx}', 'GatewayApiKeyController@showPayment');
-Route::post('/gateway/update-tx', 'GatewayApiKeyController@updatePayment');
 
 //verificar validade da api key
 Route::post('/payments/check-key', 'GatewayController@checkKey');
-Route::get('/addWeekDays/{days}', 'DraftController@addWeekDays');
 
 Route::get('/uuid', function () {
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();

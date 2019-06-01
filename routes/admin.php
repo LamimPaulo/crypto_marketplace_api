@@ -171,6 +171,26 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/nanotech', 'NanotechTypeController@index');
         Route::post('/nanotech', 'NanotechTypeController@update');
     });
+
+    //gateway de pagamentos
+    Route::group(['prefix' => 'gateway'], function () {
+        //listar chave(s)
+        Route::get('/get-key/{email}', 'GatewayApiKeyController@index');
+        //gerar api key
+        Route::post('/new-key', 'GatewayApiKeyController@store');
+        //atualizar informações da chave
+        Route::post('/update-key', 'GatewayApiKeyController@update');
+        //lista de pagamentos
+        Route::get('/list-payments/{user_email}', 'GatewayApiKeyController@listPayments');
+
+        //detalhes do pagamento
+        Route::get('/show/{payment}', 'GatewayApiKeyController@showPayment');
+        //estimar solicitacao de pagamento
+        Route::post('/estimate-payment', 'GatewayApiKeyController@estimatePayment');
+        //gerar solicitacao de pagamento
+        Route::post('/new-payment', 'GatewayApiKeyController@payment');
+
+    });
 });
 
 

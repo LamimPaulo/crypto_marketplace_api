@@ -8,7 +8,7 @@ abstract class EnumTransactionCategory
     const ORDER = 2;
     const DEPOSIT = 3;
     const WITHDRAWAL = 4;
-    const GATEWAY = 5;
+    const POS = 5;
     const CONVERSION = 6;
     const LQX_SUBMIT = 7;
     const TRANSFER = 8;
@@ -28,7 +28,7 @@ abstract class EnumTransactionCategory
         self::ORDER => 'Ordem',
         self::DEPOSIT => 'Depósito',
         self::WITHDRAWAL => 'Saque',
-        self::GATEWAY => 'Gateway',
+        self::POS => 'Pagamento POS',
         self::CONVERSION => 'Conversão',
         self::LQX_SUBMIT => 'Envio de LQX',
         self::TRANSFER => 'Transferência',

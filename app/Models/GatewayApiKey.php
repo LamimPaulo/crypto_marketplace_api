@@ -10,9 +10,20 @@ use Illuminate\Database\Eloquent\Model;
  */
 class GatewayApiKey extends Model
 {
-    protected $fillable = ['user_id', 'api_key', 'secret', 'ip', 'payment_coin'];
+    protected $fillable = [
+        'user_id',
+        'api_key',
+        'secret',
+        'ip',
+        'payment_coin',
+        'device_number',
+        'serial_number',
+        'activation_code',
+        'infinitepay_wallet',
+        'status'
+    ];
 
-    protected $hidden = ['secret'];
+    protected $hidden = ['user_id'];
 
     protected $appends = ['wallet_abbr', 'ip_front'];
 

@@ -8,11 +8,12 @@ use App\Enum\EnumGatewayStatus;
 use App\Enum\EnumGatewayType;
 use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Models\Coin;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
 use App\Models\GatewayStatus;
-use App\Models\SysConfig;
+use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\GatewayService;
@@ -47,112 +48,120 @@ class GatewayController extends Controller
         ]);
 
         try {
-            $key = GatewayApiKey::where('api_key', '=', $request->get('api_key'))->first();
+            $key = GatewayApiKey::where('api_key', $request->get('api_key'))->exists();
 
-            if (is_null($key)) {
+            if (!$key) {
                 throw new \Exception(trans('messages.auth.invalid_key'));
             }
 
             return response([
-                'message' => trans('messages.auth.invalid_key')
+                'status' => 'success',
+                'message' => trans('messages.auth.valid_key')
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             return response([
+                'status' => 'error',
                 'message' => $ex->getMessage()
             ], Response::HTTP_OK);
         }
     }
 
-    public function create(Request $request)
-    {
-        $tx = Uuid::uuid4()->toString();
-
-        $gateway = Gateway::create([
-            'address' => $this->address,
-            'user_id' => $request->get('user_id'),
-            'fiat_coin_id' => $request->get('fiat_coin_id'),
-            'coin_id' => $request->get('coin_id'),
-            'amount' => $request->get('amount'),
-            'fiat_amount' => $request->get('fiat_amount'),
-            'value' => $request->get('value'),
-            'tx' => $tx,
-            'status' => EnumGatewayStatus::NEWW,
-            'type' => $request->get('type'),
-            'tax' => $request->get('tax'),
-            'category' => EnumGatewayCategory::PAYMENT
-        ]);
-
-        GatewayStatus::create([
-            'status' => $gateway->status,
-            'gateway_id' => $gateway->id
-        ]);
-
-        return $gateway;
-    }
-
     public function store(Request $request)
     {
+        $request->validate([
+            'amount' => 'required|numeric',
+            'abbr' => 'required|exists:coins,abbr'
+        ]);
+
         try {
-            $request->validate([
-                'amount' => 'required'
-            ]);
+            DB::beginTransaction();
 
-            if ($request->user->country_id == 31) {
-                $quote = $this->conversorService::BRLTAX2BTCMIN($request->get('amount'));
-                $fiatCoin = Coin::getByAbbr('BRL')->id;
+            $amount = $request->amount;
+
+            $fiatCoin = UserWallet::whereHas(
+                'coin', function ($coin) {
+                return $coin->where('is_crypto', false);
+            })->where(['type' => EnumUserWalletType::WALLET, 'user_id' => $request->user->id])->first();
+
+            if ($fiatCoin->coin->abbr === $request->abbr) {
+                throw new \Exception("A moeda requisitada é inválida.");
             }
 
-            if ($request->user->country_id != 31) {
-                $quote = $this->conversorService::USDTAX2BTCMIN($request->get('amount'));
-                $fiatCoin = Coin::getByAbbr('USD')->id;
-            }
+            $time = env('GATEWAY_POS_TIME') ?? 10;
+            $tx = Uuid::uuid4()->toString();
 
-            $request->request->add([
+            //criar address na moeda necessária
+            $quote = $this->conversorService::FIAT2CRYPTO_MAX($amount, $request->abbr, $fiatCoin->coin->abbr);
+
+            $gateway = Gateway::create([
+                'gateway_api_key_id' => $request->gateway_api_key_id,
+                'coin_id' => Coin::getByAbbr($request->abbr)->id,
+                'address' => $this->newAddress($request->abbr),
                 'amount' => $quote['amount'],
-                'fiat_amount' => $request->get('amount'),
-                'fiat_coin_id' => $fiatCoin,
-                'value' => $quote['current'],
-                'tax' => 0
+                'value' => $quote['quote'],
+
+                'user_id' => $request->user->id,
+                'fiat_coin_id' => $fiatCoin->coin->id,
+                'fiat_amount' => $amount,
+                'tx' => $tx,
+                'status' => EnumGatewayStatus::NEWW,
+                'type' => EnumGatewayType::PAYMENT,
+                'tax' => 0,
+                'category' => EnumGatewayCategory::PAYMENT,
+                'time_limit' => Carbon::now()->addMinutes($time)
             ]);
 
-            $request->request->add(['user_id' => $request->user->id]);
-            $request->request->add(['coin_id' => 1]);
-            $request->request->add(['type' => EnumGatewayType::PAYMENT]);
+            GatewayStatus::create([
+                'status' => $gateway->status,
+                'gateway_id' => $gateway->id
+            ]);
 
-            $gateway = $this->BTC($request);
+            DB::commit();
             return response([
-                'payment' => $gateway->tx
+                'status' => 'success',
+                'payment' => $gateway->address,
+                'amount' => $gateway->amount,
+                'coin' => $gateway->coin->abbr,
+                'fiat_amount' => $gateway->fiat_amount,
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
+            DB::rollBack();
             return response([
+                'status' => 'error',
                 'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
 
-    protected function BTC(Request $request)
+    protected function newAddress($abbr)
     {
-        $this->address = env('APP_ENV') == 'local' ? Uuid::uuid4()->toString() : OffScreenController::post(EnumOperationType::CREATE_ADDRESS, null, 'BTC');
-        return $this->create($request);
+        try {
+            $address = env('APP_ENV') == 'local' ? Uuid::uuid4()->toString() : OffScreenController::post(EnumOperationType::CREATE_ADDRESS, null, $abbr);
+            return $address;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
     }
 
     public static function show($address)
     {
-        return Gateway::where('address', $address)->first();
+        Gateway::where('address', $address)->first();
     }
 
     public function status($id)
     {
         try {
-            $gateway = Gateway::where('tx', '=', $id)->first();
+            $gateway = Gateway::where('address', $id)->first();
 
             if (!isset($gateway->status)) {
                 return response(['message' => trans('messages.gateway.payment_not_found')], Response::HTTP_NOT_FOUND);
             }
 
             return response([
+                'status' => 'success',
                 'payment' => [
-                    "status" => EnumGatewayStatus::SITUATION[$gateway->status],
+                    "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
+                    "status" => $gateway->status,
                     "amount" => sprintf('%.8f', floatval($gateway->amount)),
                     "address" => $gateway->address,
                     "tx" => $gateway->tx,
@@ -162,6 +171,7 @@ class GatewayController extends Controller
             ]);
         } catch (\Exception $ex) {
             return response([
+                'status' => 'error',
                 'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -239,9 +249,7 @@ class GatewayController extends Controller
                     $histStatus[$key]->name = EnumGatewayStatus::SITUATION[$histStatus[$key]->status];
                 }
 
-                $sysConfig = SysConfig::first();
-
-                $created = Carbon::parse($gateway->created_at)->addMinutes($sysConfig->time_gateway);
+                $created = Carbon::parse($gateway->created_at)->addMinutes(10);
                 $current = Carbon::now();
                 $diff = $current->diffInMinutes($created);
 
