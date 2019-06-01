@@ -18,6 +18,7 @@ return [
         'invalid_client' => 'Cliente Inválido.',
         'invalid_code' => 'Código Inválido. Tente Novamente.',
         'invalid_key' => 'Chave Inválida',
+        'valid_key' => 'Chave Válida',
         'invalid_pin' => 'Pin Inválido.',
         'invalid_token' => 'Token Inválido.',
         'password_change_success' => 'Senha atualizada com sucesso.',

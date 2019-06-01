@@ -18,6 +18,7 @@ return [
         'invalid_client' => 'Invalid Client.',
         'invalid_code' => 'Invalid Code.',
         'invalid_key' => 'Invalid Key.',
+        'valid_key' => 'Valid Key.',
         'invalid_pin' => 'Invalid PIN.',
         'invalid_token' => 'Invalid Token',
         'password_change_success' => 'Password updated successfully.',
