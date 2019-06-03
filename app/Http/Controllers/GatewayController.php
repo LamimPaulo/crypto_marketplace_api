@@ -116,13 +116,14 @@ class GatewayController extends Controller
                 'gateway_id' => $gateway->id
             ]);
 
-            DB::commit();
             return response([
                 'status' => 'success',
                 'payment' => $gateway->address,
                 'amount' => $gateway->amount,
                 'coin' => $gateway->coin->abbr,
                 'fiat_amount' => $gateway->fiat_amount,
+                'fiat' => number_format($gateway->fiat_amount, 2, ',','.'),
+                'qr_code' => strtolower(Coin::getByAbbr($request->abbr)->name).':'.$gateway->address.'?amount='.$gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
