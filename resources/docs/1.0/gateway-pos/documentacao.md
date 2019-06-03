@@ -28,12 +28,12 @@ Para requisitar um novo pagamento no gateway POS deve ser feita uma requisição
 
 ### Parametros necessários para geração do pagamento:
 
-| Paramentro    | Descrição                   | Tipo     | Local  | Obrigatório
-| :             | :-                          | :        | :      | :
-| Authorization | secret gerado no sistema    | string   | header | X
-| api_key       | Api Key gerada no sistema   | string   | body   | X
-| amount        | valor do pagamento (em R$)  | float    | body   | X
-| abbr          | crypto do pagamento         | float    | body   | X
+| Paramentro    | Descrição                                      | Tipo      | Local  | Obrigatório
+| :             | :-                                             | :         | :      | :
+| Authorization | secret gerado no sistema                       | string    | header | X
+| api_key       | Api Key gerada no sistema                      | string    | body   | X
+| amount        | valor do pagamento (em R$) (exemplo: "20.55")  | String    | body   | X
+| abbr          | crypto do pagamento                            | string    | body   | X
 
 ### Response:
 

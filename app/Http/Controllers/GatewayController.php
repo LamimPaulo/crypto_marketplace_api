@@ -69,14 +69,14 @@ class GatewayController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric',
+            'amount' => 'required',
             'abbr' => 'required|exists:coins,abbr'
         ]);
 
         try {
             DB::beginTransaction();
 
-            $amount = $request->amount;
+            $amount = floatval($request->amount);
 
             $fiatCoin = UserWallet::whereHas(
                 'coin', function ($coin) {
