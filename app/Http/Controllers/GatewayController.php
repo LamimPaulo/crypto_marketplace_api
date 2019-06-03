@@ -116,6 +116,8 @@ class GatewayController extends Controller
                 'gateway_id' => $gateway->id
             ]);
 
+            DB::commit();
+            
             return response([
                 'status' => 'success',
                 'payment' => $gateway->address,
