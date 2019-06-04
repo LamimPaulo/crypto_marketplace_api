@@ -318,7 +318,7 @@ class GatewayController extends Controller
      *
      * @return GatewayController
      */
-    public function confirmation()
+    public static function confirmation()
     {
         $transactions = Gateway::with([
             'user' => function ($user) {
