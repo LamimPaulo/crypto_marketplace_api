@@ -3,8 +3,8 @@
 namespace App\Enum;
 
 abstract class EnumGatewayPaymentCoin {
-    const FIAT = 1;
-    const CRYPTO = 2;
+    const CRYPTO = 1;
+    const FIAT = 2;
 
     const TYPE = [
         self::FIAT => 'FIAT',

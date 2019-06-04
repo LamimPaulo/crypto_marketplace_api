@@ -318,11 +318,11 @@ class GatewayController extends Controller
      *
      * @return GatewayController
      */
-    public static function confirmation()
+    public function confirmation()
     {
         $transactions = Gateway::with([
             'user' => function ($user) {
-                return $user->with(['api_key', 'level']);
+                return $user->with(['gateway_key', 'level']);
             },])
             ->where('type', '=', EnumTransactionType::IN)
             ->whereRaw('LENGTH(txid) > 36')
@@ -345,6 +345,7 @@ class GatewayController extends Controller
         try {
             DB::beginTransaction();
             $abbr = Coin::find($transaction->coin_id)->abbr;
+
             $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->txid], $abbr);
 
             $data = [];
@@ -353,7 +354,7 @@ class GatewayController extends Controller
 
             if ((int)$data['confirmations'] >= 6) {
 
-                $data['status'] = EnumGatewayStatus::DONE == $transaction->status ? EnumGatewayStatus::PAID : $transaction->status;
+                $data['status'] = EnumGatewayStatus::PAID;
 
                 GatewayStatus::create([
                     'status' => $data['status'],
@@ -361,10 +362,9 @@ class GatewayController extends Controller
                 ]);
 
                 if ($data['status'] == EnumGatewayStatus::PAID) {
-                    self::gatewayService()->{EnumGatewayPaymentCoin::TYPE[$transaction->user->api_key->payment_coin]}($transaction);
+                    self::gatewayService()->{EnumGatewayPaymentCoin::TYPE[$transaction->user->gateway_key->payment_coin]}($transaction);
                 }
             }
-
             $transaction->update($data);
 
             DB::commit();

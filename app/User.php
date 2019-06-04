@@ -108,7 +108,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getCreatedLocalAttribute()
     {
-        return $this->created_at->format('d/m/Y H:i');
+        if($this->created_at) {
+            return $this->created_at->format('d/m/Y H:i');
+        }
+        return Carbon::now()->format('d/m/Y H:i');
     }
 
     public function getTimeAttribute()
@@ -141,7 +144,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Country::class, 'country_id');
     }
 
-    public function api_key()
+    public function gateway_key()
     {
         return $this->hasOne(GatewayApiKey::class, 'user_id');
     }
