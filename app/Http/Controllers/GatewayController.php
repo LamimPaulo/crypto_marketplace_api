@@ -148,7 +148,7 @@ class GatewayController extends Controller
 
     public static function show($address)
     {
-        Gateway::where('address', $address)->first();
+        return Gateway::where('address', $address)->first();
     }
 
     public function status($id)

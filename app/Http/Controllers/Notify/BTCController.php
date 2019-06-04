@@ -16,6 +16,7 @@ use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\TaxCoinService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
