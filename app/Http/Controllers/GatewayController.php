@@ -117,7 +117,7 @@ class GatewayController extends Controller
             ]);
 
             DB::commit();
-            
+
             return response([
                 'status' => 'success',
                 'payment' => $gateway->address,
@@ -219,7 +219,7 @@ class GatewayController extends Controller
         $transaction->amount = floatval($transaction->amount);
         $expected = floatval($expected);
 
-        if ($transaction->amount === $expected) {
+        if ($transaction->amount == $expected) {
             return EnumGatewayStatus::DONE;
         } else if ($transaction->amount < $expected) {
             return EnumGatewayStatus::UNDERPAID;

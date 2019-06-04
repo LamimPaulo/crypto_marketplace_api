@@ -69,7 +69,7 @@ class BTCController extends Controller
     {
         DB::beginTransaction();
         try {
-            $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toaddress', $data['toAddress'])->first();
+            $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toAddress', $data['toAddress'])->first();
             if (is_null($transactionController)) {
 
                 $wallet = UserWallet::where('address', $data['toAddress'])->first();
