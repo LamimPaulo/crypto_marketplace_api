@@ -164,7 +164,7 @@ class GatewayController extends Controller
                 "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
                 "status" => $gateway->status,
                 "amount" => sprintf('%.8f', floatval($gateway->amount)),
-                "address" => $gateway->address,
+                "payment" => $gateway->address,
                 "tx" => $gateway->tx,
                 "created" => $gateway->created_at,
                 "confirmations" => $gateway->confirmations
