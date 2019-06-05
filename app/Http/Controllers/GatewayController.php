@@ -123,6 +123,7 @@ class GatewayController extends Controller
                 'payment' => $gateway->address,
                 'amount' => $gateway->amount,
                 'coin' => $gateway->coin->abbr,
+                'coin_name' => $gateway->coin->name,
                 'fiat_amount' => $gateway->fiat_amount,
                 'fiat' => number_format($gateway->fiat_amount, 2, ',','.'),
                 'qr_code' => strtolower(Coin::getByAbbr($request->abbr)->name).':'.$gateway->address.'?amount='.$gateway->amount
@@ -169,6 +170,7 @@ class GatewayController extends Controller
                 "created" => $gateway->created_at,
                 "confirmations" => $gateway->confirmations,
                 "coin" => $gateway->coin->abbr,
+                "coin_name" => $gateway->coin->name,
                 "fiat_amount" => $gateway->fiat_amount,
                 "fiat" => number_format($gateway->fiat_amount, 2, ',','.'),
             ]);
