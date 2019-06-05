@@ -167,7 +167,10 @@ class GatewayController extends Controller
                 "payment" => $gateway->address,
                 "tx" => $gateway->tx,
                 "created" => $gateway->created_at,
-                "confirmations" => $gateway->confirmations
+                "confirmations" => $gateway->confirmations,
+                "coin" => $gateway->coin->abbr,
+                "fiat_amount" => $gateway->fiat_amount,
+                "fiat" => number_format($gateway->fiat_amount, 2, ',','.'),
             ]);
         } catch (\Exception $ex) {
             return response([
