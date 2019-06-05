@@ -161,16 +161,13 @@ class GatewayController extends Controller
             }
 
             return response([
-                'status' => 'success',
-                'payment' => [
-                    "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
-                    "status" => $gateway->status,
-                    "amount" => sprintf('%.8f', floatval($gateway->amount)),
-                    "address" => $gateway->address,
-                    "tx" => $gateway->tx,
-                    "created" => $gateway->created_at,
-                    "confirmations" => $gateway->confirmations
-                ]
+                "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
+                "status" => $gateway->status,
+                "amount" => sprintf('%.8f', floatval($gateway->amount)),
+                "address" => $gateway->address,
+                "tx" => $gateway->tx,
+                "created" => $gateway->created_at,
+                "confirmations" => $gateway->confirmations
             ]);
         } catch (\Exception $ex) {
             return response([
