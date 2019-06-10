@@ -51,6 +51,8 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'TransactionsController@accept');
         });
 
+        Route::get('/balance/verify/{user_email}', 'TransactionsController@balanceVerify');
+
     });
 
     Route::group(['prefix' => 'withdrawals'], function () {
@@ -191,6 +193,8 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/new-payment', 'GatewayApiKeyController@payment');
 
     });
+
+
 });
 
 

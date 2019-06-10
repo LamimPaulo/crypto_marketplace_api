@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin\Operations;
 
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumTransactionType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
 use App\Mail\TransactionReject;
+use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Services\BalanceService;
@@ -86,7 +88,7 @@ class TransactionsController extends Controller
                 ->where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('type', $request->type)
                 ->whereNotIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT, EnumTransactionsStatus::REVERSED])
-                ->orderBy('created_at','DESC');
+                ->orderBy('created_at', 'DESC');
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -187,6 +189,45 @@ class TransactionsController extends Controller
             return response([
                 'status' => 'error',
                 'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function balanceVerify($user_email)
+    {
+        try {
+            $user = User::where(['email' => $user_email])->first();
+            $transactions = Transaction::where('user_id', $user->id)
+                ->whereIn('status', [
+                    EnumTransactionsStatus::SUCCESS,
+                    EnumTransactionsStatus::REVERSED,
+                    EnumTransactionsStatus::ABOVELIMIT
+                ])
+                ->orderBy('updated_at', 'ASC')->get();
+
+            $coins = Coin::all();
+            $balances = [];
+
+            foreach ($coins as $c) {
+                $balances[$c->abbr] = 0;
+            }
+
+            foreach ($transactions as $transaction) {
+                if ($transaction->type == EnumTransactionType::IN) {
+                    $balances[$transaction->coin->abbr] += floatval($transaction->total);
+                } else {
+                    $balances[$transaction->coin->abbr] -= floatval($transaction->total);
+                }
+                $transaction['balances'] = $balances;
+            }
+
+            return response([
+                'transactions' => $transactions,
+                'balances' => $balances,
+                ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }

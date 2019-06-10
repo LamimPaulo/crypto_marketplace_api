@@ -94,7 +94,8 @@ class Transaction extends Model
         'timestamp',
         'file',
         'fileExt',
-        'totalRounded'
+        'totalRounded',
+        'total'
     ];
 
     public function getCategoryNameAttribute()
@@ -243,10 +244,14 @@ class Transaction extends Model
             ->first();
     }
 
+    public function getTotalAttribute()
+    {
+        return $this->amount + $this->fee + $this->tax;
+    }
+
     public function getTotalRoundedAttribute()
     {
-        $total = $this->amount + $this->fee + $this->tax;
-        return sprintf("%.{$this->coin->decimal}f", $total);
+        return sprintf("%.{$this->coin->decimal}f", $this->total);
     }
 
     public function getAmountRoundedAttribute()
@@ -288,6 +293,7 @@ class Transaction extends Model
     {
         return sprintf("%.8f", $value);
     }
+
     public function setAmountAttribute($value)
     {
         $this->attributes['amount'] = sprintf("%.8f", $value);
@@ -297,6 +303,7 @@ class Transaction extends Model
     {
         return sprintf("%.8f", $value);
     }
+
     public function setFeeAttribute($value)
     {
         $this->attributes['fee'] = sprintf("%.8f", $value);
@@ -306,6 +313,7 @@ class Transaction extends Model
     {
         return sprintf("%.8f", $value);
     }
+
     public function setTaxAttribute($value)
     {
         $this->attributes['tax'] = sprintf("%.8f", $value);

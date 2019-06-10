@@ -238,14 +238,6 @@ Route::group(['prefix' => 'payments', 'middleware' => 'gateway'], function () {
 Route::post('/payments/check-key', 'GatewayController@checkKey');
 
 Route::get('/uuid', function () {
-    \App\Models\User\UserBalanceHist::create([
-        'wallet_id' => "a46a4b0f-6878-11e9-b0d4-08002767d184",
-        'user_id' => "95a70463-0a8c-4de0-9f76-6863a8df9b59",
-        'coin_id' => "1",
-        'address' => "3JRhrCivUeoDqucpWGKXVnEeszR6Fs1ubj",
-        'balance' => "1.00000000",
-    ]);
-
 
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
     return response([
