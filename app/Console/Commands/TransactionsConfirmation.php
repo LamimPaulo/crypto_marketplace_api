@@ -39,6 +39,7 @@ class TransactionsConfirmation extends Command {
      */
     public function handle() {
         $this->gateway();
+
         $processing = Transaction::confirmation();
         foreach ($processing as $transaction) {
             $this->BTC($transaction);

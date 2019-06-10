@@ -109,25 +109,25 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     });
 
 
-Route::middleware(['internationalUserNotAllowed'])->group(function () {
-    //solicitar deposito
-    Route::post('deposit/send', 'DepositController@store');
-    Route::middleware(['tokencheck', 'pincheck'])->group(function () {
-        //solicitar saque
-        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed']);
-        //Envia R$ para CredminerAu
-        Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
-        //cancelar saque
-        Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
-    });
+    Route::middleware(['internationalUserNotAllowed'])->group(function () {
+        //solicitar deposito
+        Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
+        Route::middleware(['tokencheck', 'pincheck'])->group(function () {
+            //solicitar saque
+            Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
+            //Envia R$ para CredminerAu
+            Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
+            //cancelar saque
+            Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
+        });
 
-    //estimar taxas de saque
-    Route::post('draft/tax', 'DraftController@estimateTax');
-});
+        //estimar taxas de saque
+        Route::post('draft/tax', 'DraftController@estimateTax');
+    });
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
-        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck','checkkeycodelevel']);
+        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck', 'checkkeycodelevel']);
         //retorna o valor transacionado do usuario no dia
         Route::get('/sum-day/{user}', 'TransactionsController@getValueByDayUser');
         //verifica se o usuário pode efetuar a transação
@@ -145,9 +145,9 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
     });
 
     Route::group(['prefix' => 'levels', 'as' => 'levels.'], function () {
-        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed']);
-        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck']);
-        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed']);
+        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed', 'docscheck']);
+        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'docscheck']);
+        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed', 'docscheck']);
     });
 
     Route::group(['prefix' => 'coins', 'as' => 'coins.'], function () {
@@ -172,12 +172,12 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
     //enviar token de confirmação por email
     Route::post('/send-mail-token', 'Token\TokenMailController@generate');
     //estimar conversao de moeda fiat/crypto - venda
-    Route::post('/convert', 'OrderController@convert')->middleware('allowsellforfiat');
+    Route::post('/convert', 'OrderController@convert')->middleware(['allowsellforfiat', 'docscheck']);
     //estimar conversao de moeda fiat/crypto - compra
-    Route::post('/convert-buy', 'OrderController@convertBuy')->middleware('allowbuywithfiat');
+    Route::post('/convert-buy', 'OrderController@convertBuy')->middleware(['allowbuywithfiat', 'docscheck']);
     //realizar conversao de moeda fiat/crypto
-    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck', 'allowsellforfiat']);
-    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck', 'allowbuywithfiat']);
+    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck', 'allowsellforfiat', 'docscheck']);
+    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck', 'allowbuywithfiat', 'docscheck']);
     //listagem de conversoes realizadas - barra lateral
     Route::get('/conversion-list', 'OrderController@conversionList');
     //listagem de moedas em que o user possui carteira
@@ -238,6 +238,15 @@ Route::group(['prefix' => 'payments', 'middleware' => 'gateway'], function () {
 Route::post('/payments/check-key', 'GatewayController@checkKey');
 
 Route::get('/uuid', function () {
+    \App\Models\User\UserBalanceHist::create([
+        'wallet_id' => "a46a4b0f-6878-11e9-b0d4-08002767d184",
+        'user_id' => "95a70463-0a8c-4de0-9f76-6863a8df9b59",
+        'coin_id' => "1",
+        'address' => "3JRhrCivUeoDqucpWGKXVnEeszR6Fs1ubj",
+        'balance' => "1.00000000",
+    ]);
+
+
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
     return response([
         'uuid' => $id,

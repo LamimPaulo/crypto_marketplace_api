@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'tokencheck' => Middleware\TokenCheck::class,
         'pincheck' => Middleware\PinCheck::class,
+        'docscheck' => Middleware\DocsCheck::class,
         'gateway' => Middleware\Gateway::class,
         'gatewayelegible' => Middleware\GatewayElegible::class,
         'admin' => Middleware\Admin::class,

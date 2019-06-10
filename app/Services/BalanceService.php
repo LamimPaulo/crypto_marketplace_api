@@ -13,6 +13,7 @@ use App\Models\Coin;
 use App\Models\CoinQuote;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
+use App\Models\User\UserBalanceHist;
 use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Http\Request;
@@ -104,6 +105,8 @@ class BalanceService
                 OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
+            self::hist($wallet->first(), $transaction, 'increment');
+
             return $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
 
         } catch (\Exception $exception) {
@@ -128,6 +131,7 @@ class BalanceService
                 OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
+            self::hist($wallet->first(), $transaction, 'decrement');
             return $wallet->decrement('balance', (string)$total);
 
         } catch (\Exception $exception) {
@@ -150,6 +154,8 @@ class BalanceService
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
+
+            self::hist($wallet->first(), $transaction, 'reverse');
 
             return $wallet->increment('balance', (string)$total);
 
@@ -278,5 +284,21 @@ class BalanceService
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
+    }
+
+    public static function hist($wallet, $transaction, $type)
+    {
+        UserBalanceHist::create([
+            'wallet_id' => $wallet->id,
+            'user_id' => $wallet->user_id,
+            'coin_id' => $wallet->coin_id,
+            'address' => $wallet->address,
+            'transaction_id' => $transaction->id ?? null,
+            'amount' => $transaction->amount,
+            'fee' => $transaction->fee,
+            'tax' => $transaction->tax,
+            'balance' => $wallet->balance,
+            'type' => $type,
+        ]);
     }
 }

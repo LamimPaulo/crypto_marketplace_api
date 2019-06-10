@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enum\EnumStatusDocument;
 use App\Models\User\Document;
 use Closure;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,8 +21,17 @@ class DocsCheck
     {
         try {
 
-            $cpf = Document::where('document_type_id', 1)->where('status', '=', 1)->where('user_id', '=', auth()->user()->id)->count();
-            $selfie = Document::where('document_type_id', 2)->where('status', '=', 1)->where('user_id', '=', auth()->user()->id)->count();
+            $cpf = Document::where([
+                'document_type_id' => 1,
+                'status' => EnumStatusDocument::VALID,
+                'user_id' => auth()->user()->id
+            ])->count();
+
+            $selfie = Document::where([
+                'document_type_id' => 2,
+                'status' => EnumStatusDocument::VALID,
+                'user_id' => auth()->user()->id
+            ])->count();
 
             if ($cpf > 0 AND $selfie > 0) {
                 return $next($request);
