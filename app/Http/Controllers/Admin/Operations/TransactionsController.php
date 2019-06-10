@@ -12,6 +12,7 @@ use App\Mail\TransactionReject;
 use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
+use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\User;
 use Illuminate\Http\Request;
@@ -209,14 +210,20 @@ class TransactionsController extends Controller
             $balances = [];
 
             foreach ($coins as $c) {
-                $balances[$c->abbr] = 0;
+                $balances[$c->abbr] = [
+                    "balance" => 0,
+                    "balance_computed" => UserWallet::where([
+                        'user_id' => $user->id,
+                        'coin_id' => $c->id,
+                    ])->first()
+                ];
             }
 
             foreach ($transactions as $transaction) {
                 if ($transaction->type == EnumTransactionType::IN) {
-                    $balances[$transaction->coin->abbr] += floatval($transaction->total);
+                    $balances[$transaction->coin->abbr]['balance'] += floatval($transaction->total);
                 } else {
-                    $balances[$transaction->coin->abbr] -= floatval($transaction->total);
+                    $balances[$transaction->coin->abbr]['balance'] -= floatval($transaction->total);
                 }
                 $transaction['balances'] = $balances;
             }
