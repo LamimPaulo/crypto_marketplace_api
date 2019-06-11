@@ -198,12 +198,10 @@ class TransactionsController extends Controller
     {
         try {
             $user = User::where(['email' => $user_email])->first();
-            $transactions = Transaction::where('user_id', $user->id)
-                ->whereIn('status', [
-                    EnumTransactionsStatus::SUCCESS,
-                    EnumTransactionsStatus::REVERSED,
-                    EnumTransactionsStatus::ABOVELIMIT
-                ])
+
+            $transactions = Transaction::whereRaw(
+                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::REVERSED . ", " . EnumTransactionsStatus::ABOVELIMIT . ")) 
+                OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
                 ->orderBy('updated_at', 'ASC')->get();
 
             $coins = Coin::all();
@@ -231,7 +229,7 @@ class TransactionsController extends Controller
             return response([
                 'transactions' => $transactions,
                 'balances' => $balances,
-                ], Response::HTTP_OK);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage()
