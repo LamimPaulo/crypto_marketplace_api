@@ -72,6 +72,14 @@ class UserAnalysisController extends Controller
 
     public function transactionUpdate(Request $request)
     {
+        $request->validate([
+            'coin_id' => 'required|exists:coins,id',
+            'amount' => 'required|numeric',
+            'fee' => 'required|numeric',
+            'tax' => 'required|numeric',
+            'type' => 'required|numeric',
+        ]);
+
         try {
             DB::beginTransaction();
 
@@ -106,7 +114,7 @@ class UserAnalysisController extends Controller
                 "creator_user_id" => auth()->user()->id
             ]);
 
-            DB::statement("UPDATE transactions SET amount = {$request->amount}, fee = {$request->fee}, tax = {$request->tax}, type = {$request->type} WHERE id = {$transaction->id}");
+            DB::statement("UPDATE transactions SET amount = {$request->amount}, coin_id = {$request->coin_id}, fee = {$request->fee}, tax = {$request->tax}, type = {$request->type} WHERE id = {$transaction->id}");
 
             DB::commit();
             return response([
