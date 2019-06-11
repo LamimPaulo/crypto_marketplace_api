@@ -104,7 +104,15 @@ class TransactionsSend extends Command
     {
         $wallet = UserWallet::findOrFail($pending->wallet_id);
 
+        $user = User::where(['id' => $wallet->user_id])->first();
+
+
         try {
+
+            if($user->is_under_analysis){
+                throw new \Exception('Usuario em analise atualmente, transacao nao sera enviada ate o fim da analise.');
+            }
+
             $coin_abbr = Coin::find($pending->coin_id)->abbr;
             $data = [
                 'fromAddress' => $pending->address,
