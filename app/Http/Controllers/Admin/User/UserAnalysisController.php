@@ -106,7 +106,8 @@ class UserAnalysisController extends Controller
                 "creator_user_id" => auth()->user()->id
             ]);
 
-            $transaction->update($request->all());
+            DB::statement("UPDATE transactions SET amount = {$request->amount}, fee = {$request->fee}, tax = {$request->tax}, type = {$request->type} WHERE id = {$transaction->id}");
+
             DB::commit();
             return response([
                 'message' => "Transação alterada com sucesso!"

@@ -200,7 +200,7 @@ class TransactionsController extends Controller
             $user = User::where(['email' => $user_email])->first();
 
             $transactions = Transaction::whereRaw(
-                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::REVERSED . ", " . EnumTransactionsStatus::ABOVELIMIT . ")) 
+                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ")) 
                 OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
                 ->orderBy('updated_at', 'ASC')->get();
 
