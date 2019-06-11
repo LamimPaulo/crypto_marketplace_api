@@ -4,24 +4,24 @@ namespace App\Enum;
 
 abstract class EnumTransactionCategory
 {
-    const TRANSACTION = 1;
-    const ORDER = 2;
-    const DEPOSIT = 3;
-    const WITHDRAWAL = 4;
-    const POS = 5;
-    const CONVERSION = 6;
-    const LQX_SUBMIT = 7;
-    const TRANSFER = 8;
-    const ARBITRAGE = 9;
-    const FUND = 10;
-    const CREDMINER = 11;
-    const BUY_LEVEL = 12;
-    const NANOTECH_CREDMINER = 13;
-    const MASTERNODE_CREDMINER = 14;
-    const FUND_CREDMINER = 15;
-    const NANOTECH = 16;
-    const MASTERNODE = 17;
-    const BRL_SUBMIT = 18;
+    const TRANSACTION = 1;          //IN - OUT
+    const ORDER = 2;                //IN - OUT
+    const DEPOSIT = 3;              //OUT
+    const WITHDRAWAL = 4;           //OUT
+    const POS = 5;                  //IN
+    const CONVERSION = 6;           //IN - OUT
+    const LQX_SUBMIT = 7;           //OUT
+    const TRANSFER = 8;             //IN - OUT
+    const ARBITRAGE = 9;            //IN - OUT
+    const FUND = 10;                //IN - OUT
+    const CREDMINER = 11;           //IN
+    const BUY_LEVEL = 12;           //OUT
+    const NANOTECH_CREDMINER = 13;  //IN - OUT
+    const MASTERNODE_CREDMINER = 14;//IN - OUT
+    const FUND_CREDMINER = 15;      //IN - OUT
+    const NANOTECH = 16;            //IN - OUT
+    const MASTERNODE = 17;          //IN - OUT
+    const BRL_SUBMIT = 18;          //OUT
 
     const TYPES = [
         self::TRANSACTION => 'Transação',

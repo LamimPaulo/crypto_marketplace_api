@@ -73,6 +73,7 @@ class Kernel extends HttpKernel
         'gateway' => Middleware\Gateway::class,
         'gatewayelegible' => Middleware\GatewayElegible::class,
         'admin' => Middleware\Admin::class,
+        'is_dev' => Middleware\DevCheck::class,
         'localization' => Middleware\Localization::class,
         'allowbuywithfiat' => Middleware\AllowBuyWithFiat::class,
         'allowsellforfiat' => Middleware\AllowSellForFiat::class,

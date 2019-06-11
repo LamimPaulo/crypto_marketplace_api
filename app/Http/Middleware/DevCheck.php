@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class DevCheck
 {
@@ -18,10 +19,19 @@ class DevCheck
     public function handle($request, Closure $next)
     {
 
-        if(!auth()->user()->dev){
-            return abort(404);
+        try {
+
+            if (!auth()->user()->is_dev) {
+                throw new \Exception(trans('messages.auth.access_denied'));
+            }
+
+            return $next($request);
+
+        } catch (\Exception $ex) {
+            return response([
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
         }
-        
-        return $next($request);
+
     }
 }

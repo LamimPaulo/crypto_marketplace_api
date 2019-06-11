@@ -100,6 +100,14 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'UserDocumentsController@accept');
             Route::post('/reject', 'UserDocumentsController@reject');
         });
+
+        Route::group(['middleware' => 'is_dev'], function () {
+            Route::get('/analysis', 'UserAnalysisController@list');
+            Route::get('/analysis/search', 'UserAnalysisController@search');
+            Route::get('/analysis/release/{email}', 'UserAnalysisController@release');
+            Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
+            Route::post('/analysis/balance/update', 'UserAnalysisController@balanceUpdate');
+        });
     });
 
     //funds
@@ -191,10 +199,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/estimate-payment', 'GatewayApiKeyController@estimatePayment');
         //gerar solicitacao de pagamento
         Route::post('/new-payment', 'GatewayApiKeyController@payment');
-
     });
-
-
 });
 
 
