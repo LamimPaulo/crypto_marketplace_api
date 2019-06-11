@@ -86,6 +86,7 @@ class UserAccountController extends Controller
 
     public function delete(Request $request)
     {
+//        return $request->all();
         try {
             $account = UserAccount::where('user_id', auth()->user()->id)->findOrFail($request->account);
             $account->delete();

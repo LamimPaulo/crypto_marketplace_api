@@ -136,6 +136,17 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/show/{exchange}', 'ExchangesController@show');
     });
 
+    //messages - send message to users
+    Route::group(['prefix' => 'messages', 'namespace' => 'Messages'], function () {
+        //listagem de exchanges arbitrage
+        Route::get('/', 'MessageController@index');
+        Route::get('/new', 'MessageController@getNew');
+        Route::post('/new', 'MessageController@postNew');
+        Route::get('/edit/{id}', 'MessageController@getEdit');
+        Route::post('/edit/{id}', 'MessageController@postEdit');
+        Route::post('/delete{id}', 'MessageController@postDelete');
+    });
+
     Route::group(['prefix' => 'config'], function () {
         //coins
 
