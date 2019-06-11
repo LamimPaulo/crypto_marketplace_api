@@ -202,7 +202,7 @@ class TransactionsController extends Controller
             $transactions = Transaction::whereRaw(
                 "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ")) 
                 OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
-                ->orderBy('updated_at', 'ASC')->get();
+                ->orderBy('updated_at', 'ASC')->get()->makeVisible('coin_id');
 
             $coins = Coin::all();
             $balances = [];
