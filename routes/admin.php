@@ -103,7 +103,7 @@ Route::group(['namespace' => 'Admin'], function () {
 
         Route::group(['middleware' => 'is_dev'], function () {
             Route::get('/analysis', 'UserAnalysisController@list');
-            Route::get('/analysis/search', 'UserAnalysisController@search');
+            Route::post('/analysis/search', 'UserAnalysisController@search');
             Route::get('/analysis/release/{email}', 'UserAnalysisController@release');
             Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
             Route::post('/analysis/transaction/delete', 'UserAnalysisController@transactionDelete');
