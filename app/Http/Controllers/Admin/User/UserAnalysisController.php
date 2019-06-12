@@ -127,6 +127,61 @@ class UserAnalysisController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+public function transactionDelete(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:transactions,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $transaction = Transaction::findOrFail($request->id);
+
+            TransactionHist::create([
+                "transaction_id" => $transaction->id,
+                "user_id" => $transaction->user_id,
+                "coin_id" => $transaction->coin_id,
+                "wallet_id" => $transaction->wallet_id,
+                "toAddress" => $transaction->toAddress,
+                "amount" => $transaction->amount,
+                "fee" => $transaction->fee,
+                "status" => $transaction->status,
+                "type" => $transaction->type,
+                "category" => $transaction->category,
+                "tx" => $transaction->tx,
+                "confirmation" => $transaction->confirmation,
+                "info" => $transaction->info,
+                "error" => $transaction->error,
+                "sender_user_id" => $transaction->sender_user_id,
+                "is_gateway_payment" => $transaction->is_gateway_payment,
+                "system_account_id" => $transaction->system_account_id,
+                "user_account_id" => $transaction->user_account_id,
+                "file_path" => $transaction->file_path,
+                "tax" => $transaction->tax,
+                "price" => $transaction->price,
+                "market" => $transaction->market,
+                "payment_at" => $transaction->payment_at,
+                "transaction_created_at" => $transaction->created_at,
+                "transaction_updated_at" => $transaction->updated_at,
+                "creator_user_id" => auth()->user()->id
+            ]);
+
+            DB::statement("SET FOREIGN_KEY_CHECKS=0");
+            DB::statement("DELETE FROM transactions WHERE id = {$transaction->id}");
+            DB::statement("SET FOREIGN_KEY_CHECKS=1");
+
+            DB::commit();
+            return response([
+                'message' => "Transação excluida com sucesso!"
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
 
     public function balanceUpdate(Request $request)
     {
