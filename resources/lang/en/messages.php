@@ -124,7 +124,7 @@ return [
     'wallet' => [
         'inactive' => 'The requested wallet is inactive.',
         'invalid_for_coin' => 'There is no valid wallet for the requested currency.',
-        'invalid_wallet' => 'There is no valid wallet for the requisition.',
+        'invalid' => 'There is no valid wallet for the requisition.',
         'insuficient_balance' => 'Insufficient funds.',
         'insuficient_balances' => 'Insufficient funds.',
     ],

@@ -22,6 +22,7 @@ abstract class EnumTransactionCategory
     const NANOTECH = 16;            //IN - OUT
     const MASTERNODE = 17;          //IN - OUT
     const BRL_SUBMIT = 18;          //OUT
+    const USD_SUBMIT = 18;          //OUT
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
@@ -42,5 +43,6 @@ abstract class EnumTransactionCategory
         self::NANOTECH=> 'Nanotech',
         self::MASTERNODE => 'Masternode',
         self::BRL_SUBMIT => 'Envio de R$ Credminer',
+        self::USD_SUBMIT => 'Submited USD Credminer',
     ];
 }

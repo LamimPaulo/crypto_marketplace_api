@@ -48,10 +48,20 @@ class UserAccountController extends Controller
     {
         try {
             $request['user_id'] = auth()->user()->id;
-            $account = UserAccount::firstOrNew($request->only('user_id', 'bank_id', 'agency', 'account'));
 
-            $account->fill($request->all());
-            $account->save();
+            if (auth()->user()->country_id === 31) {
+                $request->validate([
+                    'bank_id'   => 'required|exists:banks,id',
+                ]);
+
+                $account = UserAccount::create($request->all());
+            }else{
+                $request->validate([
+                    'bank_name'   => 'required'
+                ]);
+
+                $account = UserAccount::create($request->all());
+            }
 
             return response([
                 'message' => trans('messages.account.created'),

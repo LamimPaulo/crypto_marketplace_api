@@ -14,6 +14,7 @@ class UserAccount extends Model
     protected $fillable = [
         'user_id',
         'bank_id',
+        'bank_name',
         'agency',
         'account',
         'agency_digit',

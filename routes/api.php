@@ -56,18 +56,16 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/wallets/conversion-order', 'UserWalletController@walletsConversionOrder');
         Route::post('/wallets/update-conversion-order', 'UserWalletController@walletsUpdateConversionOrder');
 
-        Route::middleware(['internationalUserNotAllowed'])->group(function () {
-            //contas do usuário
-            Route::get('accountsList', 'UserAccountController@index');
-            //conta especifica do usuário
-            Route::get('account/{account}', 'UserAccountController@show');
-            //criar uma conta
-            Route::post('storeAccount', 'UserAccountController@store');
-            //atualizar uma conta
-            Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
-            //criar uma conta
-            Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
-        });
+        //contas do usuário
+        Route::get('accountsList', 'UserAccountController@index');
+        //conta especifica do usuário
+        Route::get('account/{account}', 'UserAccountController@show');
+        //criar uma conta
+        Route::post('storeAccount', 'UserAccountController@store');
+        //atualizar uma conta
+        Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
+        //criar uma conta
+        Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
 
         //lista de níves disponíveis
         Route::get('levels', 'UserLevelController@index');
@@ -109,21 +107,20 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     });
 
 
-    Route::middleware(['internationalUserNotAllowed'])->group(function () {
-        //solicitar deposito
-        Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
-        Route::middleware(['tokencheck', 'pincheck'])->group(function () {
-            //solicitar saque
-            Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
-            //Envia R$ para CredminerAu
-            Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
-            //cancelar saque
-            Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
-        });
-
-        //estimar taxas de saque
-        Route::post('draft/tax', 'DraftController@estimateTax');
+    //solicitar deposito
+    Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
+    Route::middleware(['tokencheck', 'pincheck'])->group(function () {
+        //solicitar saque
+        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
+        //Envia R$ para CredminerAu
+        Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
+        Route::post('draft-usd/credminer', 'DraftController@sendUsdCredminer');
+        //cancelar saque
+        Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
     });
+
+    //estimar taxas de saque
+    Route::post('draft/tax', 'DraftController@estimateTax');
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
