@@ -36,7 +36,7 @@ class UserController extends Controller
         try {
             $user = User::with([
                 'level' => function ($level) {
-                    return $level->with('product');
+//                    return $level->with('product');
                 }
             ])->findOrFail(auth()->user()->id);
             return response([
