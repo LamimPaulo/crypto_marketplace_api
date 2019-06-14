@@ -22,7 +22,7 @@ abstract class EnumTransactionCategory
     const NANOTECH = 16;            //IN - OUT
     const MASTERNODE = 17;          //IN - OUT
     const BRL_SUBMIT = 18;          //OUT
-    const USD_SUBMIT = 18;          //OUT
+    const USD_SUBMIT = 19;          //OUT
 
     const TYPES = [
         self::TRANSACTION => 'Transação',

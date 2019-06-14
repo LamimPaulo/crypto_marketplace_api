@@ -19,7 +19,7 @@ class UserAnalysisController extends Controller
         try {
             $users = User::with(['level'])
                 ->where('is_under_analysis', true)
-                ->orderBy('name')->paginate(10);
+                ->orderBy('user_level_id', 'DESC')->orderBy('name')->paginate(10);
 
             return response($users
                 , Response::HTTP_OK);
