@@ -14,12 +14,13 @@ class CreateMessagesTable extends Migration
     public function up()
     {
         Schema::create('messages', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->integer('user_id');
-            $table->integer('type');
+            $table->increments('id');
+            $table->uuid('user_id');
+            $table->tinyInteger('type');
+            $table->string('user_email');
             $table->string('subject',50);
-            $table->longText('message')->nullable();
-            $table->integer('status');
+            $table->longText('content')->nullable();
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }

@@ -67,6 +67,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/', 'UserController@index');
         //user list
         Route::get('/list', 'UserController@list');
+        Route::get('/list', 'UserController@list');
         Route::post('/update-email', 'UserController@updateEmail');
         //user hist
         Route::post('/hist', 'UserController@hist');
@@ -139,12 +140,12 @@ Route::group(['namespace' => 'Admin'], function () {
     //messages - send message to users
     Route::group(['prefix' => 'messages', 'namespace' => 'Messages'], function () {
         //listagem de exchanges arbitrage
-        Route::get('/', 'MessageController@index');
-        Route::get('/new', 'MessageController@getNew');
-        Route::post('/new', 'MessageController@postNew');
-        Route::get('/edit/{id}', 'MessageController@getEdit');
-        Route::post('/edit/{id}', 'MessageController@postEdit');
-        Route::post('/delete{id}', 'MessageController@postDelete');
+        Route::get('/list', 'MessageController@index');
+        Route::get('/user/list', 'MessageController@userList');
+        Route::get('/list/{id}', 'MessageController@show');
+        Route::post('/new', 'MessageController@store');
+        Route::post('/update/{id}', 'MessageController@update');
+        Route::delete('/delete/{id}', 'MessageController@delete');
     });
 
     Route::group(['prefix' => 'config'], function () {
