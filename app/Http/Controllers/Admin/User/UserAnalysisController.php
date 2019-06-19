@@ -127,7 +127,8 @@ class UserAnalysisController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
-public function transactionDelete(Request $request)
+
+    public function transactionDelete(Request $request)
     {
         $request->validate([
             'id' => 'required|exists:transactions,id',
