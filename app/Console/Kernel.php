@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:expiration')->dailyAt('01:00');
 
         if (env("APP_ENV") != 'local') {
+            $schedule->command('update:offscreenbalance')->everyMinute();
             $schedule->command('gateway:expirepayments')->everyMinute();
             $schedule->command('estimate:fee')->everyMinute();
             $schedule->command('get:btcquote')->everyFiveMinutes();

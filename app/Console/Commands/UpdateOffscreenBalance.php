@@ -41,7 +41,7 @@ class UpdateOffscreenBalance extends Command
     {
         try {
             $wallets = UserWallet::where('sync', 0)
-                ->whereNotIn('coin_id', [2, 3, 8, 9])
+                ->where('coin_id', 1)
                 ->with(['user', 'coin'])->get();
 
             foreach ($wallets as $wallet) {
