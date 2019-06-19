@@ -192,7 +192,10 @@ class DraftController extends Controller
 
             $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->draft)
-                ->where('status', EnumTransactionsStatus::PENDING)
+                ->whereNotIn('status', [
+                    EnumTransactionsStatus::REVERSED,
+                    EnumTransactionsStatus::SUCCESS
+                ])
                 ->firstOrFail();
 
             $transaction->status = EnumTransactionsStatus::REVERSED;
