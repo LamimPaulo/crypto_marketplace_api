@@ -34,7 +34,7 @@ class BalanceService
         $address = UserWallet::with('coin')->where('address', '=', $request->fromAddress)->firstOrFail();
 
         $user = User::findOrFail($address->user_id);
-        $tax = TaxCoinService::sum($user->user_level_id, $address->coin->id);
+        $tax = TaxCoinService::sumTaxSendCrypto($user->user_level_id, $request->amount);
 
 
         //verificacao de transacao interna por email ou address
@@ -65,7 +65,8 @@ class BalanceService
             'toAddress' => $request->toAddress,
             'amount' => (float)$request->amount,
             'fee' => sprintf('%.' . $address->coin->decimal . 'f', $fee),
-            'tax' => sprintf('%.' . $address->coin->decimal . 'f', floatval($tax))
+            'tax' => sprintf('%.' . $address->coin->decimal . 'f', floatval($tax)),
+            'level_id' => $user->user_level_id
         ];
     }
 
@@ -97,26 +98,33 @@ class BalanceService
     public static function increments($transaction)
     {
         try {
+            DB::beginTransaction();
+
             $wallet = UserWallet::with('coin')->where('user_id', '=', $transaction->user_id)
                 ->where('coin_id', '=', $transaction->coin_id)
                 ->where('id', '=', $transaction->wallet_id);
+
+            self::hist($wallet->first(), $transaction, 'increment');
+
+            $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
-            self::hist($wallet->first(), $transaction, 'increment');
 
-            return $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
+            DB::commit();
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception);
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
         }
     }
 
     public static function decrements($transaction)
     {
         try {
+            DB::beginTransaction();
 
             $amount = floatval($transaction->amount);
             $fee = floatval($transaction->fee);
@@ -127,21 +135,26 @@ class BalanceService
                 ->where('coin_id', '=', $transaction->coin_id)
                 ->where('id', '=', $transaction->wallet_id);
 
+            self::hist($wallet->first(), $transaction, 'decrement');
+            $wallet->decrement('balance', sprintf("%.8f", $transaction->amount));
+
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
-            self::hist($wallet->first(), $transaction, 'decrement');
-            return $wallet->decrement('balance', (string)$total);
+            DB::commit();
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception);
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
         }
     }
 
     public static function reverse($transaction)
     {
         try {
+            DB::beginTransaction();
+
             $amount = floatval($transaction->amount);
             $fee = floatval($transaction->fee);
             $tax = floatval($transaction->tax);
@@ -151,16 +164,18 @@ class BalanceService
                 ->where('coin_id', '=', $transaction->coin_id)
                 ->where('id', '=', $transaction->wallet_id);
 
+            self::hist($wallet->first(), $transaction, 'reverse');
+            $wallet->increment('balance', (string)$total);
+
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
-            self::hist($wallet->first(), $transaction, 'reverse');
-
-            return $wallet->increment('balance', (string)$total);
+            DB::commit();
 
         } catch (\Exception $exception) {
-            throw new \Exception($exception);
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
         }
     }
 
