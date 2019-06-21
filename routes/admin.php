@@ -223,6 +223,10 @@ Route::group(['namespace' => 'Admin'], function () {
         //gerar solicitacao de pagamento
         Route::post('/new-payment', 'GatewayApiKeyController@payment');
     });
+
+    Route::post('/navi/payment/filter', 'NaviPaymentController@filter');
+    Route::get('/navi/payment', 'NaviPaymentController@index');
+    Route::post('/navi/payment', 'NaviPaymentController@payment');
 });
 
 

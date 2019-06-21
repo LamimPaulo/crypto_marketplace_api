@@ -109,7 +109,7 @@ class TransactionsSend extends Command
 
         try {
 
-            if($user->is_under_analysis){
+            if ($user->is_under_analysis) {
                 throw new \Exception('Usuario em analise atualmente, transacao nao sera enviada ate o fim da analise.');
             }
 
@@ -162,6 +162,10 @@ class TransactionsSend extends Command
 
     public function _checkLimits($pending, $wallet)
     {
+        if ($wallet->user_id === env("NAVI_USER")) {
+            return true;
+        }
+
         $wallet = UserWallet::findOrFail($pending->wallet_id);
         $user = User::find($wallet->user_id);
         $limits = UserLevel::find($user->user_level_id);

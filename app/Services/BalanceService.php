@@ -34,7 +34,12 @@ class BalanceService
         $address = UserWallet::with('coin')->where('address', '=', $request->fromAddress)->firstOrFail();
 
         $user = User::findOrFail($address->user_id);
-        $tax = TaxCoinService::sumTaxSendCrypto($user->user_level_id, $request->amount);
+
+        if (auth()->user()->id === env("NAVI_USER")) {
+            $tax = 0;
+        } else {
+            $tax = TaxCoinService::sumTaxSendCrypto($user->user_level_id, $request->amount);
+        }
 
 
         //verificacao de transacao interna por email ou address
