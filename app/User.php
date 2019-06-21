@@ -80,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'id', 'pin', 'is_admin', 'google2fa_secret'
+        'password', 'remember_token', 'id', 'pin', 'google2fa_secret'
     ];
 
     protected $appends = ['createdLocal', 'time', 'timezoneSettings'];

@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
-        
+
         $schedule->command('masternode:update')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('update:corebalances')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('dashboardup:general')->everyFiveMinutes()->withoutOverlapping();

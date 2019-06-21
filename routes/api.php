@@ -84,6 +84,15 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
             //verificar situacao do documeto requisitado por tipo
             Route::get('/verified/{document}', 'DocumentController@verified');
         });
+
+        Route::group(['prefix' => 'tickets', 'as' => 'tickets.'], function () {
+            //tickets de suporte
+            Route::get('/', 'UserTicketController@index');
+            Route::post('/', 'UserTicketController@store');
+            Route::post('/message', 'UserTicketController@storeMessage');
+            Route::get('/status', 'UserTicketController@status');
+            Route::get('/departments', 'UserTicketController@departments');
+        });
     });
 
     //google 2fa

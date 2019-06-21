@@ -109,6 +109,15 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/analysis/transaction/delete', 'UserAnalysisController@transactionDelete');
             Route::post('/analysis/balance/update', 'UserAnalysisController@balanceUpdate');
         });
+
+        //tickets de suporte
+        Route::group(['prefix' => 'tickets', 'as' => 'tickets.'], function () {
+            Route::get('/', 'UserTicketController@index');
+            Route::post('/byDepartment', 'UserTicketController@byDepartment');
+            Route::post('/byStatus', 'UserTicketController@byStatus');
+            Route::post('/message', 'UserTicketController@storeMessage');
+            Route::get('/status', 'UserTicketController@status');
+        });
     });
 
     //funds
