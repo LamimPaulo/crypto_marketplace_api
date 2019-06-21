@@ -141,8 +141,9 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::group(['prefix' => 'messages', 'namespace' => 'Messages'], function () {
         //listagem de exchanges arbitrage
         Route::get('/list', 'MessageController@index');
+        Route::get('/notifications', 'MessageController@notificationsList');
         Route::get('/user/list', 'MessageController@userList');
-        Route::get('/list/{id}', 'MessageController@show');
+        Route::get('/edit/{id}', 'MessageController@edit');
         Route::post('/new', 'MessageController@store');
         Route::post('/update/{id}', 'MessageController@update');
         Route::delete('/delete/{id}', 'MessageController@delete');

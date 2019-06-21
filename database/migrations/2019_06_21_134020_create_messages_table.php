@@ -17,7 +17,6 @@ class CreateMessagesTable extends Migration
             $table->increments('id');
             $table->uuid('user_id');
             $table->tinyInteger('type');
-            $table->string('user_email');
             $table->string('subject',50);
             $table->longText('content')->nullable();
             $table->tinyInteger('status');

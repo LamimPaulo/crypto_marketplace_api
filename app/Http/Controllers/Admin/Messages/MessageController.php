@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin\Messages;
 
 use App\Http\Controllers\Controller;
-use App\Models\Coin;
-use App\Models\CoinQuote;
 use App\Models\Messages;
 use App\User;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,26 +15,10 @@ class MessageController extends Controller
     {
         try {
 
-//            $messages = Messages::with([
-//                'user_id',
-//                'subject'
-//            ])->orderBy('created_at', 'DESC');
-
-            $messages = Messages::with([])
+            $messages = Messages::with(['user'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
-//            $data = $messages->getCollection();
-//            $data->each(function ($item) {
-//                $item->makeVisible(['id']);
-//            });
-//            $messages->setCollection($data);
-
-//            return response([
-//                'status' => 'success',
-//                'count' => $messages->count(),
-//                'messages' => $messages->get()
-//            ], Response::HTTP_OK);
 
             return response($messages, Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -46,29 +28,50 @@ class MessageController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function notificationsList()
+    {
+        try {
+
+            $messages = Messages::where([
+                'type' => 0
+            ])
+                ->orWhereRaw('type = 1 AND user_id = "'.auth()->user()->id.'"')
+                ->orderBy('created_at', 'DESC')->get();
+
+
+            return response($messages, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'messages' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     // Novas Mensagens
     public function store(Request $request)
     {
         try{
-            $user_email = User::where('email', $request->user_email)->first();
-            $user_id = $user_email->id;
-
-            if ($user_id) {
-                $message = new Messages([
-                    'user_id' => $user_id,
-                    'user_email' => $request->get('user_email'),
-                    'type' => $request->get('type'),
-                    'subject' => $request->get('subject'),
-                    'content' => $request->get('content'),
-                    'status' => $request->get('status')
-                ]);
-
-                $message->save();
-
-                return response()->json('successfully added');
+            if ($request->user_email) {
+                $user_email = User::where('email', $request->user_email)->first();
+                $user_id = $user_email->id;
             } else {
-                echo 'Id não existe';
+                $user_id = 0;
             }
+
+            $message = new Messages([
+                'user_id' => $user_id,
+                'type' => $request->get('type'),
+                'subject' => $request->get('subject'),
+                'content' => $request->get('content'),
+                'status' => $request->get('status')
+            ]);
+
+            $message->save();
+
+            return response()->json('successfully added - Enviada Para Usuário');
+
         } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
@@ -76,12 +79,11 @@ class MessageController extends Controller
         }
     }
 
-//    public function show($id)
-    public function show($message_id)
+    public function edit($message_id)
     {
         try {
 
-            $message = Messages::with([])->findOrFail($message_id);
+            $message = Messages::with(['user'])->findOrFail($message_id);
 
             return response([
                 'message' => trans('messages.general.success'),
@@ -94,12 +96,6 @@ class MessageController extends Controller
         }
     }
 
-//    public function show($id)
-    public function edit()
-    {
-//        dd('fuck off');
-        echo 'fuck off';
-    }
 
     public function update(Request $request)
     {
