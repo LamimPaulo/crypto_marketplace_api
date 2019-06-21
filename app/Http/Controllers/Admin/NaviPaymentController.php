@@ -159,7 +159,7 @@ class NaviPaymentController extends Controller
                     ->whereNull('sender_user_id')
                     ->where('category', $key)->count();
 
-                $trans[$key] = [
+                $trans[] = [
                     'type' => $key,
                     'count' => $count,
                     'description' => $cat,
