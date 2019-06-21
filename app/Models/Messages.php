@@ -1,7 +1,8 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Messages extends Model
@@ -10,9 +11,14 @@ class Messages extends Model
       'user_id',
       'type',
       'subject',
-      'message',
+      'content',
       'status'
     ];
-    protected $hidden = ['id', 'created_at', 'updated_at'];
+
+    protected $hidden = ['created_at', 'updated_at'];
     protected $table = 'messages';
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

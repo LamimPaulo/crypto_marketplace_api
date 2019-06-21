@@ -100,8 +100,6 @@ class AlterDecimalsCypto extends Migration
             $table->decimal('balance_blocked', 28, 8)->default(0)->change();
             $table->decimal('balance_free', 28, 8)->default(0)->change();
         });
-
-        DB::statement("UPDATE user_wallets SET sync = 0 WHERE coin_id = 1");
     }
 
     /**
