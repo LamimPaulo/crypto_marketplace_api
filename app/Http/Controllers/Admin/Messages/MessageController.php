@@ -37,7 +37,8 @@ class MessageController extends Controller
                 'type' => 0
             ])
                 ->orWhereRaw('type = 1 AND user_id = "'.auth()->user()->id.'"')
-                ->orderBy('created_at', 'DESC')->get();
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
 
 
             return response($messages, Response::HTTP_OK);
@@ -84,6 +85,11 @@ class MessageController extends Controller
         try {
 
             $message = Messages::with(['user'])->findOrFail($message_id);
+
+            if(!auth()->user()->is_admin){
+                $message->status = 1;
+                $message->save();
+            }
 
             return response([
                 'message' => trans('messages.general.success'),
@@ -158,4 +164,5 @@ class MessageController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
 }

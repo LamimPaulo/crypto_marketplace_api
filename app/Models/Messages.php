@@ -12,10 +12,11 @@ class Messages extends Model
       'type',
       'subject',
       'content',
-      'status'
+      'status',
+      'created_at'
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = ['updated_at'];
     protected $table = 'messages';
 
     public function user() {
