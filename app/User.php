@@ -173,4 +173,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(UserWallet::class, 'user_id');
     }
+
+    public function user_role()
+    {
+        return $this->hasOne(UserRole::class, 'user_id');
+    }
 }

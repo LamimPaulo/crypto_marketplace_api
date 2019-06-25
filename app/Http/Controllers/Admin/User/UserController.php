@@ -18,7 +18,9 @@ use App\Models\User\Document;
 use App\Models\User\UserAccount;
 use App\Models\User\UserEmailChange;
 use App\Models\User\UserWallet;
+use App\Services\PermissionService;
 use App\User;
+use App\UserRole;
 use App\VerifyUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,9 +35,11 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail(auth()->user()->id);
+
             return response([
                 'message' => trans('messages.general.success'),
-                'user' => $user
+                'user' => $user,
+                'permissions' => PermissionService::list(auth()->user()->id)
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([

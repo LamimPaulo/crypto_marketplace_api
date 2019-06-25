@@ -227,6 +227,15 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::post('/navi/payment/filter', 'NaviPaymentController@filter');
     Route::get('/navi/payment', 'NaviPaymentController@index');
     Route::post('/navi/payment', 'NaviPaymentController@payment');
+
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('/', 'PermissionsController@roles');
+        Route::get('/enum_permissions', 'PermissionsController@enum_permissions');
+        Route::post('/store', 'PermissionsController@storeRole');
+        Route::post('/permissions/update', 'PermissionsController@updatePermissions');
+        Route::post('/delete/{role_id}/{user_email}', 'PermissionsController@deleteUserRole');
+    });
+
 });
 
 
