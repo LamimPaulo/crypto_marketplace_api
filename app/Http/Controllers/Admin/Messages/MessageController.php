@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Messages;
 
 use App\Http\Controllers\Controller;
+use App\Models\MessageStatus;
 use App\Models\Messages;
 use App\User;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,12 +34,11 @@ class MessageController extends Controller
     {
         try {
 
-            $messages = Messages::where([
-                'type' => 0
-            ])
-                ->orWhereRaw('type = 1 AND user_id = "'.auth()->user()->id.'"')
-                ->orderBy('created_at', 'DESC')
+            $messages = Messages::with([
+                'statuses' => function($statuses) {return $statuses->where('user_id', auth()->user()->id);}
+            ])  ->orderBy('created_at', 'DESC')
                 ->paginate(10);
+
 
 
             return response($messages, Response::HTTP_OK);
@@ -53,23 +53,44 @@ class MessageController extends Controller
     // Novas Mensagens
     public function store(Request $request)
     {
-        try{
+        try {
             if ($request->user_email) {
                 $user_email = User::where('email', $request->user_email)->first();
-                $user_id = $user_email->id;
+
+                $message = Messages::create([
+                    'user_id' => $user_email->id,
+                    'type' => $request->get('type'),
+                    'subject' => $request->get('subject'),
+                    'content' => $request->get('content'),
+                    'status' => 0
+                ]);
+
+                MessageStatus::create([
+                    'user_id' => $user_email->id,
+                    'message_id' => $message->id,
+                    'status' => 0
+                ]);
             } else {
-                $user_id = 0;
+
+                $users = User::whereNotNull('email_verified_at')->get();
+
+                $message = Messages::create([
+                    'user_id' => 0,
+                    'type' => $request->get('type'),
+                    'subject' => $request->get('subject'),
+                    'content' => $request->get('content'),
+                    'status' => $request->get('status')
+                ]);
+
+                foreach ($users as $user) {
+                    MessageStatus::create([
+                        'user_id' => $user->id,
+                        'message_id' => $message->id,
+                        'status' => 0
+                    ]);
+                }
+
             }
-
-            $message = new Messages([
-                'user_id' => $user_id,
-                'type' => $request->get('type'),
-                'subject' => $request->get('subject'),
-                'content' => $request->get('content'),
-                'status' => $request->get('status')
-            ]);
-
-            $message->save();
 
             return response()->json('successfully added - Enviada Para Usuário');
 
@@ -87,8 +108,13 @@ class MessageController extends Controller
             $message = Messages::with(['user'])->findOrFail($message_id);
 
             if(!auth()->user()->is_admin){
-                $message->status = 1;
-                $message->save();
+                $msg_status = MessageStatus::where([
+                    'user_id' => auth()->user()->id,
+                    'message_id' => $message_id
+                    ])->first();
+
+                $msg_status->status = 1;
+                $msg_status->save();
             }
 
             return response([
@@ -165,4 +191,31 @@ class MessageController extends Controller
         }
     }
 
+    public function readed(Request $request){
+        try {
+            echo $request;
+            dd($request);
+            DB::beginTransaction();
+
+            $message = Messages::where('id', $request->id)->first();
+
+//            echo $request->status;
+//            dd($request->status);
+
+            $message->update($request->all());
+
+            DB::commit();
+            return response([
+                'status' => 'success',
+                'message' => 'Mensagem Atualizada com Sucesso!'
+            ],Response::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+    }
 }
