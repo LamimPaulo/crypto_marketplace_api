@@ -141,7 +141,7 @@ class BalanceService
                 ->where('id', '=', $transaction->wallet_id);
 
             self::hist($wallet->first(), $transaction, 'decrement');
-            $wallet->decrement('balance', sprintf("%.8f", $transaction->amount));
+            $wallet->decrement('balance', sprintf("%.8f", (string)$total));
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
                 OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);

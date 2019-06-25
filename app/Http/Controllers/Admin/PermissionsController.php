@@ -94,7 +94,7 @@ class PermissionsController extends Controller
         $request->validate([
             'desc' => 'required'
         ]);
-        
+
         try {
             DB::beginTransaction();
 

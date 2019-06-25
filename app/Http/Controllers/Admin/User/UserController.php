@@ -35,11 +35,11 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail(auth()->user()->id);
+            $user['permissions'] = PermissionService::list(auth()->user()->id);
 
             return response([
                 'message' => trans('messages.general.success'),
                 'user' => $user,
-                'permissions' => PermissionService::list(auth()->user()->id)
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([

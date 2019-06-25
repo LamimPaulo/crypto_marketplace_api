@@ -82,6 +82,8 @@ class Kernel extends HttpKernel
         'checkkeycodelevel' => Middleware\CheckKeycodeLevel::class,
         'internationalUserNotAllowed' => Middleware\InternationalUserNotAllowed::class,
         'nationalUserNotAllowed' => Middleware\NationalUserNotAllowed::class,
+        'can_access' => Middleware\CanAccess::class,
+        'can_execute' => Middleware\CanExecute::class,
     ];
 
     /**

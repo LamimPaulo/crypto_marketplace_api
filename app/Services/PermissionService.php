@@ -26,9 +26,7 @@ class PermissionService
         $up = [];
 
         foreach ($user_role->role->permissions as $p) {
-            $up[] = [
-                $p->permission->name => $p->type
-            ];
+            $up[$p->permission->name] = $p->type;
         }
 
         return $up;
