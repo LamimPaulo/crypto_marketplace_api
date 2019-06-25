@@ -118,12 +118,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //solicitar deposito
     Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
-
-    Route::post('draft/send', 'DraftController@store');
-
+    
     Route::middleware(['tokencheck', 'pincheck'])->group(function () {
         //solicitar saque
-        //Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
+        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
         //Envia R$ para CredminerAu
         Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
         Route::post('draft-usd/credminer', 'DraftController@sendUsdCredminer');
