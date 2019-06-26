@@ -85,6 +85,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $appends = ['createdLocal', 'time', 'timezoneSettings'];
 
+    public function getNameAttribute($value)
+    {
+        $name = $value ?? $this->username;
+
+        if ($this->is_admin) {
+            return explode(" ", $name)[0];
+        }
+        return $name;
+    }
+
     public function getTimezoneSettingsAttribute()
     {
         $config = SysConfig::first();
@@ -108,7 +118,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getCreatedLocalAttribute()
     {
-        if($this->created_at) {
+        if ($this->created_at) {
             return $this->created_at->format('d/m/Y H:i');
         }
         return Carbon::now()->format('d/m/Y H:i');
@@ -127,11 +137,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getBirthdateAttribute($v)
     {
         return Carbon::parse($v)->format('d/m/Y');
-    }
-
-    public function getNameAttribute($v)
-    {
-        return $v ?? $this->username;
     }
 
     public function level()
