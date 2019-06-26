@@ -84,8 +84,8 @@ class DepositController extends Controller
         $uuid4 = Uuid::uuid4();
         $extension = $request->file('file')->getClientOriginalExtension();
         $nameFile = $uuid4->toString() . ".{$extension}";
-        $request->file('file')->storeAs("navi/ico/" . auth()->user()->id . "/deposit/", $nameFile);
-        $file_path = "navi/ico/" . auth()->user()->id . "/deposit/$nameFile";
+        $request->file('file')->storeAs("liquidex_v2/" . auth()->user()->id . "/deposit/", $nameFile);
+        $file_path = "liquidex_v2/" . auth()->user()->id . "/deposit/$nameFile";
         return $file_path;
     }
 

@@ -45,7 +45,7 @@ class DocumentController extends Controller
 
             $extension = $request->file('file')->getClientOriginalExtension();
             $nameFile = "{$type->type}.{$extension}";
-            $path = "navi/ico/documents/" . auth()->user()->id . "/";
+            $path = "liquidex_v2/" . auth()->user()->id . "/documents/";
 
             $request->file('file')->storeAs($path, $nameFile);
 

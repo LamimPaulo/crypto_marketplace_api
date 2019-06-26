@@ -3,27 +3,30 @@
 namespace App\Services;
 
 use App\Enum\EnumCalcType;
+use App\Enum\EnumOperations;
+use App\Enum\EnumOperationType;
 use App\Enum\EnumTaxType;
-use App\Models\CoinQuote;
 use App\Models\TaxCoin;
 use App\Models\TaxCoinTransaction;
 
 class TaxCoinService
 {
-    public static function tax($userStatus, $coin_id)
-    {
-        $tax = TaxCoin::sum($userStatus, $coin_id);
-        $quote = CoinQuote::where(['coin_id'=>1, 'quote_coin_id'=>2])->first();
-
-        $quote->average_quote = floatval($quote->average_quote);
-        $quote->tax = floatval($tax);
-        return $quote;
-    }
+//    public static function tax($userStatus, $coin_id)
+//    {
+//        $tax = TaxCoin::sum($userStatus, $coin_id);
+//        $quote_coin = auth()->user()->country_id ==31 ? Coin::getByAbbr("BRL")->id : Coin::getByAbbr("USD")->id;
+//        $quote = CoinQuote::where(['coin_id'=> $coin_id, 'quote_coin_id'=> $quote_coin])->first();
+//
+//        $quote->average_quote = floatval($quote->average_quote);
+//        $quote->tax = floatval($tax);
+//        return $quote;
+//    }
 
     public static function sum($userStatus, $coin_id)
     {
-        $taxas = self::tax($userStatus, $coin_id);
-        return ($taxas->tax / $taxas->average_quote);
+//        $taxas = self::tax($userStatus, $coin_id);
+//        return ($taxas->tax / $taxas->average_quote);
+
     }
 
     /**
@@ -89,5 +92,31 @@ class TaxCoinService
                 'operation_id' => $transaction->id
             ]);
         }
+    }
+
+    /**usando essa para envios 19062019
+     * @param $user_level
+     * @param $amount
+     * @return float|int
+     */
+    public static function sumTaxSendCrypto($user_level, $amount)
+    {
+        $taxCoins = TaxCoin::where([
+            'user_level_id' => $user_level,
+            'operation' => EnumOperations::CRYPTO_SEND
+        ])->get();
+        $taxes = 0;
+
+        foreach ($taxCoins as $tax) {
+            if ($tax->calc_type == EnumCalcType::DECIMAL) {
+                $taxes += $tax->value;
+            }
+
+            if ($tax->calc_type == EnumCalcType::PERCENT) {
+                $taxes += $amount * $tax->value / 100;
+            }
+        }
+
+        return $taxes;
     }
 }

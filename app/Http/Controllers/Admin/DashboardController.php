@@ -13,6 +13,7 @@ use App\Models\Nanotech\Nanotech;
 use App\Models\Transaction;
 use App\Models\User\Document;
 use App\Models\User\UserWallet;
+use App\Services\PermissionService;
 use App\User;
 use Symfony\Component\HttpFoundation\Response;
 

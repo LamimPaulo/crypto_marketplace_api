@@ -24,7 +24,6 @@ class UserAccountRequest extends FormRequest
     public function rules()
     {
         return [
-            'bank_id'   => 'nullable|exists:banks,id',
             'nickname'  => 'required',
             'email'     => 'nullable|email',
             'type'      => 'required',
@@ -34,7 +33,6 @@ class UserAccountRequest extends FormRequest
     public function messages()
     {
         return [
-            'bank_id.exists'    => trans('validation.user_account.bank_id_exists'),
             'nickname.required' => trans('validation.user_account.nickname_required'),
             'email.email'       => trans('validation.user_account.email_email'),
             'type.required'     => trans('validation.user_account.type_required'),

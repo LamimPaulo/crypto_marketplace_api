@@ -18,6 +18,7 @@ return [
         'invalid_client' => 'Invalid Client.',
         'invalid_code' => 'Invalid Code.',
         'invalid_key' => 'Invalid Key.',
+        'valid_key' => 'Valid Key.',
         'invalid_pin' => 'Invalid PIN.',
         'invalid_token' => 'Invalid Token',
         'password_change_success' => 'Password updated successfully.',
@@ -123,7 +124,7 @@ return [
     'wallet' => [
         'inactive' => 'The requested wallet is inactive.',
         'invalid_for_coin' => 'There is no valid wallet for the requested currency.',
-        'invalid_wallet' => 'There is no valid wallet for the requisition.',
+        'invalid' => 'There is no valid wallet for the requisition.',
         'insuficient_balance' => 'Insufficient funds.',
         'insuficient_balances' => 'Insufficient funds.',
     ],

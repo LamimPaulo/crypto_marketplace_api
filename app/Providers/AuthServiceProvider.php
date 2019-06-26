@@ -31,6 +31,10 @@ class AuthServiceProvider extends ServiceProvider
             $router->forAccessTokens();
         });
 
-        Passport::tokensExpireIn(now()->addHours(12));
+        if(env('APP_ENV')==='local') {
+            Passport::tokensExpireIn(now()->addYear());
+        }else{
+            Passport::tokensExpireIn(now()->addHours(12));
+        }
     }
 }

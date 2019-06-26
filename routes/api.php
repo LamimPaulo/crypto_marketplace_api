@@ -56,18 +56,16 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/wallets/conversion-order', 'UserWalletController@walletsConversionOrder');
         Route::post('/wallets/update-conversion-order', 'UserWalletController@walletsUpdateConversionOrder');
 
-        Route::middleware(['internationalUserNotAllowed'])->group(function () {
-            //contas do usuário
-            Route::get('accountsList', 'UserAccountController@index');
-            //conta especifica do usuário
-            Route::get('account/{account}', 'UserAccountController@show');
-            //criar uma conta
-            Route::post('storeAccount', 'UserAccountController@store');
-            //atualizar uma conta
-            Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
-            //criar uma conta
-            Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
-        });
+        //contas do usuário
+        Route::get('accountsList', 'UserAccountController@index');
+        //conta especifica do usuário
+        Route::get('account/{account}', 'UserAccountController@show');
+        //criar uma conta
+        Route::post('storeAccount', 'UserAccountController@store');
+        //atualizar uma conta
+        Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
+        //criar uma conta
+        Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
 
         //lista de níves disponíveis
         Route::get('levels', 'UserLevelController@index');
@@ -85,6 +83,15 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
             Route::get('/show/{document}', 'DocumentController@show');
             //verificar situacao do documeto requisitado por tipo
             Route::get('/verified/{document}', 'DocumentController@verified');
+        });
+
+        Route::group(['prefix' => 'tickets', 'as' => 'tickets.'], function () {
+            //tickets de suporte
+            Route::get('/', 'UserTicketController@index');
+            Route::post('/', 'UserTicketController@store');
+            Route::post('/message', 'UserTicketController@storeMessage');
+            Route::get('/status', 'UserTicketController@status');
+            Route::get('/departments', 'UserTicketController@departments');
         });
     });
 
@@ -109,25 +116,25 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     });
 
 
-Route::middleware(['internationalUserNotAllowed'])->group(function () {
     //solicitar deposito
-    Route::post('deposit/send', 'DepositController@store');
+    Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
+
     Route::middleware(['tokencheck', 'pincheck'])->group(function () {
         //solicitar saque
-        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed']);
+        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
         //Envia R$ para CredminerAu
         Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
+        Route::post('draft-usd/credminer', 'DraftController@sendUsdCredminer');
         //cancelar saque
         Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
     });
 
     //estimar taxas de saque
     Route::post('draft/tax', 'DraftController@estimateTax');
-});
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
-        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck','checkkeycodelevel']);
+        Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck', 'checkkeycodelevel']);
         //retorna o valor transacionado do usuario no dia
         Route::get('/sum-day/{user}', 'TransactionsController@getValueByDayUser');
         //verifica se o usuário pode efetuar a transação
@@ -145,9 +152,9 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
     });
 
     Route::group(['prefix' => 'levels', 'as' => 'levels.'], function () {
-        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed']);
-        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck']);
-        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed']);
+        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed', 'docscheck']);
+        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'docscheck']);
+        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed', 'docscheck']);
     });
 
     Route::group(['prefix' => 'coins', 'as' => 'coins.'], function () {
@@ -172,36 +179,18 @@ Route::middleware(['internationalUserNotAllowed'])->group(function () {
     //enviar token de confirmação por email
     Route::post('/send-mail-token', 'Token\TokenMailController@generate');
     //estimar conversao de moeda fiat/crypto - venda
-    Route::post('/convert', 'OrderController@convert')->middleware('allowsellforfiat');
+    Route::post('/convert', 'OrderController@convert')->middleware(['allowsellforfiat', 'docscheck']);
     //estimar conversao de moeda fiat/crypto - compra
-    Route::post('/convert-buy', 'OrderController@convertBuy')->middleware('allowbuywithfiat');
+    Route::post('/convert-buy', 'OrderController@convertBuy')->middleware(['allowbuywithfiat', 'docscheck']);
     //realizar conversao de moeda fiat/crypto
-    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck', 'allowsellforfiat']);
-    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck', 'allowbuywithfiat']);
+    Route::post('/convert-amount', 'OrderController@convertAmount')->middleware(['pincheck', 'allowsellforfiat', 'docscheck']);
+    Route::post('/convert-buy-amount', 'OrderController@convertBuyAmount')->middleware(['pincheck', 'allowbuywithfiat', 'docscheck']);
     //listagem de conversoes realizadas - barra lateral
     Route::get('/conversion-list', 'OrderController@conversionList');
     //listagem de moedas em que o user possui carteira
     Route::get('/my-coins-list', 'OrderController@myCoinsList');
     //detalhes da conversao pela tx - retorna as duas transações geradas
     Route::get('/conversion/{tx}', 'OrderController@conversion');
-
-    //gateway de pagamentos
-    Route::group(['prefix' => 'gateway', 'middleware' => 'gatewayelegible'], function () {
-        //listar chave(s)
-        Route::get('/get-key', 'GatewayApiKeyController@index');
-        //gerar api key
-        Route::post('/new-key', 'GatewayApiKeyController@store')->middleware('pincheck');
-        //atualizar informações da chave
-        Route::post('/update-key', 'GatewayApiKeyController@update')->middleware('pincheck');
-        //estimar solicitacao de pagamento
-        Route::post('/estimate-payment', 'GatewayApiKeyController@estimatePayment');
-        //gerar solicitacao de pagamento
-        Route::post('/new-payment', 'GatewayApiKeyController@payment');
-        //lista de pagamentos
-        Route::get('/list-payments', 'GatewayApiKeyController@listPayments');
-        //detalhes do pagamento
-        Route::get('/show/{payment}', 'GatewayApiKeyController@showPayment');
-    });
 
     Route::group(['prefix' => 'exchange', 'namespace' => 'Exchange', 'as' => 'exchange.'], function () {
         Route::get('/', 'ExchangesController@index');
@@ -249,18 +238,14 @@ Route::group(['prefix' => 'payments', 'middleware' => 'gateway'], function () {
     //gerar solicitação de pagamento
     Route::post('/new', 'GatewayController@store');
     Route::post('/list', 'GatewayController@list');
+    Route::post('/status/{tx}', 'GatewayController@status');
 });
-
-//mostra a tela de pagamento externamente na plataforma
-Route::get('/gateway/tx/{tx}', 'GatewayApiKeyController@showPayment');
-Route::get('/payments/status/{tx}', 'GatewayApiKeyController@showPayment');
-Route::post('/gateway/update-tx', 'GatewayApiKeyController@updatePayment');
 
 //verificar validade da api key
 Route::post('/payments/check-key', 'GatewayController@checkKey');
-Route::get('/addWeekDays/{days}', 'DraftController@addWeekDays');
 
 Route::get('/uuid', function () {
+
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
     return response([
         'uuid' => $id,

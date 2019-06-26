@@ -69,7 +69,7 @@ class BTCController extends Controller
     {
         DB::beginTransaction();
         try {
-            $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toaddress', $data['toAddress'])->first();
+            $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toAddress', $data['toAddress'])->first();
             if (is_null($transactionController)) {
 
                 $wallet = UserWallet::where('address', $data['toAddress'])->first();
@@ -97,25 +97,33 @@ class BTCController extends Controller
 
     public static function confirmation($transaction)
     {
-        $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx], Coin::find($transaction->coin_id)->abbr);
+        try {
+            DB::beginTransaction();
+            $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx], Coin::find($transaction->coin_id)->abbr);
 
-        $data['confirmation'] = $result['confirmations'];
+            $data['confirmation'] = $result['confirmations'];
 
-        if ($data['confirmation'] >= 6) {
-            $data['status'] = EnumTransactionsStatus::SUCCESS;
+            if ($data['confirmation'] >= 6) {
+                $data['status'] = EnumTransactionsStatus::SUCCESS;
 
-            self::balanceService()->increments($transaction);
+                self::balanceService()->increments($transaction);
 
-            TransactionStatus::create([
-                'transaction_id' => $transaction->id,
-                'status' => $transaction->status
-            ]);
+                TransactionStatus::create([
+                    'transaction_id' => $transaction->id,
+                    'status' => $transaction->status
+                ]);
+            }
+
+            $transaction->update($data);
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return $ex->getMessage();
         }
-
-        $transaction->update($data);
     }
 
-    public static function balanceService(){
+    public static function balanceService()
+    {
         return new BalanceService();
     }
 }

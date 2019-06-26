@@ -33,6 +33,7 @@ class Gateway extends Model
 
     protected $fillable = [
         'user_id',
+        'gateway_api_key_id',
         'coin_id',
         'status',
         'type',
@@ -46,8 +47,6 @@ class Gateway extends Model
         'confirmations',
         'fiat_coin_id',
         'fiat_amount',
-        'mining_user_id',
-        'arbitrage_user_id',
         'is_internal_payment',
         'payer_user_id',
         'category',
@@ -55,7 +54,7 @@ class Gateway extends Model
     ];
 
     protected $appends = ['fiatAmountLocal', 'timeLimitLocal', 'createdLocal', 'statusName', 'categoryName', 'endTime', 'startTime'];
-    protected $hidden = ['mining_user_id', 'user_id', 'id', 'coin_id', 'fiat_coin_id', 'status', 'type'];
+    protected $hidden = ['user_id', 'id', 'coin_id', 'fiat_coin_id', 'status', 'type'];
 
     public function histStatus()
     {

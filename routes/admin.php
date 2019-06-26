@@ -13,62 +13,81 @@
 
 Route::group(['namespace' => 'Admin'], function () {
 
+    //dados do usuario admin
+    Route::get('/user', 'User\UserController@index');
     //dados dashboard
     Route::get('/dashboard', 'DashboardController@index');
 
     Route::group(['namespace' => 'Operations'], function () {
         //depositos
-        Route::group(['prefix' => 'deposits'], function () {
+        Route::group([
+            'prefix' => 'deposits',
+            'middleware' => ['can_access:fiat_menu', 'can_access:fiat_deposits']
+        ], function () {
             Route::post('/pending', 'DepositController@index');
             Route::post('/list', 'DepositController@list');
-            Route::post('/reject', 'DepositController@reject');
-            Route::post('/accept', 'DepositController@accept');
+            Route::post('/reject', 'DepositController@reject')->middleware('can_execute:fiat_deposits');
+            Route::post('/accept', 'DepositController@accept')->middleware('can_execute:fiat_deposits');
         });
 
         //saques
-        Route::group(['prefix' => 'withdrawals'], function () {
+        Route::group([
+            'prefix' => 'withdrawals',
+            'middleware' => ['can_access:fiat_menu', 'can_access:fiat_withdrawals']
+        ], function () {
             Route::post('/list', 'DraftController@list');
-            Route::post('/reject', 'DraftController@reject');
-            Route::post('/accept', 'DraftController@accept');
-            Route::post('/process', 'DraftController@process');
+            Route::post('/reject', 'DraftController@reject')->middleware('can_execute:fiat_withdrawals');
+            Route::post('/accept', 'DraftController@accept')->middleware('can_execute:fiat_withdrawals');
+            Route::post('/process', 'DraftController@process')->middleware('can_execute:fiat_withdrawals');
         });
 
         //saques nanotech
-        Route::group(['prefix' => 'nanotech/withdrawals'], function () {
+        Route::group([
+            'prefix' => 'nanotech/withdrawals',
+            'middleware' => ['can_access:nanotech_menu']
+        ], function () {
             Route::get('/list', 'NanotechController@index');
             Route::get('/list/{status}', 'NanotechController@list');
-            Route::post('/reject', 'NanotechController@reject');
-            Route::post('/accept', 'NanotechController@accept');
+            Route::post('/reject', 'NanotechController@reject')->middleware('can_execute:nanotech_withdrawals');
+            Route::post('/accept', 'NanotechController@accept')->middleware('can_execute:nanotech_withdrawals');
         });
 
-        Route::group(['prefix' => 'transactions'], function () {
+        Route::group([
+            'prefix' => 'transactions',
+            'middleware' => 'can_access:crypto_above_limit'
+        ], function () {
             //transactions list
             Route::post('/by-status', 'TransactionsController@byStatus');
             Route::post('/by-type', 'TransactionsController@byType');
             //transaction reject
-            Route::post('/reject', 'TransactionsController@reject');
+            Route::post('/reject', 'TransactionsController@reject')->middleware('can_execute:crypto_above_limit');
             //transaction accept
-            Route::post('/accept', 'TransactionsController@accept');
+            Route::post('/accept', 'TransactionsController@accept')->middleware('can_execute:crypto_above_limit');
         });
 
+        Route::get('/balance/verify/{user_email}', 'TransactionsController@balanceVerify')->middleware('is_dev');
+
     });
 
-    Route::group(['prefix' => 'withdrawals'], function () {
-        Route::get('/deadlines', 'WithdrawalDeadlineController@index');
-        Route::post('/deadlines', 'WithdrawalDeadlineController@update');
+    Route::group([
+        'prefix' => 'withdrawals',
+        'middleware' => ['can_access:fiat_menu']
+    ], function () {
+        Route::get('/deadlines', 'WithdrawalDeadlineController@index')->middleware('can_access:fiat_withdrawals_taxes');
+        Route::post('/deadlines', 'WithdrawalDeadlineController@update')->middleware('can_execute:fiat_withdrawals_taxes');
 
-        Route::get('/holydays', 'WithdrawalDeadlineController@holydays');
-        Route::post('/holydays', 'WithdrawalDeadlineController@storeHolydays');
-        Route::post('/holyday', 'WithdrawalDeadlineController@deleteHolyday');
+        Route::get('/holydays', 'WithdrawalDeadlineController@holydays')->middleware('can_access:fiat_holidays');
+        Route::post('/holydays', 'WithdrawalDeadlineController@storeHolydays')->middleware('can_execute:fiat_holidays');
+        Route::post('/holyday', 'WithdrawalDeadlineController@deleteHolyday')->middleware('can_execute:fiat_holidays');
     });
 
-    Route::group(['prefix' => 'user', 'namespace' => 'User'], function () {
-        //dados do usuario admin
-        Route::get('/', 'UserController@index');
+    Route::group([
+        'prefix' => 'user', 'namespace' => 'User',
+        'middleware' => 'can_access:user_list'
+    ], function () {
         //user list
         Route::get('/list', 'UserController@list');
-        Route::get('/list', 'UserController@list');
-        Route::post('/update-email', 'UserController@updateEmail');
+        Route::post('/update-email', 'UserController@updateEmail')->middleware('can_execute:user_mail_change');
         //user hist
         Route::post('/hist', 'UserController@hist');
         Route::post('/transactions', 'UserController@transactions');
@@ -77,40 +96,69 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/deposits', 'UserController@deposits');
         //busca de usuarios
         Route::post('/search', 'UserController@search');
-        Route::post('/search', 'UserController@search');
         //listagem de usuários que nao completaram o cadastro
         Route::get('/incomplete', 'UserController@incomplete');
         //verificação de documentos
-        Route::post('/documents', 'UserController@documents');
+        Route::post('/documents', 'UserController@documents')->middleware('can_access:user_documents');
         //remove 2FA
-        Route::get('/remove2fa/{email}', 'UserController@remove2fa');
+        Route::get('/remove2fa/{email}', 'UserController@remove2fa')->middleware('can_execute:user_2fa_disable');
         //levels
-        Route::group(['prefix' => 'levels'], function () {
+        Route::group([
+            'prefix' => 'levels',
+            'middleware' => 'can_access:levels'
+        ], function () {
             Route::get('/', 'UserLevelController@index');
             Route::get('/enum-types', 'UserLevelController@enumTypes');
-            Route::post('/store', 'UserLevelController@store');
-            Route::post('/update', 'UserLevelController@update');
+            Route::post('/store', 'UserLevelController@store')->middleware('can_execute:levels');
+            Route::post('/update', 'UserLevelController@update')->middleware('can_execute:levels');
         });
         //documents
-        Route::group(['prefix' => 'documents'], function () {
+        Route::group([
+            'prefix' => 'documents',
+            'middleware' => 'can_access:user_documents'
+        ], function () {
             Route::get('/', 'UserDocumentsController@index');
             //busca de usuarios
             Route::post('/search', 'UserDocumentsController@search');
-            Route::post('/accept', 'UserDocumentsController@accept');
-            Route::post('/reject', 'UserDocumentsController@reject');
+            Route::post('/accept', 'UserDocumentsController@accept')->middleware('can_execute:user_documents');
+            Route::post('/reject', 'UserDocumentsController@reject')->middleware('can_execute:user_documents');
+        });
+
+        Route::group(['middleware' => 'is_dev'], function () {
+            Route::get('/analysis', 'UserAnalysisController@list');
+            Route::post('/analysis/search', 'UserAnalysisController@search');
+            Route::get('/analysis/release/{email}', 'UserAnalysisController@release');
+            Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
+            Route::post('/analysis/transaction/delete', 'UserAnalysisController@transactionDelete');
+            Route::post('/analysis/balance/update', 'UserAnalysisController@balanceUpdate');
+        });
+
+        //tickets de suporte
+        Route::group([
+            'prefix' => 'tickets', 'as' => 'tickets.',
+            'middleware' => 'can_access:user_tickets'
+        ], function () {
+            Route::get('/', 'UserTicketController@index');
+            Route::post('/byDepartment', 'UserTicketController@byDepartment');
+            Route::post('/byStatus', 'UserTicketController@byStatus');
+            Route::post('/message', 'UserTicketController@storeMessage')->middleware('can_execute:user_tickets');
+            Route::get('/status', 'UserTicketController@status');
         });
     });
 
     //funds
-    Route::group(['prefix' => 'funds', 'namespace' => 'Funds'], function () {
+    Route::group([
+        'prefix' => 'funds', 'namespace' => 'Funds',
+        'middleware' => 'can_access:funds'
+    ], function () {
         //resumo
         Route::get('/resume/{fund}', 'FundsController@resume');
         //gravar fundo de investimentos
-        Route::post('/store', 'FundsController@store');
+        Route::post('/store', 'FundsController@store')->middleware('can_execute:funds');
         //atualizar fundo de investimentos
-        Route::post('/update', 'FundsController@update');
+        Route::post('/update', 'FundsController@update')->middleware('can_execute:funds');
         //atualizar as moedas componentes do fundo de investimento
-        Route::post('/update-coins', 'FundsController@updateCoins');
+        Route::post('/update-coins', 'FundsController@updateCoins')->middleware('can_execute:funds');
         //listagem de fundo de investimentos
         Route::get('/list', 'FundsController@index');
         //detalhe do fundo de investimento
@@ -125,7 +173,10 @@ Route::group(['namespace' => 'Admin'], function () {
     });
 
     //exchanges - coin providers
-    Route::group(['prefix' => 'exchanges', 'namespace' => 'Exchanges'], function () {
+    Route::group([
+        'prefix' => 'exchanges', 'namespace' => 'Exchanges',
+        'middleware' => 'is_dev'
+    ], function () {
         //listagem de exchanges arbitrage
         Route::get('/arbitrage', 'ExchangesController@arbitrage');
         Route::get('/arbitrage-provider/{exchange}', 'ExchangesController@arbitrageExchange');
@@ -138,53 +189,100 @@ Route::group(['namespace' => 'Admin'], function () {
     });
 
     //messages - send message to users
-    Route::group(['prefix' => 'messages', 'namespace' => 'Messages'], function () {
+    Route::group([
+        'prefix' => 'messages', 'namespace' => 'Messages',
+        'middleware' => 'can_access:messages'
+    ], function () {
         //listagem de exchanges arbitrage
         Route::get('/list', 'MessageController@index');
         Route::get('/notifications', 'MessageController@notificationsList');
         Route::get('/user/list', 'MessageController@userList');
         Route::get('/edit/{id}', 'MessageController@edit');
-        Route::post('/new', 'MessageController@store');
-        Route::post('/update/{id}', 'MessageController@update');
-        Route::post('/readed', 'MessageController@readed');
-        Route::delete('/delete/{id}', 'MessageController@delete');
+        Route::post('/new', 'MessageController@store')->middleware('can_execute:messages');
+        Route::post('/update/{id}', 'MessageController@update')->middleware('can_execute:messages');
+        Route::delete('/delete/{id}', 'MessageController@delete')->middleware('can_execute:messages');
     });
 
-    Route::group(['prefix' => 'config'], function () {
+    Route::group([
+        'prefix' => 'config',
+        'middleware' => 'can_access:config_menu'
+    ], function () {
         //coins
-
-        Route::group(['prefix' => 'coins'], function () {
+        Route::group([
+            'prefix' => 'coins'
+        ], function () {
             //listagem de moedas
-            Route::get('/', 'CoinsController@index');
+            Route::get('/', 'CoinsController@index')->middleware('can_access:coins_config');
             //gravar moedas
-            Route::post('/store', 'CoinsController@store');
+            Route::post('/store', 'CoinsController@store')->middleware('can_execute:coins_config');
             //atualizar moedas
-            Route::post('/update', 'CoinsController@update');
-            Route::post('/update/lqx', 'CoinsController@updateLqx');
+            Route::post('/update', 'CoinsController@update')->middleware('can_execute:coins_config');
+            Route::post('/update/lqx', 'CoinsController@updateLqx')->middleware('can_execute:coins_config');
             //listagem de ordem das carteiras
-            Route::get('/wallets-order', 'CoinsController@walletsOrder');
+            Route::get('/wallets-order', 'CoinsController@walletsOrder')->middleware('can_access:wallet_order');
             //gravar order das carteiras
-            Route::post('/wallets-order', 'CoinsController@updateWalletsOrder');
+            Route::post('/wallets-order', 'CoinsController@updateWalletsOrder')->middleware('can_execute:wallet_order');
 
         });
 
-        Route::post('/bank-search', 'SystemAccountController@bankSearch');
+        Route::post('/bank-search', 'SystemAccountController@bankSearch')->middleware('can_access:system_accounts');
         //system accounts
-        Route::group(['prefix' => 'accounts'], function () {
+        Route::group([
+            'prefix' => 'accounts',
+            'middleware' => 'can_access:system_accounts'
+        ], function () {
             //listagem de contas
             Route::get('/', 'SystemAccountController@index');
             //gravar contas
-            Route::post('/store', 'SystemAccountController@store');
+            Route::post('/store', 'SystemAccountController@store')->middleware('can_execute:system_accounts');
             //atualizar contas
-            Route::post('/update', 'SystemAccountController@update');
+            Route::post('/update', 'SystemAccountController@update')->middleware('can_execute:system_accounts');
         });
         //configuracoes do sistema
-        Route::get('/system', 'SystemConfigController@index');
-        Route::post('/system', 'SystemConfigController@update');
+        Route::get('/system', 'SystemConfigController@index')->middleware('can_access:system');
+        Route::post('/system', 'SystemConfigController@update')->middleware('can_execute:system');
         //configurcoes nanotech
-        Route::get('/nanotech', 'NanotechTypeController@index');
-        Route::post('/nanotech', 'NanotechTypeController@update');
+        Route::get('/nanotech', 'NanotechTypeController@index')->middleware('can_access:nanotech_configs');
+        Route::post('/nanotech', 'NanotechTypeController@update')->middleware('can_execute:nanotech_configs');
     });
+
+    //gateway de pagamentos
+    Route::group(['prefix' => 'gateway'], function () {
+        //listar chave(s)
+        Route::get('/get-key/{email}', 'GatewayApiKeyController@index');
+        //gerar api key
+        Route::post('/new-key', 'GatewayApiKeyController@store');
+        //atualizar informações da chave
+        Route::post('/update-key', 'GatewayApiKeyController@update');
+        //lista de pagamentos
+        Route::get('/list-payments/{user_email}', 'GatewayApiKeyController@listPayments');
+
+        //POS
+        //detalhes do pagamento
+        Route::get('/show/{payment}', 'GatewayApiKeyController@showPayment');
+        //estimar solicitacao de pagamento
+        Route::post('/estimate-payment', 'GatewayApiKeyController@estimatePayment');
+        //gerar solicitacao de pagamento
+        Route::post('/new-payment', 'GatewayApiKeyController@payment');
+    });
+
+    Route::group(['middleware' => 'is_dev'], function () {
+        Route::post('/navi/payment/filter', 'NaviPaymentController@filter');
+        Route::get('/navi/payment', 'NaviPaymentController@index');
+        Route::post('/navi/payment', 'NaviPaymentController@payment');
+    });
+
+    Route::group([
+        'prefix' => 'roles',
+        'middleware' => 'can_access:assign_permission'
+    ], function () {
+        Route::get('/', 'PermissionsController@roles');
+        Route::get('/enum_permissions', 'PermissionsController@enum_permissions');
+        Route::post('/store', 'PermissionsController@storeRole')->middleware('can_execute:assign_permission');
+        Route::post('/permissions/update', 'PermissionsController@updatePermissions')->middleware('can_execute:assign_permission');
+        Route::post('/delete/{role_id}/{user_email}', 'PermissionsController@deleteUserRole')->middleware('can_execute:assign_permission');
+    });
+
 });
 
 

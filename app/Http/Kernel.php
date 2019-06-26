@@ -69,9 +69,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'tokencheck' => Middleware\TokenCheck::class,
         'pincheck' => Middleware\PinCheck::class,
+        'docscheck' => Middleware\DocsCheck::class,
         'gateway' => Middleware\Gateway::class,
         'gatewayelegible' => Middleware\GatewayElegible::class,
         'admin' => Middleware\Admin::class,
+        'is_dev' => Middleware\DevCheck::class,
         'localization' => Middleware\Localization::class,
         'allowbuywithfiat' => Middleware\AllowBuyWithFiat::class,
         'allowsellforfiat' => Middleware\AllowSellForFiat::class,
@@ -80,6 +82,8 @@ class Kernel extends HttpKernel
         'checkkeycodelevel' => Middleware\CheckKeycodeLevel::class,
         'internationalUserNotAllowed' => Middleware\InternationalUserNotAllowed::class,
         'nationalUserNotAllowed' => Middleware\NationalUserNotAllowed::class,
+        'can_access' => Middleware\CanAccess::class,
+        'can_execute' => Middleware\CanExecute::class,
     ];
 
     /**

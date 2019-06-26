@@ -74,17 +74,10 @@ class TransactionsController extends Controller
                 throw new \Exception(trans('messages.coin.inactive'));
             }
 
-            $cotacao = $this->conversorService::BRLTAX2BTCMAX($request->amount);
-
-            //VERIFICAR TAXAS PARA CADA MOEDA
-            $taxCoin = $this->taxCoinService->show($from->coin_id, EnumOperations::CRYPTO_SEND, $from->user->user_level_id, $request->amount, $cotacao['quote']);
-
-            $sumTaxas = $this->taxCoinService->sumTax($taxCoin);
-
             $request['fromAddress'] = $from->address;
             $fee = $this->balanceService->withDrawFee($request);
 
-            $sumValueTransaction = floatval($sumTaxas + $request->amount);
+            $sumValueTransaction = floatval($fee['fee'] + $fee['tax'] + $request->amount);
 
             if ($request->amount < $this->getValueMinTransaction()) {
                 throw new \Exception(trans('messages.transaction.value_below_the_minimum', ['amount' => $this->getValueMinTransaction()]));
@@ -132,6 +125,7 @@ class TransactionsController extends Controller
             ActivityLogger::log(trans('messages.transaction.crypto_sent'), $transaction->id, Transaction::class, $transaction);
 
             $this->balanceService::decrements($transaction);
+
             DB::commit();
             return response([
                 'message' => trans('messages.transaction.sent_success'),

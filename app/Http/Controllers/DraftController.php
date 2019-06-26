@@ -64,7 +64,7 @@ class DraftController extends Controller
             DB::beginTransaction();
             $account = UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->user_account_id])->first();
 
-            $coin = Coin::getByAbbr('BRL')->id;
+            $coin = auth()->user()->country_id == 31 ? Coin::getByAbbr('BRL')->id : Coin::getByAbbr('USD')->id;
 
             $amount = abs($request->amount);
 
@@ -97,16 +97,8 @@ class DraftController extends Controller
             $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::WITHDRAWAL);
             $valorDiario = floatval($valorDiario);
 
-            if ($from->coin_id == 2) {
-                if (!$this->_calcBrlLimits($valorDiario, $amount)) {
-                    throw new \Exception(trans('messages.transaction.value_exceeds_level_limits'));
-                }
-            }
-
-            if ($from->coin_id == 3) {
-                if (!$this->_calcUsdLimits($valorDiario, $amount)) {
-                    throw new \Exception(trans('messages.transaction.value_exceeds_level_limits'));
-                }
+            if (!$this->_calcBrlLimits($valorDiario, $amount)) {
+                throw new \Exception(trans('messages.transaction.value_exceeds_level_limits'));
             }
 
             $uuid = Uuid::uuid4();
@@ -221,6 +213,107 @@ class DraftController extends Controller
                 'status' => EnumTransactionsStatus::SUCCESS,
                 'type' => EnumTransactionType::OUT,
                 'category' => EnumTransactionCategory::BRL_SUBMIT,
+                'confirmation' => 0,
+                'fee' => 0,
+                'tax' => 0,
+                'payment_at' => Carbon::now(),
+                'tx' => $uuid->toString(),
+                'info' => "Envio pra Login: '{$request->toAddress}'",
+                'error' => '',
+            ]);
+
+            $transactionStatus = TransactionStatus::create([
+                'status' => $transaction->status,
+                'transaction_id' => $transaction->id,
+            ]);
+
+            ActivityLogger::log('R$ Enviado para Credminer: ' . $request->toAddress, $transaction->id, Transaction::class, $transaction);
+
+            $this->balanceService::decrements($transaction);
+            DB::commit();
+            return response([
+                'message' => 'R$ Enviado para Credminer: ' . $request->toAddress,
+                'transaction' => $transaction,
+                'transactionStatus' => $transactionStatus
+            ], Response::HTTP_CREATED);
+
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response([
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+    public function sendUsdCredminer(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            UserAccount::where(['user_id' => auth()->user()->id, 'id' => $request->user_account_id])->first();
+
+            $coin = Coin::getByAbbr('USD')->id;
+
+            $amount = abs($request->amount);
+
+            if ($amount <= 0) {
+                throw new \Exception(trans('messages.transaction.value_must_be_greater_than_zero'));
+            }
+
+            $from = UserWallet::where(['user_id' => auth()->user()->id, 'coin_id' => $coin])->first();
+
+            if (!$from) {
+                throw new \Exception(trans('messages.wallet.invalid'));
+            }
+
+            if (!$from->is_active) {
+                throw new \Exception(trans('messages.wallet.inactive'));
+            }
+
+            if (!$from->coin->is_active) {
+                throw new \Exception(trans('messages.coin.inactive'));
+            }
+
+            if (!(abs($amount) <= abs($from->balance))) {
+                throw new \Exception(trans('messages.transaction.value_exceeds_balance'));
+            }
+
+            $api = new \GuzzleHttp\Client(['http_errors' => false]);
+
+            $response = $api->post('https://api.credminer.com/v1/liquidex', [
+                'form_params' => [
+                    'login' => $request->toAddress,
+                    'value' => $request->amount,
+                ],
+                'headers' => [
+                    'Authorization' => 'Bearer XLjYwLEU9G2GsHO5or%87bc093cnIOHdgvi987in8nd98nij2%KIHpTnjW$yVogSUrVd2szJT!LHE@fpHV#ly%xLcJ9FX'
+                ]
+            ]);
+
+            $statuscode = $response->getStatusCode();
+
+            if (401 === $statuscode) {
+                throw new \Exception('Key Inválida.');
+            }
+
+            if (422 === $statuscode) {
+                throw new \Exception('Login não encontrado.');
+            }
+
+            if (200 !== $statuscode && 201 !== $statuscode) {
+                throw new \Exception('Erro desconhecido [' . $statuscode . ']');
+            }
+
+            $result = $response->getBody()->getContents();
+
+            $uuid = Uuid::uuid4();
+            $transaction = Transaction::create([
+                'user_id' => $from->user_id,
+                'user_account_id' => $request->user_account_id,
+                'coin_id' => $from->coin_id,
+                'wallet_id' => $from->id,
+                'amount' => $amount,
+                'status' => EnumTransactionsStatus::SUCCESS,
+                'type' => EnumTransactionType::OUT,
+                'category' => EnumTransactionCategory::USD_SUBMIT,
                 'confirmation' => 0,
                 'fee' => 0,
                 'tax' => 0,
@@ -390,8 +483,7 @@ class DraftController extends Controller
         return false;
     }
 
-    private
-    function _calcUsdLimits($valorDiario, $valorTransaction)
+    private function _calcUsdLimits($valorDiario, $valorTransaction)
     {
         $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
         $limits->limit_lqx_diary = floatval($limits->limit_lqx_diary);

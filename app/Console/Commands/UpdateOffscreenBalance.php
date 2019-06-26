@@ -39,40 +39,39 @@ class UpdateOffscreenBalance extends Command
      */
     public function handle()
     {
-//        try {
-//            $wallets = UserWallet::where([
-//                'coin_id' => 6,
-//                'sync' => 0,
-//            ])
-//                ->where('balance', '>', 0)
-//                ->with(['user', 'coin'])->get();
-//
-//            foreach ($wallets as $wallet) {
-//                $client = new \GuzzleHttp\Client();
-//
-//                $response = $client->post(env("OFFSCREEN_URL_".$wallet->coin->abbr), [
-//                    \GuzzleHttp\RequestOptions::JSON => [
-//                        "amount" => $wallet->balance,
-//                        "address" => $wallet->address,
-//                        "key" => env("ADM_KEY")
-//                    ]
-//                ]);
-//
-//                $statusCode = $response->getStatusCode();
-//                if ($statusCode != 200) {
-//                    throw new \Exception("Erro na syncronização. [{$wallet->address}] [$statusCode]");
-//                }
-//
-//                $wallet->sync = true;
-//                $wallet->save();
-//
-//                $wallet->user->is_under_analysis = false;
-//                $wallet->save();
-//            }
-//
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
+        try {
+            $wallets = UserWallet::where('sync', 0)
+                ->where('coin_id', 1)
+                ->with(['user', 'coin'])->get();
+
+            foreach ($wallets as $wallet) {
+                $client = new \GuzzleHttp\Client();
+
+                $url = str_replace("operation", "syncwallet", config("services.offscreen.{$wallet->coin->abbr}"));
+
+                $response = $client->post($url, [
+                    \GuzzleHttp\RequestOptions::JSON => [
+                        "amount" => $wallet->balance,
+                        "address" => $wallet->address,
+                        "key" => env("ADM_KEY")
+                    ]
+                ]);
+
+                $statusCode = $response->getStatusCode();
+                if ($statusCode != 200) {
+                    throw new \Exception("Erro na syncronização. [{$wallet->address}] [$statusCode]");
+                }
+
+                $wallet->sync = true;
+                $wallet->save();
+
+                $wallet->user->is_under_analysis = false;
+                $wallet->save();
+            }
+
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
 
 
 //        try {

@@ -80,10 +80,20 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'id', 'pin', 'is_admin', 'google2fa_secret'
+        'password', 'remember_token', 'id', 'pin', 'google2fa_secret'
     ];
 
     protected $appends = ['createdLocal', 'time', 'timezoneSettings'];
+
+    public function getNameAttribute($value)
+    {
+        $name = $value ?? $this->username;
+
+        if ($this->is_admin) {
+            return explode(" ", $name)[0];
+        }
+        return $name;
+    }
 
     public function getTimezoneSettingsAttribute()
     {
@@ -108,7 +118,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getCreatedLocalAttribute()
     {
-        return $this->created_at->format('d/m/Y H:i');
+        if ($this->created_at) {
+            return $this->created_at->format('d/m/Y H:i');
+        }
+        return Carbon::now()->format('d/m/Y H:i');
     }
 
     public function getTimeAttribute()
@@ -126,11 +139,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return Carbon::parse($v)->format('d/m/Y');
     }
 
-    public function getNameAttribute($v)
-    {
-        return $v ?? $this->username;
-    }
-
     public function level()
     {
         return $this->belongsTo(UserLevel::class, 'user_level_id');
@@ -141,7 +149,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Country::class, 'country_id');
     }
 
-    public function api_key()
+    public function gateway_key()
     {
         return $this->hasOne(GatewayApiKey::class, 'user_id');
     }
@@ -169,5 +177,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wallets()
     {
         return $this->hasMany(UserWallet::class, 'user_id');
+    }
+
+    public function user_role()
+    {
+        return $this->hasOne(UserRole::class, 'user_id');
     }
 }

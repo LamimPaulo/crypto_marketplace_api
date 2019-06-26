@@ -31,10 +31,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:profits')->monthlyOn(10, '00:30');
         $schedule->command('funds:expiration')->dailyAt('01:00');
 
+        $schedule->command('gateway:expirepayments')->everyMinute();
         $schedule->command('estimate:fee')->everyMinute();
         $schedule->command('get:btcquote')->everyFiveMinutes();
-        $schedule->command('trade:execute')->everyMinute()->withoutOverlapping();
-        $schedule->command('get:marketcapquotes')->everyTenMinutes()->withoutOverlapping();
+        $schedule->command('trade:execute')->everyMinute();
+        $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
@@ -54,7 +55,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

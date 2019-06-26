@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin\Operations;
 
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumTransactionType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
 use App\Mail\TransactionReject;
+use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
+use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\User;
 use Illuminate\Http\Request;
@@ -36,7 +39,7 @@ class TransactionsController extends Controller
                 },
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
-                ->orderBy('created_at')
+                ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
             return response($transactions, Response::HTTP_OK);
@@ -58,7 +61,7 @@ class TransactionsController extends Controller
                 'coin'])
                 ->where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('status', $request->status)
-                ->orderBy('created_at');
+                ->orderBy('created_at', 'DESC');
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -86,7 +89,7 @@ class TransactionsController extends Controller
                 ->where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('type', $request->type)
                 ->whereNotIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT, EnumTransactionsStatus::REVERSED])
-                ->orderBy('created_at');
+                ->orderBy('created_at', 'DESC');
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -187,6 +190,49 @@ class TransactionsController extends Controller
             return response([
                 'status' => 'error',
                 'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function balanceVerify($user_email)
+    {
+        try {
+            $user = User::where(['email' => $user_email])->first();
+
+            $transactions = Transaction::whereRaw(
+                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ")) 
+                OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
+                ->orderBy('updated_at', 'ASC')->orderBy('type', 'DESC')->get()->makeVisible('coin_id');
+
+            $coins = Coin::all();
+            $balances = [];
+
+            foreach ($coins as $c) {
+                $balances[$c->abbr] = [
+                    "balance" => 0,
+                    "balance_computed" => UserWallet::where([
+                        'user_id' => $user->id,
+                        'coin_id' => $c->id,
+                    ])->first()
+                ];
+            }
+
+            foreach ($transactions as $transaction) {
+                if ($transaction->type == EnumTransactionType::IN) {
+                    $balances[$transaction->coin->abbr]['balance'] += floatval($transaction->total);
+                } else {
+                    $balances[$transaction->coin->abbr]['balance'] -= floatval($transaction->total);
+                }
+                $transaction['balances'] = $balances;
+            }
+
+            return response([
+                'transactions' => $transactions,
+                'balances' => $balances,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }

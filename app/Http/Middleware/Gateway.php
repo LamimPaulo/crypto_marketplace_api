@@ -40,6 +40,7 @@ class Gateway
             }
 
             $request['user'] = $auth->user;
+            $request['gateway_api_key_id'] = $auth->id;
 
             return $next($request);
         } catch (\Exception $ex) {

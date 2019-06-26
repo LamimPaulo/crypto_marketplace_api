@@ -40,8 +40,7 @@ class DraftController extends Controller
                     return $account->with('bank');
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
-                ->where('status', EnumTransactionsStatus::PENDING)
-                ->orderBy('created_at');
+                ->where('status', EnumTransactionsStatus::PENDING);
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -49,7 +48,7 @@ class DraftController extends Controller
                 });
             }
 
-            return response($transactions->paginate(10), Response::HTTP_OK);
+            return response($transactions->orderBy('payment_at')->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
@@ -70,8 +69,7 @@ class DraftController extends Controller
                     return $account->with('bank');
                 }])
                 ->where('category', EnumTransactionCategory::WITHDRAWAL)
-                ->where('status', $request->status)
-                ->orderBy('created_at');
+                ->where('status', $request->status);
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -79,7 +77,7 @@ class DraftController extends Controller
                 });
             }
 
-            return response($transactions->paginate(10), Response::HTTP_OK);
+            return response($transactions->orderBy('payment_at')->paginate(10), Response::HTTP_OK);
 
         } catch (\Exception $e) {
             return response([
@@ -194,7 +192,10 @@ class DraftController extends Controller
 
             $transaction = Transaction::where('category', EnumTransactionCategory::WITHDRAWAL)
                 ->where('id', $request->draft)
-                ->where('status', EnumTransactionsStatus::PENDING)
+                ->whereNotIn('status', [
+                    EnumTransactionsStatus::REVERSED,
+                    EnumTransactionsStatus::SUCCESS
+                ])
                 ->firstOrFail();
 
             $transaction->status = EnumTransactionsStatus::REVERSED;
