@@ -195,12 +195,12 @@ Route::group(['namespace' => 'Admin'], function () {
     ], function () {
         //listagem de exchanges arbitrage
         Route::get('/list', 'MessageController@index');
-        Route::get('/notifications', 'MessageController@notificationsList');
+        Route::post('/readed', 'MessageController@readed');
         Route::get('/user/list', 'MessageController@userList');
         Route::get('/edit/{id}', 'MessageController@edit');
-        Route::post('/new', 'MessageController@store')->middleware('can_execute:messages');
-        Route::post('/update/{id}', 'MessageController@update')->middleware('can_execute:messages');
-        Route::delete('/delete/{id}', 'MessageController@delete')->middleware('can_execute:messages');
+        Route::post('/new', 'MessageController@store');
+        Route::post('/update/{id}', 'MessageController@update');
+        Route::delete('/delete/{id}', 'MessageController@delete');
     });
 
     Route::group([

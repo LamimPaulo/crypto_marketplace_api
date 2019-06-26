@@ -74,6 +74,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/hist', 'UserController@hist');
         Route::get('/dashboard', 'UserController@dashboard');
 
+
         Route::group(['prefix' => 'documents', 'as' => 'documents.'], function () {
             //gravar documento do usuario atual por tipo
             Route::post('/store', 'DocumentController@store');
@@ -95,6 +96,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         });
     });
 
+    //Notificações
+    Route::get('/messages/notifications', 'Admin\Messages\MessageController@notificationsList');
+    Route::get('/messages/general', 'Admin\Messages\MessageController@generalMessages');
+    Route::get('/messages/edit/{id}', 'Admin\Messages\MessageController@edit');
     //google 2fa
     Route::group(['prefix' => '2fa'], function () {
         Route::get('/qr-code', 'Google2faController@getQrCodeUrl');
