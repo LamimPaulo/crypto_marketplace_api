@@ -274,7 +274,7 @@ Route::group(['namespace' => 'Admin'], function () {
 
     Route::group([
         'prefix' => 'roles',
-        'middleware' => 'assign_permission'
+        'middleware' => 'can_access:assign_permission'
     ], function () {
         Route::get('/', 'PermissionsController@roles');
         Route::get('/enum_permissions', 'PermissionsController@enum_permissions');

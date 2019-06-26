@@ -118,7 +118,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //solicitar deposito
     Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
-    
+
     Route::middleware(['tokencheck', 'pincheck'])->group(function () {
         //solicitar saque
         Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
