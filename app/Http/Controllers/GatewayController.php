@@ -477,6 +477,11 @@ class GatewayController extends Controller
     {
         try {
             $payment = Gateway::where('address', $address_tx)->orWhere('tx', $address_tx)->first();
+
+            if (!$payment) {
+                throw new \Exception("Pagamento não encontrado!");
+            }
+
             return response([
                 'message' => 'success',
                 'payment' => $payment

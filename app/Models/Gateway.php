@@ -63,7 +63,7 @@ class Gateway extends Model
         'startTime'
     ];
 
-    protected $hidden = ['user_id', 'id', 'coin_id', 'fiat_coin_id', 'status', 'type'];
+    protected $hidden = ['user_id', 'id', 'coin_id', 'fiat_coin_id', 'type'];
 
     public function histStatus()
     {
