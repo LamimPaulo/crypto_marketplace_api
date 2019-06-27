@@ -3,11 +3,11 @@
 namespace App\Enum;
 
 abstract class EnumGatewayCategory {
-    const PAYMENT = 1;
-    const MINING = 2;
+    const POS = 1;
+    const CREDMINER = 2;
 
     const CATEGORY = [
-      self::PAYMENT => 'Pagamento',
-      self::MINING => 'Compra de Mineração',
+      self::POS => 'Pagamento POS',
+      self::CREDMINER => 'Pagamento Credminer'
     ];
 }

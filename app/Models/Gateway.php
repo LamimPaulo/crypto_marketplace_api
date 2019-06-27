@@ -53,7 +53,16 @@ class Gateway extends Model
         'time_limit'
     ];
 
-    protected $appends = ['fiatAmountLocal', 'timeLimitLocal', 'createdLocal', 'statusName', 'categoryName', 'endTime', 'startTime'];
+    protected $appends = [
+        'fiatAmountLocal',
+        'timeLimitLocal',
+        'createdLocal',
+        'statusName',
+        'categoryName',
+        'endTime',
+        'startTime'
+    ];
+
     protected $hidden = ['user_id', 'id', 'coin_id', 'fiat_coin_id', 'status', 'type'];
 
     public function histStatus()
@@ -88,11 +97,11 @@ class Gateway extends Model
 
     public function getFiatAmountLocalAttribute()
     {
-        if ($this->fiat_coin_id == 2) {
+        if ($this->fiat_coin_id == Coin::getByAbbr("BRL")->id) {
             return number_format($this->fiat_amount, 2, ',', '.');
         }
 
-        if ($this->fiat_coin_id == 3) {
+        if ($this->fiat_coin_id == Coin::getByAbbr("USD")->id) {
             return sprintf("%.2f", $this->fiat_amount);
         }
     }

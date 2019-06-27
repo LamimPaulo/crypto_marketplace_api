@@ -13,6 +13,7 @@ use App\Models\Coin;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
 use App\Models\GatewayStatus;
+use App\Models\SysConfig;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
@@ -21,6 +22,7 @@ use App\Services\TaxCoinService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -125,8 +127,8 @@ class GatewayController extends Controller
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
                 'fiat_amount' => $gateway->fiat_amount,
-                'fiat' => number_format($gateway->fiat_amount, 2, ',','.'),
-                'qr_code' => strtolower(Coin::getByAbbr($request->abbr)->name).':'.$gateway->address.'?amount='.$gateway->amount
+                'fiat' => number_format($gateway->fiat_amount, 2, ',', '.'),
+                'qr_code' => strtolower(Coin::getByAbbr($request->abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -152,10 +154,10 @@ class GatewayController extends Controller
         return Gateway::where('address', $address)->first();
     }
 
-    public function status($id)
+    public function status($payment)
     {
         try {
-            $gateway = Gateway::where('address', $id)->first();
+            $gateway = Gateway::where('address', $payment)->orWhere('tx', $payment)->first();
 
             if (!isset($gateway->status)) {
                 return response(['message' => trans('messages.gateway.payment_not_found')], Response::HTTP_NOT_FOUND);
@@ -164,15 +166,16 @@ class GatewayController extends Controller
             return response([
                 "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
                 "status" => $gateway->status,
-                "amount" => sprintf('%.8f', floatval($gateway->amount)),
                 "payment" => $gateway->address,
                 "tx" => $gateway->tx,
                 "created" => $gateway->created_at,
                 "confirmations" => $gateway->confirmations,
+                "amount" => sprintf('%.8f', floatval($gateway->amount)),
                 "coin" => $gateway->coin->abbr,
                 "coin_name" => $gateway->coin->name,
                 "fiat_amount" => $gateway->fiat_amount,
-                "fiat" => number_format($gateway->fiat_amount, 2, ',','.'),
+                "fiat" => number_format($gateway->fiat_amount, 2, ',', '.'),
+                "fiat_abbr" => $gateway->fiat_coin->abbr
             ]);
         } catch (\Exception $ex) {
             return response([
@@ -240,9 +243,10 @@ class GatewayController extends Controller
     public function showPayment($payment)
     {
         try {
-            $gateway = Gateway::where('tx', '=', $payment)
-                ->where('type', '=', EnumGatewayType::PAYMENT)
+            $gateway = Gateway::where('tx', $payment)
+                ->orWhere('address', $payment)
                 ->first();
+
 
             if (!is_null($gateway)) {
                 $total = ($gateway->amount + $gateway->taxas);
@@ -254,7 +258,8 @@ class GatewayController extends Controller
                     $histStatus[$key]->name = EnumGatewayStatus::SITUATION[$histStatus[$key]->status];
                 }
 
-                $created = Carbon::parse($gateway->created_at)->addMinutes(10);
+                //$created = Carbon::parse($gateway->created_at)->addMinutes(10);
+                $created = Carbon::parse($gateway->created_at);
                 $current = Carbon::now();
                 $diff = $current->diffInMinutes($created);
 
@@ -267,6 +272,15 @@ class GatewayController extends Controller
                         'hist_status' => $gateway->histStatus
                     ], Response::HTTP_OK);
                 }
+
+                return response([
+                    'eita' => '',
+                    'total' => $total,
+                    'address' => $gateway->address,
+                    'created' => $created->format('M d, Y H:i:s'),
+                    'expired' => $diff,
+                    'hist_status' => $gateway->histStatus
+                ], Response::HTTP_OK);
             }
             return response([
                 'message' => trans('messages.gateway.payment_not_found'),
@@ -363,7 +377,7 @@ class GatewayController extends Controller
                     'gateway_id' => $transaction->id
                 ]);
 
-                if ($data['status'] == EnumGatewayStatus::PAID) {
+                if ($data['status'] == EnumGatewayStatus::PAID AND $transaction->category == EnumGatewayCategory::POS) {
                     self::gatewayService()->{EnumGatewayPaymentCoin::TYPE[$transaction->user->gateway_key->payment_coin]}($transaction);
                 }
             }
@@ -373,6 +387,71 @@ class GatewayController extends Controller
         } catch (\Exception $ex) {
             DB::rollBack();
             return $ex->getMessage();
+        }
+    }
+
+    public function new(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required',
+            'abbr' => [
+                'required',
+                Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr])
+            ]
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $amount = floatval($request->amount);
+            $gateway_coin = "BTC";
+            $time = SysConfig::first()->time_gateway ?? 30;
+            $tx = Uuid::uuid4()->toString();
+
+            //criar address na moeda necessária
+            $quote = $this->conversorService::FIAT2CRYPTO_MAX($amount, $gateway_coin, $request->abbr);
+
+            $gateway = Gateway::create([
+                'gateway_api_key_id' => 0,
+                'coin_id' => Coin::getByAbbr($gateway_coin)->id,
+                'address' => $this->newAddress($request->abbr),
+                'amount' => $quote['amount'],
+                'value' => $quote['quote'],
+
+                'user_id' => '',
+                'fiat_coin_id' => Coin::getByAbbr($request->abbr)->id,
+                'fiat_amount' => $amount,
+                'tx' => $tx,
+                'status' => EnumGatewayStatus::NEWW,
+                'type' => EnumGatewayType::PAYMENT,
+                'tax' => 0,
+                'category' => EnumGatewayCategory::CREDMINER,
+                'time_limit' => Carbon::now()->addMinutes($time)
+            ]);
+
+            GatewayStatus::create([
+                'status' => $gateway->status,
+                'gateway_id' => $gateway->id
+            ]);
+
+            DB::commit();
+
+            return response([
+                'status' => $gateway->statusName,
+                'payment' => $gateway->address,
+                'coin' => $gateway->coin->abbr,
+                'coin_name' => $gateway->coin->name,
+                'amount' => $gateway->amount,
+                'fiat' => $request->abbr,
+                'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
+                'qr_code' => strtolower(Coin::getByAbbr($gateway_coin)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+            ], Response::HTTP_OK);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response([
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -389,6 +468,23 @@ class GatewayController extends Controller
 
         } catch (\Exception $ex) {
             return response([
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function showGatewayData($address_tx)
+    {
+        try {
+            $payment = Gateway::where('address', $address_tx)->orWhere('tx', $address_tx)->first();
+            return response([
+                'message' => 'success',
+                'payment' => $payment
+            ], Response::HTTP_OK);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response([
+                'status' => 'error',
                 'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }

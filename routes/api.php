@@ -278,8 +278,19 @@ Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
     });
 
 //gateway de saques credminer
-Route::group(['prefix' => 'credminer/payments', 'middleware' => 'credminer'],
+Route::group([
+    'prefix' => 'credminer/payments',
+    'middleware' => 'credminer'
+],
     function () {
         Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
         Route::post('/check-key', 'Credminer\PaymentController@checkKey');
+    });
+
+Route::group([
+    'prefix' => 'credminer/gateway'
+],
+    function () {
+        Route::post('/new', 'GatewayController@new')->middleware('credminer');
+        Route::get('/status/{tx}', 'GatewayController@showGatewayData');
     });

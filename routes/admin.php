@@ -248,6 +248,10 @@ Route::group(['namespace' => 'Admin'], function () {
 
     //gateway de pagamentos
     Route::group(['prefix' => 'gateway'], function () {
+        //listar pagamentos
+        Route::post('/', 'Operations\GatewayController@index');
+        Route::get('/status', 'Operations\GatewayController@status');
+
         //listar chave(s)
         Route::get('/get-key/{email}', 'GatewayApiKeyController@index');
         //gerar api key
