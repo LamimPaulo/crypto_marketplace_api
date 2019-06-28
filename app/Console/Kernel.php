@@ -34,18 +34,19 @@ class Kernel extends ConsoleKernel
         $schedule->command('gateway:expirepayments')->everyMinute();
         $schedule->command('estimate:fee')->everyMinute();
         $schedule->command('get:btcquote')->everyFiveMinutes();
-        $schedule->command('trade:execute')->everyMinute();
         $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('transactions:send')->everyMinute()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
         $schedule->command('masternode:update')->everyFifteenMinutes()->withoutOverlapping();
-        $schedule->command('update:corebalances')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('update:corebalances')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:general')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('dashboardup:withdrawals')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:deposits')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:nanotech')->everyMinute()->withoutOverlapping();
         $schedule->command('dashboardup:cryptooperations')->everyFiveMinutes()->withoutOverlapping();
+
+        $schedule->command('trade:execute')->everyMinute();
     }
 
     /**
