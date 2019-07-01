@@ -16,7 +16,11 @@ class MessageController extends Controller
     {
         try {
 
-            $messages = Messages::with(['user'])
+//            $messages = Messages::with(['user'])
+//                ->orderBy('created_at', 'DESC')
+//                ->paginate(10);
+
+            $messages = Messages::with(['user','statuses'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
