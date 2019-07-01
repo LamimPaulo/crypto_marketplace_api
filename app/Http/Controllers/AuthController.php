@@ -43,7 +43,7 @@ class AuthController extends Controller
 
             if ($user->is_under_analysis) {
                 Mail::to($user->email)->send(new UnderAnalysisMail($user));
-                throw new \Exception('Sua conta está temporariamente bloqueada, favor entrar em contato com o suporte!');
+                throw new \Exception('Uma tentativa de acesso em sua conta não foi autorizada, por Medida de segurança ela foi bloqueada, por favor acesse o <a href="https://www.facebook.com/liquidex/" target="_blank"> suporte aqui</a>, identifique-se e peça que seja desbloqueada.');
             }
 
             if (!isset($user->email_verified_at)) {
