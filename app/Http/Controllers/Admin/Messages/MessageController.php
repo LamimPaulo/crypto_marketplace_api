@@ -252,9 +252,6 @@ class MessageController extends Controller
                 ->where(['status' => 0])
                 ->count();
 
-
-
-
             return response($total, Response::HTTP_OK);
 
         } catch(\Exception $e) {
