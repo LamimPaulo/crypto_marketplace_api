@@ -164,6 +164,12 @@ class MessageController extends Controller
             $message = Messages::where('id', $request->id)->first();
             $message->delete($request->id);
 
+            // Apagando Status
+            $msg_status = MessageStatus::where('message_id', $request->id)->get();
+            foreach ($msg_status as $status) {
+                $status->delete($request->id);
+            }
+
             DB::commit();
             return response([
                 'status' => 'success',
@@ -238,9 +244,12 @@ class MessageController extends Controller
         try {
 
             $total = DB::table('message_statuses')
-                ->where('status', 0)
                 ->where('user_id', auth()->user()->id)
+                ->where(['status' => 0])
                 ->count();
+
+
+
 
             return response($total, Response::HTTP_OK);
 
