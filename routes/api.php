@@ -100,6 +100,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::get('/messages/notifications', 'Admin\Messages\MessageController@notificationsList');
     Route::get('/messages/general', 'Admin\Messages\MessageController@generalMessages');
     Route::get('/messages/edit/{id}', 'Admin\Messages\MessageController@edit');
+    Route::get('/messages/total', 'Admin\Messages\MessageController@totalMessages');
     //google 2fa
     Route::group(['prefix' => '2fa'], function () {
         Route::get('/qr-code', 'Google2faController@getQrCodeUrl');

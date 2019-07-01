@@ -30,18 +30,23 @@ class MessageController extends Controller
         }
     }
 
+//    Lista de Notificações no front
     public function notificationsList()
     {
         try {
 
             $messages = Messages::with([
-                'statuses' => function($statuses) {return $statuses->where('user_id', auth()->user()->id);}
-            ])  ->orderBy('created_at', 'DESC')
+                'user',
+                'statuses' => function($statuses) {
+                    return $statuses->where('user_id', auth()->user()->id);
+                }
+            ])  ->where('user_id', auth()->user()->id)
+                ->orWhere('type', 0)
+                ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
-
-
             return response($messages, Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return response([
                 'status' => 'error',
@@ -128,7 +133,6 @@ class MessageController extends Controller
         }
     }
 
-
     public function update(Request $request)
     {
         try {
@@ -152,7 +156,6 @@ class MessageController extends Controller
         }
     }
 
-
     public function delete(Request $request)
     {
         try {
@@ -160,6 +163,12 @@ class MessageController extends Controller
 
             $message = Messages::where('id', $request->id)->first();
             $message->delete($request->id);
+
+            // Apagando Status
+            $msg_status = MessageStatus::where('message_id', $request->id)->get();
+            foreach ($msg_status as $status) {
+                $status->delete($request->id);
+            }
 
             DB::commit();
             return response([
@@ -199,9 +208,6 @@ class MessageController extends Controller
 
             $message = Messages::where('id', $request->id)->first();
 
-//            echo $request->status;
-//            dd($request->status);
-
             $message->update($request->all());
 
             DB::commit();
@@ -217,5 +223,41 @@ class MessageController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
+    }
+
+    public function generalMessages()
+    {
+        try {
+            $messages = Messages::select(['subject','content'])->with([
+                'statuses' => function($statuses) {return $statuses->where('user_id', auth()->user()->id);}
+            ])->where('type', 0)->get();
+            return response($messages, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'messages' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function totalMessages(){
+        try {
+
+            $total = DB::table('message_statuses')
+                ->where('user_id', auth()->user()->id)
+                ->where(['status' => 0])
+                ->count();
+
+
+
+
+            return response($total, Response::HTTP_OK);
+
+        } catch(\Exception $e) {
+            return response([
+                'status' => 'error',
+                'messages' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }

@@ -34,7 +34,7 @@ class Product extends Model
 
     public function level()
     {
-        return $this->hasOne(UserLevel::class, 'product_id');
+        return $this->belongsTo(UserLevel::class, 'product_id');
     }
 
     public function getBrlValueAttribute()

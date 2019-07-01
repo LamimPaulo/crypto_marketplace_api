@@ -26,4 +26,8 @@ class Messages extends Model
     public function statuses() {
         return $this->hasMany(MessageStatus::class, 'message_id');
     }
+
+    public function message() {
+        return $this->hasMany(Messages::class, 'user_id');
+    }
 }
