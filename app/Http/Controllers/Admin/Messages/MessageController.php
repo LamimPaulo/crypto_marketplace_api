@@ -16,7 +16,11 @@ class MessageController extends Controller
     {
         try {
 
-            $messages = Messages::with(['user'])
+//            $messages = Messages::with(['user'])
+//                ->orderBy('created_at', 'DESC')
+//                ->paginate(10);
+
+            $messages = Messages::with(['user','statuses'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
@@ -247,9 +251,6 @@ class MessageController extends Controller
                 ->where('user_id', auth()->user()->id)
                 ->where(['status' => 0])
                 ->count();
-
-
-
 
             return response($total, Response::HTTP_OK);
 

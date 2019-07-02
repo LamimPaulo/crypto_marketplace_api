@@ -8,6 +8,7 @@ use App\Models\GatewayApiKey;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
 use App\Models\SysConfig;
+use App\Models\System\ActivityLogger;
 use App\Models\User\Document;
 use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
@@ -177,6 +178,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function wallets()
     {
         return $this->hasMany(UserWallet::class, 'user_id');
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(ActivityLogger::class, 'subject_id');
+    }
+
+    public function causer()
+    {
+        return $this->hasMany(ActivityLogger::class, 'causer_id');
     }
 
     public function user_role()

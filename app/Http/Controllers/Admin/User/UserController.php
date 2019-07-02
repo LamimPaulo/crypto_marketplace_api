@@ -6,8 +6,9 @@ use App\Enum\EnumNanotechOperationType;
 use App\Enum\EnumStatusDocument;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
-use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
+use App\Helpers\ActivityLogger;
+use App\Models\System\ActivityLogger as UserLogger;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyMail;
 use App\Models\Funds\FundBalances;
@@ -420,6 +421,26 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function userActivity($email)
+    {
+        try {
+            $user = User::where('email', $email)->first();
+
+            $users = UserLogger::with(['causer', 'user'])
+                ->where('subject_id', $user->id)
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
+
+
+            return response($users
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
             ], Response::HTTP_BAD_REQUEST);

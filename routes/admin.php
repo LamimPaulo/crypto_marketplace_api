@@ -98,6 +98,8 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/search', 'UserController@search');
         //listagem de usuários que nao completaram o cadastro
         Route::get('/incomplete', 'UserController@incomplete');
+        //listagem de ações(logs) dos usuários
+        Route::get('/logs/{email}', 'UserController@userActivity');
         //verificação de documentos
         Route::post('/documents', 'UserController@documents')->middleware('can_access:user_documents');
         //remove 2FA
