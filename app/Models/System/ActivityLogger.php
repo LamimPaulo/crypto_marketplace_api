@@ -43,5 +43,13 @@ class ActivityLogger extends Model
         return Carbon::parse($this->created_at)->diffForHumans();
     }
 
+    public function causer() {
+        return $this->belongsTo(User::class, 'causer_id');
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'subject_id');
+    }
+
 
 }
