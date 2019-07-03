@@ -176,8 +176,15 @@ class TransactionsController extends Controller
 
             User::findOrFail($transaction->user_id);
 
-            $TransactionsSend = new \App\Console\Commands\TransactionsSend();
-            $TransactionsSend->connectionSendBTC($transaction->id);
+//            $TransactionsSend = new \App\Console\Commands\TransactionsSend();
+//            $TransactionsSend->connectionSendBTC($transaction->id);
+            $transaction->status = EnumTransactionsStatus::AUTHORIZED;
+            $transaction->save();
+
+            TransactionStatus::create([
+                'status' => $transaction->status,
+                'transaction_id' => $transaction->id
+            ]);
 
             ActivityLogger::log(trans('messages.transaction.sent_blockchain'), $transaction->user_id);
 

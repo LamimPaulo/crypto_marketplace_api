@@ -233,6 +233,16 @@ class Transaction extends Model
             ->get();
     }
 
+    public static function listAuthorized()
+    {
+        return self::join('user_wallets', 'user_wallets.id', '=', 'transactions.wallet_id')
+            ->whereIn('transactions.status', [EnumTransactionsStatus::AUTHORIZED])
+            ->where('transactions.type', '=', EnumTransactionType::OUT)
+            ->where('transactions.category', '=', EnumTransactionCategory::TRANSACTION)
+            ->select(DB::raw('transactions.*, user_wallets.address'))
+            ->get();
+    }
+
     public static function listUnique($id)
     {
         return self::join('user_wallets', 'user_wallets.id', '=', 'transactions.wallet_id')

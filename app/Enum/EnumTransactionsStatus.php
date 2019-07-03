@@ -11,6 +11,7 @@ abstract class EnumTransactionsStatus {
     const ABOVELIMIT = 6;
     const ERROR = 7;
     const REVERSED = 8;
+    const AUTHORIZED = 9;
 
 
     const STATUS = [
@@ -22,6 +23,7 @@ abstract class EnumTransactionsStatus {
         self::ABOVELIMIT => 'Acima do Limite',
         self::ERROR => 'Erro',
         self::REVERSED => 'Estornada',
+        self::AUTHORIZED => 'Autorizada',
     ];
 
     const STATUS_CLIENT = [
@@ -33,6 +35,7 @@ abstract class EnumTransactionsStatus {
         self::ABOVELIMIT => 'Pendente',
         self::ERROR => 'Pendente',
         self::REVERSED => 'Estornada',
+        self::AUTHORIZED => 'Autorizada',
     ];
 
     const STATUS_DRAFT = [
@@ -51,5 +54,6 @@ abstract class EnumTransactionsStatus {
         self::ABOVELIMIT => 'warning',
         self::ERROR => 'danger',
         self::REVERSED => 'primary',
+        self::AUTHORIZED => 'success',
     ];
 }
