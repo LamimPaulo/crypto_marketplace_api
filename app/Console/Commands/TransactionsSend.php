@@ -56,6 +56,10 @@ class TransactionsSend extends Command
             $this->BTC($pending, $wallet);
         }
 
+        $authorizedTransaction = Transaction::listAuthorized();
+        foreach ($authorizedTransaction as $authorized) {
+            $this->sendBTC($authorized);
+        }
     }
 
     /**
