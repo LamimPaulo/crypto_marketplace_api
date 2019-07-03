@@ -38,6 +38,13 @@ class UserTicketController extends Controller
     public function store(UserTicketRequest $request)
     {
         try {
+            $tickets = UserTicket::where('user_id', auth()->user()->id)
+            ->whereIn('status', [EnumUserTicketsStatus::PENDING, EnumUserTicketsStatus::WAIT_USER])->first();
+
+            if($tickets) {
+                throw new \Exception('Não é possivel abrir um novo ticket enquanto há um pendente');
+            }
+
             DB::beginTransaction();
 
             $request['user_id'] = auth()->user()->id;
