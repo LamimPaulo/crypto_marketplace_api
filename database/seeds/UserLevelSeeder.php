@@ -24,15 +24,17 @@ class UserLevelSeeder extends Seeder
                 'name' => $obj->name,
                 'limit_btc_diary' => $obj->limit_btc_diary,
                 'limit_brl_diary' => $obj->limit_brl_diary,
-                'limit_lqx_diary' => $obj->limit_lqx_diary,
                 'limit_transaction_auto' => $obj->limit_transaction_auto,
                 'brokerage_fee' => $obj->brokerage_fee,
                 'is_referrable' => $obj->is_referrable,
                 'referral_profit' => $obj->referral_profit,
-                'is_gateway_elegible' => $obj->is_gateway_elegible,
-                'gateway_tax' => $obj->gateway_tax,
-                'is_card_elegible' => $obj->is_card_elegible,
                 'is_active' => $obj->is_active,
+                'is_allowed_sell_for_fiat' => $obj->is_allowed_sell_for_fiat,
+                'is_allowed_buy_with_fiat' => $obj->is_allowed_buy_with_fiat,
+                'nanotech_lqx_fee' => $obj->nanotech_lqx_fee,
+                'nanotech_btc_fee' => $obj->nanotech_btc_fee,
+                'masternode_fee' => $obj->masternode_fee,
+                'type' => $obj->type
             ]);
         }
     }

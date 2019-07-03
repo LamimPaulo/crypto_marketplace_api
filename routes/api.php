@@ -37,6 +37,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/update-pin', 'UserController@updatePin')->middleware('tokencheck');
         //preencher dados pelo cpf informado
         Route::get('/cpf/{cpf}', 'UserController@cpf');
+        //get address zip
+        Route::get('/address/get/{zip}', 'UserAddressController@show');
+        //save address
+        Route::post('/address/store', 'UserAddressController@store');
         //gerar codigo para validar telefone
         Route::post('/verify-phone', 'UserController@sendPhoneCode');
         //validar telefone
