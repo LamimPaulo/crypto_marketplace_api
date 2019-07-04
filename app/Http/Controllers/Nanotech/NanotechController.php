@@ -97,7 +97,10 @@ class NanotechController extends Controller
                 ->where('type_id', $investmentType->id)
                 ->sum('percent');
 
-            $diary = NanotechProfitPercent::where('day', date('Y-m-d'))->first();
+            $diary = NanotechProfitPercent::where([
+                'day' => date('Y-m-d'),
+                'type_id' => $investmentType->id
+            ])->first();
 
             return [
                 'base' => sprintf("%.2f", $investmentType->montly_return - 0),
@@ -170,7 +173,7 @@ class NanotechController extends Controller
 
     public function chart($type)
     {
-        $profits = NanotechProfitPercent::select("percent","day")
+        $profits = NanotechProfitPercent::select("percent", "day")
             ->where('day', '>', Carbon::now()->subMonths(1))
             ->where('day', '<', Carbon::now())
             ->where('type_id', $type)
@@ -179,10 +182,10 @@ class NanotechController extends Controller
 
         $chart = [];
 
-        foreach($profits as $profit){
+        foreach ($profits as $profit) {
             $chart[] = [
-              $profit->day,
-              $profit->percent
+                $profit->day,
+                $profit->percent
             ];
         }
         return $chart;
