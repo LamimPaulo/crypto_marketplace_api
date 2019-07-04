@@ -538,6 +538,10 @@ class OrderController extends Controller
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
+        if ($request->base === 'LQX') {
+            return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
+        }
+
         $amount = (float)$request->amount;
         $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
         $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
