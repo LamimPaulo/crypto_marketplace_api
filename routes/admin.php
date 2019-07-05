@@ -130,6 +130,7 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::get('/analysis', 'UserAnalysisController@list');
             Route::post('/analysis/search', 'UserAnalysisController@search');
             Route::get('/analysis/release/{email}', 'UserAnalysisController@release');
+            Route::get('/analysis/block/{email}', 'UserAnalysisController@block');
             Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
             Route::post('/analysis/transaction/delete', 'UserAnalysisController@transactionDelete');
             Route::post('/analysis/balance/update', 'UserAnalysisController@balanceUpdate');

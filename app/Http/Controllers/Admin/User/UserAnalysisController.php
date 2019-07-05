@@ -70,6 +70,23 @@ class UserAnalysisController extends Controller
         }
     }
 
+    public function block($email)
+    {
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+            $user->is_under_analysis = true;
+            $user->save();
+
+            return response([
+                'message' => "Usuário bloqueado com sucesso!"
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function transactionUpdate(Request $request)
     {
         $request->validate([

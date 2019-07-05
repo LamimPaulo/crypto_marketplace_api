@@ -91,7 +91,7 @@ class ProductController extends Controller
     {
         try {
             throw new \Exception("Compra de Produtos com LQX está indisponível no momento.");
-            
+
             $level = UserLevel::with('product')->find($request->level_id);
             $coin = Coin::getByAbbr("LQX");
             $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();

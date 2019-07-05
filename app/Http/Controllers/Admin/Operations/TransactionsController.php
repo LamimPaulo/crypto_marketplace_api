@@ -69,6 +69,11 @@ class TransactionsController extends Controller
                 });
             }
 
+            if (!empty($request->tx)) {
+                $transactions->where('tx', 'LIKE', "%{$request->tx}%")
+                             ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
+            }
+
             return response($transactions->paginate(10), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
@@ -95,6 +100,11 @@ class TransactionsController extends Controller
                 $transactions->whereHas('user', function ($user) use ($request) {
                     return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
                 });
+            }
+
+            if (!empty($request->tx)) {
+                $transactions->where('tx', 'LIKE', "%{$request->tx}%")
+                             ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
             }
 
             return response($transactions->paginate(10), Response::HTTP_OK);
