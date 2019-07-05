@@ -145,6 +145,18 @@ class UserController extends Controller
             $array = [];
 
             foreach ($nanotech as $n) {
+                $from_balance = NanotechOperation::whereIn('type', EnumNanotechOperationType::IN)
+                    ->where('user_id', $user_id)
+                    ->where('investment_id', $n->id)
+                    ->where('brokerage_fee', '>', 0)
+                    ->sum('amount');
+
+                $from_brokerage = NanotechOperation::where('type', EnumNanotechOperationType::IN)
+                    ->where('user_id', $user_id)
+                    ->where('investment_id', $n->id)
+                    ->where('brokerage_fee', '>', 0)
+                    ->sum('brokerage_fee');
+
                 $array[] = [
                     'coin' => $n->coin->abbr,
                     'name' => $n->type->type,
@@ -171,6 +183,7 @@ class UserController extends Controller
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount'),
+                    'investment_from_balance' => $from_balance + $from_brokerage,
                     'investment_withdrawal' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::WITHDRAWAL])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
