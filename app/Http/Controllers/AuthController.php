@@ -46,6 +46,10 @@ class AuthController extends Controller
                 throw new \Exception('Uma tentativa de acesso em sua conta não foi autorizada, por Medida de segurança ela foi bloqueada, por favor acesse o <a href="https://www.facebook.com/liquidex/" target="_blank"> suporte aqui</a>, identifique-se e peça que seja desbloqueada.');
             }
 
+            if ($user->is_canceled) {
+                throw new \Exception('Conta cancelada. Não é possível acessar a plataforma.');
+            }
+
             if (!isset($user->email_verified_at)) {
                 Localization::setLocale($user);
                 Mail::to($user->email)->send(new VerifyMail($user));

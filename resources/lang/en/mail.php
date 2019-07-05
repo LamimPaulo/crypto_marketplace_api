@@ -69,6 +69,10 @@ return [
     'hello' => 'Hello',
     'auto_message' => 'This is an automated message, please do not reply.',
     'rights' => 'All Rights Reserved.',
-
+    'cancel_account' => [
+        'subject' => 'Account Cancellation Request.',
+        'main_message' => 'Your account has been successfully canceled. You do not need to reply to this message.',
+        'message' => 'Cancellation was effected by your pin confirmation and security token on the date of receipt of this message.'
+    ]
 
 ];

@@ -73,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'address',
         'number',
         'complement',
+        'is_canceled'
     ];
 
     /**

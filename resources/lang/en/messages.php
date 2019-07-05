@@ -29,6 +29,7 @@ return [
         'token_email_invalid' => 'Token or incorrect mail.',
         'unauthorized_ip' => 'Unauthorized IP [:address].',
         'you_could_not_updated_your_id' => 'You can not update your ID again.',
+        'is_canceled' => 'Account canceled.',
     ],
     'account' => [
         'updated' => 'Account updated successfully.',

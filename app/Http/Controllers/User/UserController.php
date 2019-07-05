@@ -11,6 +11,7 @@ use App\Http\Requests\UserPasswordRequest;
 use App\Http\Requests\UserPhoneRequest;
 use App\Http\Requests\UserPinRequest;
 use App\Http\Requests\UserRequest;
+use App\Mail\UserCancelAccount;
 use App\Models\Country;
 use App\Models\Funds\FundBalances;
 use App\Models\Nanotech\Nanotech;
@@ -20,6 +21,7 @@ use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
@@ -277,6 +279,32 @@ class UserController extends Controller
 
             return response([
                 'message' => trans('messages.auth.telephone_verified')
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function cancel(Request $request)
+    {
+        try {
+            $user = User::findOrFail(auth()->user()->id);
+            $user->is_canceled = true;
+            $user->save();
+
+            Mail::to($user->email)->send(new UserCancelAccount($user));
+
+            ActivityLogger::log(trans('messages.auth.is_canceled'), auth()->user()->id, User::class);
+
+            $user->tokens()->each(function ($token) {
+                $token->delete();
+            });
+
+            return response([
+                'message' => trans('messages.general.success')
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {

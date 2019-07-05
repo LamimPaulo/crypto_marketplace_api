@@ -69,6 +69,9 @@ return [
     'hello' => 'Olá',
     'auto_message' => 'Está é uma mensagem automática, por favor não responda.',
     'rights' => 'Direitos Reservados.',
-
-
+    'cancel_account' => [
+        'subject' => 'Solicitação de Cancelamento da Conta.',
+        'main_message' => 'Sua conta foi cancelada com sucesso. Não é necessário responder esta mensagem.',
+        'message' => 'O cancelamento foi efetuado mediante sua confirmação por pin e token de segurança na data de recebimento desta mensagem.'
+    ]
 ];

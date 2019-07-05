@@ -29,6 +29,7 @@ return [
         'token_email_invalid' => 'Token ou Email incorreto.',
         'unauthorized_ip' => 'IP não liberado.',
         'you_could_not_updated_your_id' => 'Você não pode atualizar seu CPF novamente.',
+        'is_canceled' => 'Conta Cancelada.',
     ],
     'account' => [
         'created' => 'Conta criada com sucesso.',
