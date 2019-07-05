@@ -145,7 +145,7 @@ class UserController extends Controller
             $array = [];
 
             foreach ($nanotech as $n) {
-                $from_balance = NanotechOperation::whereIn('type', EnumNanotechOperationType::IN)
+                $from_balance = NanotechOperation::where('type', EnumNanotechOperationType::IN)
                     ->where('user_id', $user_id)
                     ->where('investment_id', $n->id)
                     ->where('brokerage_fee', '>', 0)
