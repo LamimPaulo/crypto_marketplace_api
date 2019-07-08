@@ -23,6 +23,7 @@ class UserDocumentsController extends Controller
                         ->whereHas('documents', function ($documents) {
                             return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
                         })->orderBy('created_at')->paginate(10);
+
             return response($users, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([

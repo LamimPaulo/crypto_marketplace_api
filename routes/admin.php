@@ -17,6 +17,9 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::get('/user', 'User\UserController@index');
     //dados dashboard
     Route::get('/dashboard', 'DashboardController@index');
+    Route::get('/dashboard/coins', 'DashboardController@coins');
+    Route::get('/dashboard/fiat/{abbr}', 'DashboardController@fiat');
+    Route::get('/dashboard/crypto/{abbr}', 'DashboardController@crypto');
 
     Route::group(['namespace' => 'Operations'], function () {
         //depositos
