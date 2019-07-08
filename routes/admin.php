@@ -19,7 +19,16 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::get('/dashboard', 'DashboardController@index');
     Route::get('/dashboard/coins', 'DashboardController@coins');
     Route::get('/dashboard/fiat/{abbr}', 'DashboardController@fiat');
+
     Route::get('/dashboard/crypto/{abbr}', 'DashboardController@crypto');
+    Route::get('/dashboard/crypto_balance/{abbr}', 'DashboardController@crypto_balance');
+    Route::get('/dashboard/crypto_above_limit/{abbr}', 'DashboardController@crypto_above_limit');
+    Route::get('/dashboard/crypto_above_internal/{abbr}', 'DashboardController@crypto_above_internal');
+    Route::get('/dashboard/crypto_in/{abbr}', 'DashboardController@crypto_in');
+    Route::get('/dashboard/crypto_out/{abbr}', 'DashboardController@crypto_out');
+    Route::get('/dashboard/crypto_out_internal/{abbr}', 'DashboardController@crypto_out_internal');
+    Route::get('/dashboard/crypto_buy/{abbr}', 'DashboardController@crypto_buy');
+    Route::get('/dashboard/crypto_sell/{abbr}', 'DashboardController@crypto_sell');
 
     Route::group(['namespace' => 'Operations'], function () {
         //depositos

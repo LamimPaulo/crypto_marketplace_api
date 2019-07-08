@@ -161,6 +161,197 @@ class DashboardController extends Controller
         }
     }
 
+    public function crypto_balance($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+
+            return [
+                'balance' => sprintf("%.8f", UserWallet::where('coin_id', $coin->id)->sum('balance')),
+                'core_balance' => $coin->core_balance,
+                'core_status' => $coin->core_status,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_above_limit($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+            $transactions_out = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'status' => EnumTransactionsStatus::ABOVELIMIT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $above_limit = sprintf("%.8f", $transactions_out->count());
+            $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
+                + $transactions_out->sum('tax')
+                + $transactions_out->sum('fee'));
+
+            return [
+                'above_limit' => $above_limit,
+                'above_limit_amount' => $above_limit_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_above_internal($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+            $transactions_out = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'status' => EnumTransactionsStatus::ABOVELIMIT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $above_limit = sprintf("%.8f", $transactions_out->count());
+            $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
+                + $transactions_out->sum('tax')
+                + $transactions_out->sum('fee'));
+
+            return [
+                'above_internal' => $above_limit,
+                'above_internal_amount' => $above_limit_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_in($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+            $transactions_in = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::IN,
+                'coin_id' => $coin->id
+            ])->whereNull('sender_user_id');
+
+            $in = sprintf("%.8f", $transactions_in->count());
+            $in_amount = sprintf("%.8f", $transactions_in->sum('amount')
+                + $transactions_in->sum('tax')
+                + $transactions_in->sum('fee'));
+
+            return [
+                'in' => $in,
+                'in_amount' => $in_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_buy($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+
+            $buy_orders = Transaction::where([
+                'category' => EnumTransactionCategory::CONVERSION,
+                'type' => EnumTransactionType::IN,
+                'coin_id' => $coin->id
+            ]);
+
+            $buy = sprintf("%.8f", $buy_orders->count());
+            $buy_amount = sprintf("%.8f", $buy_orders->sum('amount'));
+
+            return [
+                'buy' => $buy,
+                'buy_amount' => $buy_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_sell($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+
+            $sell_orders = Transaction::where([
+                'category' => EnumTransactionCategory::CONVERSION,
+                'type' => EnumTransactionType::OUT,
+                'coin_id' => $coin->id
+            ]);
+
+            $sell = sprintf("%.8f", $sell_orders->count());
+            $sell_amount = sprintf("%.8f", $sell_orders->sum('amount'));
+
+            return [
+                'sell' => $sell,
+                'sell_amount' => $sell_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_out($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+            $transactions_out = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $out = sprintf("%.8f", $transactions_out->count());
+            $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
+                + $transactions_out->sum('tax')
+                + $transactions_out->sum('fee'));
+
+            return [
+                'out' => $out,
+                'out_amount' => $out_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function crypto_out_internal($abbr)
+    {
+        try {
+            $coin = Coin::getByAbbr($abbr);
+            $transactions_out = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'type' => EnumTransactionType::OUT,
+                'coin_id' => $coin->id
+            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+
+            $out = sprintf("%.8f", $transactions_out->count());
+            $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
+                + $transactions_out->sum('tax')
+                + $transactions_out->sum('fee'));
+
+            return [
+                'out_internal' => $out,
+                'out_internal_amount' => $out_amount,
+            ];
+
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function crypto($abbr)
     {
         try {
@@ -173,23 +364,39 @@ class DashboardController extends Controller
             $query_buy_orders = clone $query;
             $query_sell_orders = clone $query;
 
+            //TRANSACTIONS IN
             $transactions_in = $query_transactions_in->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::IN,
 
             ])->whereNull('sender_user_id');
 
+            return $transactions_in;
+
+            $in = $transactions_in->count();
+            $in_amount = $transactions_in->sum('amount') + $transactions_in->sum('tax') + $transactions_in->sum('fee');
+
+            //TRANSACTIONS OUT
             $transactions_out = $query_transactions_out->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
 
             ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
+            $out = $transactions_out->count();
+            $out_amount = $transactions_out->sum('amount') + $transactions_out->sum('tax') + $transactions_out->sum('fee');
+
+            //TRANSACTIONS OUT INTERNAL
             $transactions_out_internal = $query_transactions_out_internal->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT
             ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
+            $out_internal = $transactions_out_internal->count();
+            $out_amount_internal = $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee');
+
+
+            //ORDERs
             $buy_orders = $query_buy_orders->where([
                 'category' => EnumTransactionCategory::CONVERSION,
                 'type' => EnumTransactionType::IN
@@ -200,35 +407,43 @@ class DashboardController extends Controller
                 'type' => EnumTransactionType::OUT
             ]);
 
+            $buy = $buy_orders->count();
+            $buy_amount = $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee');
+            $sell = $sell_orders->count();
+            $sell_amount = $sell_orders->sum('amount') + $sell_orders->sum('tax') + $sell_orders->sum('fee');
+
             return [
                 'coin' => $coin->abbr,
                 'balance' => UserWallet::where('coin_id', $coin->id)->sum('balance'),
-                'buy' => $buy_orders->count(),
-                'buy_amount' => $buy_orders->sum('amount') + $buy_orders->sum('tax') + $buy_orders->sum('fee'),
-                'sell' => $sell_orders->count(),
-                'sell_amount' => $sell_orders->sum('amount') + $sell_orders->sum('tax') + $sell_orders->sum('fee'),
-                'in' => $transactions_in->count(),
-                'in_amount' => $transactions_in->sum('amount') + $transactions_in->sum('tax') + $transactions_in->sum('fee'),
-                'out' => $transactions_out->count(),
-                'out_amount' => $transactions_out->sum('amount') + $transactions_out->sum('tax') + $transactions_out->sum('fee'),
-                'above_limit' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
-                'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+                'in' => $in,
+                'in_amount' => $in_amount,
+                'out' => $out,
+                'out_amount' => $out_amount,
+                'out_internal' => $out_internal,
+                'out_amount_internal' => $out_amount_internal,
 
-                'out_internal' => $transactions_out_internal->count(),
-                'out_amount_internal' => $transactions_out_internal->sum('amount') + $transactions_out_internal->sum('tax') + $transactions_out_internal->sum('fee'),
-                'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
-                'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
-                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
-                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+                'buy' => $buy,
+                'buy_amount' => $buy_amount,
+                'sell' => $sell,
+                'sell_amount' => $sell_amount,
+
+//                'above_limit' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
+//                'above_limit_amount' => $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
+//                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+//                    + $transactions_out->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
+//
+//
+//                'above_limit_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->count(),
+//                'above_limit_amount_internal' => $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('amount')
+//                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('tax')
+//                    + $transactions_out_internal->where('status', EnumTransactionsStatus::ABOVELIMIT)->sum('fee'),
 
                 'core_balance' => $coin->core_balance,
                 'core_status' => $coin->core_status,
             ];
 
         } catch (\Exception $e) {
-            return response(['message' => $e->getLine()], Response::HTTP_BAD_REQUEST);
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 }
