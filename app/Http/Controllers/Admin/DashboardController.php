@@ -166,34 +166,38 @@ class DashboardController extends Controller
         try {
             $coin = Coin::getByAbbr($abbr);
 
-            $transactions_in = Transaction::where([
+            $query = Transaction::where('coin_id', $coin->id);
+            $query_transactions_in = clone $query;
+            $query_transactions_out = clone $query;
+            $query_transactions_out_internal = clone $query;
+            $query_buy_orders = clone $query;
+            $query_sell_orders = clone $query;
+
+            $transactions_in = $query_transactions_in->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::IN,
-                'coin_id' => $coin->id
+
             ])->whereNull('sender_user_id');
 
-            $transactions_out = Transaction::where([
+            $transactions_out = $query_transactions_out->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
+
             ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $transactions_out_internal = Transaction::where([
+            $transactions_out_internal = $query_transactions_out_internal->where([
                 'category' => EnumTransactionCategory::TRANSACTION,
-                'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
+                'type' => EnumTransactionType::OUT
             ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $buy_orders = Transaction::where([
+            $buy_orders = $query_buy_orders->where([
                 'category' => EnumTransactionCategory::CONVERSION,
-                'type' => EnumTransactionType::IN,
-                'coin_id' => $coin->id
+                'type' => EnumTransactionType::IN
             ]);
 
-            $sell_orders = Transaction::where([
+            $sell_orders = $query_sell_orders->where([
                 'category' => EnumTransactionCategory::CONVERSION,
-                'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
+                'type' => EnumTransactionType::OUT
             ]);
 
             return [
