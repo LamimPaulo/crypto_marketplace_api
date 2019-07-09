@@ -95,7 +95,8 @@ class Transaction extends Model
         'file',
         'fileExt',
         'totalRounded',
-        'total'
+        'total',
+        'isInternal',
     ];
 
     public function getCategoryNameAttribute()
@@ -292,6 +293,15 @@ class Transaction extends Model
     public function getTimestampAttribute()
     {
         return Carbon::now()->format('H:i:s');
+    }
+
+    public function getIsInternalAttribute()
+    {
+        $exists = UserWallet::where('address', $this->toAddress)->exists();
+        if ($exists) {
+            return 1;
+        }
+        return 0;
     }
 
     /*
