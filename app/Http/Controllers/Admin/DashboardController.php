@@ -188,7 +188,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $above_limit = sprintf("%.8f", $transactions_out->count());
+            $above_limit = $transactions_out->count();
             $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
                 + $transactions_out->sum('tax')
                 + $transactions_out->sum('fee'));
@@ -214,7 +214,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $above_limit = sprintf("%.8f", $transactions_out->count());
+            $above_limit = $transactions_out->count();
             $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
                 + $transactions_out->sum('tax')
                 + $transactions_out->sum('fee'));
@@ -239,7 +239,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ])->whereNull('sender_user_id');
 
-            $in = sprintf("%.8f", $transactions_in->count());
+            $in = $transactions_in->count();
             $in_amount = sprintf("%.8f", $transactions_in->sum('amount')
                 + $transactions_in->sum('tax')
                 + $transactions_in->sum('fee'));
@@ -265,7 +265,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ]);
 
-            $buy = sprintf("%.8f", $buy_orders->count());
+            $buy = $buy_orders->count();
             $buy_amount = sprintf("%.8f", $buy_orders->sum('amount'));
 
             return [
@@ -289,7 +289,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ]);
 
-            $sell = sprintf("%.8f", $sell_orders->count());
+            $sell = $sell_orders->count();
             $sell_amount = sprintf("%.8f", $sell_orders->sum('amount'));
 
             return [
@@ -312,7 +312,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $out = sprintf("%.8f", $transactions_out->count());
+            $out = $transactions_out->count();
             $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
                 + $transactions_out->sum('tax')
                 + $transactions_out->sum('fee'));
@@ -337,7 +337,7 @@ class DashboardController extends Controller
                 'coin_id' => $coin->id
             ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
 
-            $out = sprintf("%.8f", $transactions_out->count());
+            $out = $transactions_out->count();
             $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
                 + $transactions_out->sum('tax')
                 + $transactions_out->sum('fee'));
