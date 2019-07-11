@@ -8,6 +8,7 @@ use App\Enum\EnumOperations;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserLevelLimitType;
 use App\Enum\EnumUserWalletType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Validations;
@@ -23,6 +24,7 @@ use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\User\UserFavAccount;
 use App\Models\User\UserLevel;
+use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
@@ -90,10 +92,10 @@ class TransactionsController extends Controller
             $gateway = Gateway::where('address', $request->toAddress)->exists();
 
             if (!$gateway) {
-                $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::TRANSACTION);
+                $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::TRANSACTION, $fee['is_internal']);
                 $valorDiario = floatval($valorDiario);
 
-                if (!$this->_calcLimits($valorDiario, $request->amount)) {
+                if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id, $fee['is_internal'])) {
                     throw new \Exception(trans('messages.transaction.value_exceeds_level_limits'));
                 }
             }
@@ -112,6 +114,7 @@ class TransactionsController extends Controller
                 'tx' => '',
                 'info' => '',
                 'error' => '',
+                'is_internal' => $fee['is_internal'],
             ]);
 
             $this->internalTransaction($transaction);
@@ -159,6 +162,16 @@ class TransactionsController extends Controller
         }
 
         if ($to) {
+
+            if (!$this->_checkLimits($transaction)) {
+                $transaction->update([
+                    'status' => EnumTransactionsStatus::ABOVELIMIT,
+                    'toAddress' => $to->address
+                ]);
+
+                return false;
+            }
+
             $uuid4 = Uuid::uuid4();
             $internalTx = $uuid4->toString();
 
@@ -177,6 +190,7 @@ class TransactionsController extends Controller
                 'tx' => $internalTx,
                 'info' => trans('info.internal_receiving'),
                 'error' => '',
+                'is_internal' => true,
             ]);
 
             TransactionStatus::create([
@@ -302,7 +316,7 @@ class TransactionsController extends Controller
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        if (!$this->_calcLimits($valorDiario, $request->amount)) {
+        if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id)) {
             return response([
                 'message' => trans('messages.transaction.value_exceeds_day_limits')
             ], Response::HTTP_NOT_ACCEPTABLE);
@@ -310,14 +324,14 @@ class TransactionsController extends Controller
         return response('', Response::HTTP_OK);
     }
 
-    public function getValueByDayUser($coin_id, $category)
+    public function getValueByDayUser($coin_id, $category, $is_internal)
     {
-        $transactions = Transaction::getValueByDayUser($coin_id, $category);
+        $transactions = Transaction::getValueByDayUser($coin_id, $category, $is_internal);
         $value = 0;
 
         try {
             foreach ($transactions as $transaction) {
-                $value += ($transaction->amount + $transaction->fee);
+                $value += ($transaction->amount);
             }
         } catch (\Exception $ex) {
             return $value;
@@ -326,15 +340,22 @@ class TransactionsController extends Controller
         return $value;
     }
 
-    private function _calcLimits($valorDiario, $valorTransaction)
+    private function _calcLimits($valorDiario, $valorTransaction, $coin_id, $is_internal)
     {
-        $limits = UserLevel::findOrFail(auth()->user()->user_level_id);
-        $limits->limit_btc_diary = floatval($limits->limit_btc_diary);
+        $limits = UserLevelLimit::where(
+            [
+                'user_level_id' => auth()->user()->user_level_id,
+                'coin_id' => $coin_id,
+                'type' => $is_internal==1 ? EnumUserLevelLimitType::INTERNAL : EnumUserLevelLimitType::EXTERNAL,
+            ]
+        )->first();
+
+        $limits->limit = floatval($limits->limit);
         $valorDiario = floatval($valorDiario);
 
-        if ($valorTransaction <= $limits->limit_btc_diary) {
+        if ($valorTransaction <= $limits->limit) {
             $_limit = floatval($valorTransaction + $valorDiario);
-            if ($_limit <= $limits->limit_btc_diary) {
+            if ($_limit <= $limits->limit) {
                 return true;
             }
         }
@@ -448,7 +469,6 @@ class TransactionsController extends Controller
             ]);
 
 
-
             $transaction_in = Transaction::create([
                 'user_id' => $beneficiary->id,
                 'coin_id' => $conversion['coin_in'],
@@ -557,6 +577,25 @@ class TransactionsController extends Controller
                 return $conversion;
             }
         }
+    }
+
+    private function _checkLimits($transaction)
+    {
+        $wallet = UserWallet::findOrFail($transaction->wallet_id);
+
+        if ($wallet->user_id === env("NAVI_USER")) {
+            return true;
+        }
+
+        $user = User::find($wallet->user_id);
+        $limits = UserLevelLimit::where([
+            'user_level_id' => $user->user_level_id,
+            'coin_id' => $wallet->coin_id,
+            'type' => EnumUserLevelLimitType::INTERNAL,
+        ])->first();
+        $auto = floatval($limits->limit_auto);
+        $amount = floatval($transaction->amount);
+        return ($auto >= $amount) ? true : false;
     }
 
 }

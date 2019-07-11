@@ -67,7 +67,7 @@ class UserLevel extends Model
     public function getMinWithdrawalAttribute()
     {
         $sysConfig = SysConfig::first();
-        return number_format($sysConfig->deposit_min_valor,2 , ',', '.');
+        return number_format($sysConfig->deposit_min_valor, 2, ',', '.');
     }
 
     public function getMinCryptoSubmissionAttribute()
@@ -125,5 +125,10 @@ class UserLevel extends Model
     public function tax_brl()
     {
         return $this->hasMany(TaxCoin::class, 'user_level_id')->where('coin_id', 2);
+    }
+
+    public function limits()
+    {
+        return $this->hasMany(UserLevelLimit::class, 'user_level_id');
     }
 }
