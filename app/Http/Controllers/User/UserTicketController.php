@@ -30,7 +30,7 @@ class UserTicketController extends Controller
                 , Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
-                'message' => "Erro ao caregar tickets: {$e->getMessage()}"
+                'message' => "Erro ao carregar tickets: {$e->getMessage()}"
             ], Response::HTTP_BAD_REQUEST);
         }
     }
