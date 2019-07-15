@@ -25,13 +25,21 @@ class UserLevelLimitSeeder extends Seeder
         foreach ($levels as $level) {
             foreach ($coins as $coin) {
                 foreach (EnumUserLevelLimitType::TYPES as $k => $v) {
-                    UserLevelLimit::create([
+                    $levelLimit = UserLevelLimit::where([
                         'user_level_id' => $level->id,
                         'coin_id' => $coin->id,
                         'type' => $k,
-                        'limit' => $level->limit_btc_diary,
-                        'limit_auto' => $level->limit_transaction_auto,
-                    ]);
+                    ])->exists();
+
+                    if (!$levelLimit) {
+                        UserLevelLimit::create([
+                            'user_level_id' => $level->id,
+                            'coin_id' => $coin->id,
+                            'type' => $k,
+                            'limit' => $level->limit_btc_diary,
+                            'limit_auto' => $level->limit_transaction_auto,
+                        ]);
+                    }
                 }
             }
         }

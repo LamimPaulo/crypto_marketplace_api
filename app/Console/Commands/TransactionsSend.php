@@ -9,7 +9,6 @@ use App\Http\Controllers\OffScreenController;
 use App\Mail\UnderAnalysisMail;
 use App\Models\Coin;
 use App\Models\Transaction;
-use App\Models\User\UserLevel;
 use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use App\User;

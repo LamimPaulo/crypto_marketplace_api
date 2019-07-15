@@ -23,7 +23,6 @@ use App\Models\TaxCoinTransaction;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\User\UserFavAccount;
-use App\Models\User\UserLevel;
 use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
@@ -62,7 +61,13 @@ class TransactionsController extends Controller
         try {
 
             DB::beginTransaction();
-            $from = UserWallet::where(['user_id' => auth()->user()->id, 'address' => $request->address, 'type' => EnumUserWalletType::WALLET])->first();
+            $from = UserWallet::where([
+                'user_id' => auth()->user()->id,
+                'address' => $request->address,
+                'type' => EnumUserWalletType::WALLET])
+                ->whereHas('coin', function ($coin) {
+                    return $coin->where('is_crypto', true);
+                })->first();
 
             if (!$from) {
                 throw new \Exception(trans('messages.wallet.invalid'));
@@ -346,7 +351,7 @@ class TransactionsController extends Controller
             [
                 'user_level_id' => auth()->user()->user_level_id,
                 'coin_id' => $coin_id,
-                'type' => $is_internal==1 ? EnumUserLevelLimitType::INTERNAL : EnumUserLevelLimitType::EXTERNAL,
+                'type' => $is_internal == 1 ? EnumUserLevelLimitType::INTERNAL : EnumUserLevelLimitType::EXTERNAL,
             ]
         )->first();
 
