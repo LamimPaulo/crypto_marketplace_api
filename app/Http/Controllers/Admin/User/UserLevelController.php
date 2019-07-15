@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin\User;
 use App\Enum\EnumUserLevelType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LevelRequest;
+use App\Models\Coin;
 use App\Models\Product;
 use App\Models\TaxCoin;
 use App\Models\User\UserLevel;
+use App\Models\User\UserLevelLimit;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +18,14 @@ class UserLevelController extends Controller
     public function index()
     {
         try {
-            $levels = UserLevel::with(['tax_brl', 'tax_crypto', 'product'])->get();
+            $levels = UserLevel::with([
+                'tax_brl',
+                'tax_crypto',
+                'product',
+                'limits' => function ($limits) {
+                    return $limits->with('coin');
+                }
+            ])->get();
             return response([
                 'message' => trans('messages.general.success'),
                 'levels' => $levels
@@ -42,7 +51,13 @@ class UserLevelController extends Controller
             'tax_types' => [
                 1 => 'TED',
                 2 => 'Operação',
-            ]
+            ],
+            'coins' => Coin::select('id', 'shortname')
+                ->where([
+                    'is_crypto' => true,
+                    'is_wallet' => true,
+                    'is_active' => true,
+                ])->get()
         ];
     }
 
@@ -130,18 +145,22 @@ class UserLevelController extends Controller
                 ]);
             }
 
-            if ($level->type == EnumUserLevelType::NACIONAL) {
+            foreach ($request->tax_brl as $tax) {
+                TaxCoin::create([
+                    'coin_id' => 2,
+                    'user_level_id' => $request->id,
+                    'coin_tax_type' => $tax['coin_tax_type'],
+                    'value' => $tax['value'],
+                    'operation' => $tax['operation'],
+                    'calc_type' => $tax['calc_type']
+                ]);
+            }
 
-                foreach ($request->tax_brl as $tax) {
-                    TaxCoin::create([
-                        'coin_id' => 2,
-                        'user_level_id' => $request->id,
-                        'coin_tax_type' => $tax['coin_tax_type'],
-                        'value' => $tax['value'],
-                        'operation' => $tax['operation'],
-                        'calc_type' => $tax['calc_type']
-                    ]);
-                }
+            foreach ($request->limits as $limit) {
+                $level_limit = UserLevelLimit::find($limit['id']);
+                $level_limit->limit = $limit['limit'];
+                $level_limit->limit_auto = $limit['limit_auto'];
+                $level_limit->save();
             }
 
             DB::commit();

@@ -4,11 +4,12 @@ namespace App\Console\Commands;
 
 use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumUserLevelLimitType;
 use App\Http\Controllers\OffScreenController;
 use App\Mail\UnderAnalysisMail;
 use App\Models\Coin;
 use App\Models\Transaction;
-use App\Models\User\UserLevel;
+use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Console\Command;
@@ -52,8 +53,7 @@ class TransactionsSend extends Command
 
         $pendingTransaction = Transaction::listPending();
         foreach ($pendingTransaction as $pending) {
-            $wallet = UserWallet::where('id', $pending->wallet_id);
-            $this->BTC($pending, $wallet);
+            $this->BTC($pending);
         }
 
         $authorizedTransaction = Transaction::listAuthorized();
@@ -82,13 +82,12 @@ class TransactionsSend extends Command
     /**
      * Envia transações baseadas em BitCoin
      * @param type $pending
-     * @param $wallet
      * @return bool
      * @throws \Exception
      */
-    private function BTC($pending, $wallet)
+    private function BTC($pending)
     {
-        if (!$this->_checkLimits($pending, $wallet)) {
+        if (!$this->_checkLimits($pending)) {
             $pending->update([
                 'status' => EnumTransactionsStatus::ABOVELIMIT
             ]);
@@ -107,9 +106,7 @@ class TransactionsSend extends Command
     public function sendBTC($pending)
     {
         $wallet = UserWallet::findOrFail($pending->wallet_id);
-
         $user = User::where(['id' => $wallet->user_id])->first();
-
 
         try {
 
@@ -173,8 +170,12 @@ class TransactionsSend extends Command
         }
 
         $user = User::find($wallet->user_id);
-        $limits = UserLevel::find($user->user_level_id);
-        $auto = floatval($limits->limit_transaction_auto);
+        $limits = UserLevelLimit::where([
+            'user_level_id' => $user->user_level_id,
+            'coin_id' => $wallet->coin_id,
+            'type' => EnumUserLevelLimitType::EXTERNAL,
+        ])->first();
+        $auto = floatval($limits->limit_auto);
         $amount = floatval($pending->amount);
         return ($auto >= $amount) ? true : false;
     }

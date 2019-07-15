@@ -58,7 +58,9 @@ class BalanceService
                 'toAddress' => $request->toAddress,
                 'amount' => (float)$request->amount,
                 'fee' => sprintf('%.' . $address->coin->decimal . 'f', 0),
-                'tax' => sprintf('%.' . $address->coin->decimal . 'f', 0)
+                'tax' => sprintf('%.' . $address->coin->decimal . 'f', 0),
+                'level_id' => $user->user_level_id,
+                'is_internal' => 1
             ];
         }
 
@@ -71,7 +73,8 @@ class BalanceService
             'amount' => (float)$request->amount,
             'fee' => sprintf('%.' . $address->coin->decimal . 'f', $fee),
             'tax' => sprintf('%.' . $address->coin->decimal . 'f', floatval($tax)),
-            'level_id' => $user->user_level_id
+            'level_id' => $user->user_level_id,
+            'is_internal' => 0
         ];
     }
 

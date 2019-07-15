@@ -64,7 +64,8 @@ class Transaction extends Model
         'tax',
         'price',
         'market',
-        'payment_at'
+        'payment_at',
+        'is_internal'
     ];
 
     protected $hidden = [
@@ -96,7 +97,6 @@ class Transaction extends Model
         'fileExt',
         'totalRounded',
         'total',
-        'isInternal',
     ];
 
     public function getCategoryNameAttribute()
@@ -208,7 +208,7 @@ class Transaction extends Model
             ->get();
     }
 
-    public static function getValueByDayUser($coin_id, $category)
+    public static function getValueByDayUser($coin_id, $category, $is_internal = 0)
     {
         return self::where('user_id', '=', auth()->user()->id)
             ->where('created_at', '>=', date('Y-m-d') . ' 00:00:00')
@@ -216,7 +216,7 @@ class Transaction extends Model
             ->where('type', '=', EnumTransactionType::OUT)
             ->where('coin_id', '=', $coin_id)
             ->where('category', '=', $category)
-            ->get();
+            ->where('is_internal', $is_internal)->get();
     }
 
     public static function showByHash($hash)
@@ -293,15 +293,6 @@ class Transaction extends Model
     public function getTimestampAttribute()
     {
         return Carbon::now()->format('H:i:s');
-    }
-
-    public function getIsInternalAttribute()
-    {
-        $exists = UserWallet::where('address', $this->toAddress)->exists();
-        if ($exists) {
-            return 1;
-        }
-        return 0;
     }
 
     /*
