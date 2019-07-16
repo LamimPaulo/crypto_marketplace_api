@@ -109,7 +109,7 @@ class GatewayController extends Controller
                 'status' => EnumGatewayStatus::NEWW,
                 'type' => EnumGatewayType::PAYMENT,
                 'tax' => 0,
-                'category' => EnumGatewayCategory::PAYMENT,
+                'category' => EnumGatewayCategory::POS,
                 'time_limit' => Carbon::now()->addMinutes($time)
             ]);
 
