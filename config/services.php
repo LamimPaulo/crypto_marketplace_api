@@ -72,6 +72,12 @@ return [
     'masternode' => [
         'api' => 'https://masternodes.pro/api/v1/',
         'key' => env("MASTERNODE_KEY")
-    ]
+    ],
+    'slushpool' => [
+        'key' => env('SLUSH_KEY'),
+        'stats' => 'https://slushpool.com/stats/json/btc',
+        'profile' => 'https://slushpool.com/accounts/profile/json/btc',
+        'workers' => 'https://slushpool.com/accounts/workers/json/btc'
+    ],
 
 ];

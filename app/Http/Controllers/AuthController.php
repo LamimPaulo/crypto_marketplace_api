@@ -139,11 +139,9 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $uuid4 = Uuid::uuid4();
-
             VerifyUser::create([
                 'user_id' => $user->id,
-                'token' => $uuid4->toString()
+                'token' => Uuid::uuid4()->toString()
             ]);
 
             Localization::setLocale($user);

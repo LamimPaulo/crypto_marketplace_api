@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:expiration')->dailyAt('01:00');
 
         $schedule->command('gateway:expirepayments')->everyMinute();
+        $schedule->command('pool:refresh')->everyMinute();
         $schedule->command('estimate:fee')->everyMinute();
         $schedule->command('get:btcquote')->everyFiveMinutes();
         $schedule->command('get:marketcapquotes')->everyTenMinutes();

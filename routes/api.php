@@ -103,6 +103,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     });
 
     //Notificações
+    Route::get('/mining/status', 'Mining\MiningPoolController@status');
+    Route::get('/mining/blocks', 'Mining\MiningPoolController@blocks');
+    Route::get('/mining/rewards', 'Mining\MiningPoolController@rewardChart');
+
     Route::get('/messages/notifications', 'Admin\Messages\MessageController@notificationsList');
     Route::get('/messages/general', 'Admin\Messages\MessageController@generalMessages');
     Route::get('/messages/edit/{id}', 'Admin\Messages\MessageController@edit');
