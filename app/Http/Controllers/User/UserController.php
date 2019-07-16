@@ -346,26 +346,31 @@ class UserController extends Controller
                     'name' => "Nanotech BTC",
                     'value_lqx' => $nanotech_btc['value_lqx'],
                     'value_brl' => $nanotech_btc['value_brl'],
+                    'value_usd' => $nanotech_btc['value_usd'],
                 ],
                 [
                     'name' => "Nanotech LQX",
                     'value_lqx' => $nanotech_lqx['value_lqx'],
                     'value_brl' => $nanotech_lqx['value_brl'],
+                    'value_usd' => $nanotech_lqx['value_usd'],
                 ],
                 [
                     'name' => "Masternode",
                     'value_lqx' => $masternode['value_lqx'],
                     'value_brl' => $masternode['value_brl'],
+                    'value_usd' => $masternode['value_usd'],
                 ],
             ];
             //total
 
             $products_total['value_lqx'] = 0;
             $products_total['value_brl'] = 0;
+            $products_total['value_usd'] = 0;
 
             foreach ($products as $product) {
                 $products_total['value_lqx'] += $product['value_lqx'];
                 $products_total['value_brl'] += $product['value_brl'];
+                $products_total['value_usd'] += $product['value_usd'];
             }
 
             //chart
@@ -407,15 +412,18 @@ class UserController extends Controller
         if ($total == 0) {
             return [
                 'value_brl' => 0,
-                'value_lqx' => 0
+                'value_lqx' => 0,
+                'value_usd' => 0,
             ];
         }
 
         $nanotech_btc_to_brl = $conversor::CRYPTO2FIAT_MIN($total, "BTC");
+        $nanotech_btc_to_usd = $conversor::CRYPTO2FIAT_MIN($total, "BTC", "USD");
 
         return [
             'value_brl' => $nanotech_btc_to_brl['amount'],
-            'value_lqx' => $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX")['amount']
+            'value_lqx' => $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX")['amount'],
+            'value_usd' => $nanotech_btc_to_usd
         ];
     }
 
@@ -432,13 +440,15 @@ class UserController extends Controller
         if ($total == 0) {
             return [
                 'value_brl' => 0,
-                'value_lqx' => 0
+                'value_lqx' => 0,
+                'value_usd' => 0,
             ];
         }
 
         return [
             'value_brl' => $conversor::CRYPTO2FIAT_MIN($total, "LQX")['amount'],
-            'value_lqx' => $total
+            'value_lqx' => $total,
+            'value_usd' => $conversor::CRYPTO2FIAT_MIN($total, "LQX", "USD")['amount'],
         ];
     }
 
@@ -456,13 +466,15 @@ class UserController extends Controller
         if ($total == 0) {
             return [
                 'value_brl' => 0,
-                'value_lqx' => 0
+                'value_lqx' => 0,
+                'value_usd' => 0,
             ];
         }
 
         return [
             'value_brl' => $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX")['amount'],
-            'value_lqx' => $total
+            'value_lqx' => $total,
+            'value_usd' => $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX", "USD")['amount'],
         ];
     }
 
