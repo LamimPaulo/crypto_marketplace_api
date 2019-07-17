@@ -119,7 +119,7 @@ return [
         'value_below_the_minimum' => 'Value below the minimum. (:amount)',
         'value_exceeds_balance' => 'Value of the transaction above the balance.',
         'value_exceeds_day_limits' => 'Transaction value exceeds daily limits.',
-        'value_exceeds_level_limits' => 'Transaction value exceeds daily limit according to your level.',
+        'value_exceeds_level_limits' => 'Transaction value exceeds daily limit according to your keycode.',
         'value_must_be_greater_than_zero' => 'Value must be greater than 0.',
     ],
     'wallet' => [

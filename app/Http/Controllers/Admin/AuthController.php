@@ -30,13 +30,17 @@ class AuthController extends Controller
 
             $g = new \Sonata\GoogleAuthenticator\GoogleAuthenticator();
 
-            if($user->is_google2fa_active) {
+            if ($user->is_google2fa_active) {
                 if (!$g->checkCode($user->google2fa_secret, $request->code_2fa)) {
                     throw new \Exception('O código 2FA informado é inválido ou expirou. Tente novamente.');
                 }
-            }else{
+            } else {
                 throw new \Exception('O código 2FA informado é inválido ou expirou. Tente novamente.');
             }
+
+            $user->tokens->each(function ($token) {
+                $token->delete();
+            });
 
             $req = Request::create('/oauth/token', 'POST', [
                 'grant_type' => 'password',

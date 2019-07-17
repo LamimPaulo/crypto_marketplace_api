@@ -69,6 +69,10 @@ class AuthController extends Controller
                 }
             }
 
+            $user->tokens->each(function ($token) {
+                $token->delete();
+            });
+
             $req = Request::create('/oauth/token', 'POST', [
                 'grant_type' => 'password',
                 'client_id' => config('services.passport.client_id'),

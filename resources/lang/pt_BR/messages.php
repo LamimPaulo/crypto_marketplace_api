@@ -119,7 +119,7 @@ return [
         'value_below_the_minimum' => 'Valor abaixo do minimo. (:amount)',
         'value_exceeds_balance' => 'Valor da transação acima do valor em carteira.',
         'value_exceeds_day_limits' => 'Valor da transação excede os limites diários.',
-        'value_exceeds_level_limits' => 'Valor da transação excede o limite diário de acordo com seu nivel.',
+        'value_exceeds_level_limits' => 'Valor da transação excede o limite diário de acordo com seu keycode.',
         'value_must_be_greater_than_zero' => 'O valor deve ser maior que 0.',
     ],
     'wallet' => [

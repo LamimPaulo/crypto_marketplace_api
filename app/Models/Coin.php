@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enum\EnumUserLevelLimitType;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechType;
+use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,6 +45,21 @@ class Coin extends Model
     public function quote_brl()
     {
         return $this->hasOne(CoinQuote::class)->where(['quote_coin_id' => Coin::getByAbbr("BRL")->id]);
+    }
+
+    public function limits()
+    {
+        return $this->hasMany(UserLevelLimit::class, 'coin_id');
+    }
+
+    public function internal_limit()
+    {
+        return $this->hasOne(UserLevelLimit::class, 'coin_id')->where('type', EnumUserLevelLimitType::INTERNAL);
+    }
+
+    public function external_limit()
+    {
+        return $this->hasOne(UserLevelLimit::class, 'coin_id')->where('type', EnumUserLevelLimitType::EXTERNAL);
     }
 
     public static function getByAbbr($abbr)

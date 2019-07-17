@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
 class TransactionsController extends Controller
@@ -71,7 +72,7 @@ class TransactionsController extends Controller
 
             if (!empty($request->tx)) {
                 $transactions->where('tx', 'LIKE', "%{$request->tx}%")
-                             ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
+                    ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
             }
 
             return response($transactions->paginate(10), Response::HTTP_OK);
@@ -104,7 +105,7 @@ class TransactionsController extends Controller
 
             if (!empty($request->tx)) {
                 $transactions->where('tx', 'LIKE', "%{$request->tx}%")
-                             ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
+                    ->orWhere('toAddress', 'LIKE', "%{$request->tx}%");
             }
 
             return response($transactions->paginate(10), Response::HTTP_OK);
@@ -186,8 +187,55 @@ class TransactionsController extends Controller
 
             User::findOrFail($transaction->user_id);
 
-//            $TransactionsSend = new \App\Console\Commands\TransactionsSend();
-//            $TransactionsSend->connectionSendBTC($transaction->id);
+
+            if ($transaction->is_internal) {
+                $to = UserWallet::where('address', $transaction->toAddress)->firstOrFail();
+
+                $uuid4 = Uuid::uuid4();
+                $internalTx = $uuid4->toString();
+
+                $newTransaction = Transaction::create([
+                    'user_id' => $to->user_id,
+                    'sender_user_id' => $transaction->user_id,
+                    'coin_id' => $to->coin_id,
+                    'wallet_id' => $to->id,
+                    'toAddress' => '',
+                    'amount' => $transaction->amount,
+                    'status' => EnumTransactionsStatus::SUCCESS,
+                    'type' => EnumTransactionType::IN,
+                    'category' => EnumTransactionCategory::TRANSACTION,
+                    'fee' => 0,
+                    'taxas' => 0,
+                    'tx' => $internalTx,
+                    'info' => trans('info.internal_receiving'),
+                    'error' => '',
+                    'is_internal' => true,
+                ]);
+
+                TransactionStatus::create([
+                    'status' => $newTransaction->status,
+                    'transaction_id' => $newTransaction->id,
+                ]);
+
+                $transaction->update(['toAddress' => $to->address, 'status' => EnumTransactionsStatus::SUCCESS, 'tx' => $internalTx, 'info' => trans('info.internal_sent')]);
+
+                TransactionStatus::create([
+                    'status' => $transaction->status,
+                    'transaction_id' => $transaction->id
+                ]);
+
+                $this->balanceService->increments($newTransaction);
+
+                ActivityLogger::log("Transação Interna Aprovada", $transaction->user_id);
+
+                DB::commit();
+                return response([
+                    'message' => 'Transação aprovada.',
+                ], Response::HTTP_OK);
+
+            }
+
+
             $transaction->status = EnumTransactionsStatus::AUTHORIZED;
             $transaction->save();
 
