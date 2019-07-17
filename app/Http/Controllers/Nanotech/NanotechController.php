@@ -213,15 +213,52 @@ class NanotechController extends Controller
         }
 
         try {
+
+            $brokerageFeePercentage = $this->brokerageFee($type->id);
+            $brokerageFee = $request->amount * $brokerageFeePercentage / 100;
+            $amount = $request->amount - $brokerageFee;
+
             $operation = [
                 'user_id' => auth()->user()->id,
                 'investment_id' => $investment,
-                'amount' => $request->amount,
-                'brokerage_fee_percentage' => 0,
+                'amount' => $amount,
+                'brokerage_fee_percentage' => $brokerageFeePercentage,
                 'status' => EnumNanotechOperationStatus::SUCCESS,
                 'type' => EnumNanotechOperationType::IN,
-                'brokerage_fee' => 0
+                'brokerage_fee' => $brokerageFee
             ];
+
+            if (EnumNanotechOperationType::IN == $request->operation_type) {
+                //verificar se possui saldo suficiente para deposito
+                $wallet = UserWallet::where([
+                    'user_id' => auth()->user()->id,
+                    'coin_id' => $type->coin_id,
+                    'type' => EnumUserWalletType::WALLET
+                ])->first();
+
+                if ($wallet->balance < $request->amount) {
+                    throw new \Exception(trans('messages.wallet.insuficient_balance'));
+                }
+
+                //criar transaction e decrementar balance
+                $transaction = Transaction::create([
+                    'user_id' => $wallet->user_id,
+                    'coin_id' => $wallet->coin_id,
+                    'wallet_id' => $wallet->id,
+                    'toAddress' => '',
+                    'amount' => $operation['amount'],
+                    'status' => EnumTransactionsStatus::SUCCESS,
+                    'type' => EnumTransactionType::OUT,
+                    'category' => EnumTransactionCategory::NANOTECH,
+                    'fee' => 0,
+                    'tax' => $operation['brokerage_fee'],
+                    'tx' => Uuid::uuid4()->toString(),
+                    'info' => trans('info.arbitrage_investment'),
+                    'error' => '',
+                ]);
+
+                $this->balanceService::decrements($transaction);
+            }
 
             if (EnumNanotechOperationType::PROFIT_IN == $request->operation_type) {
                 //verificar se o valor de lucro é valido
