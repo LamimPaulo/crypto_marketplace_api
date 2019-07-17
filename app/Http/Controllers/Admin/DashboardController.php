@@ -185,8 +185,9 @@ class DashboardController extends Controller
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
                 'status' => EnumTransactionsStatus::ABOVELIMIT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+                'coin_id' => $coin->id,
+                'is_internal' => false
+            ]);
 
             $above_limit = $transactions_out->count();
             $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
@@ -211,8 +212,9 @@ class DashboardController extends Controller
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
                 'status' => EnumTransactionsStatus::ABOVELIMIT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+                'coin_id' => $coin->id,
+                'is_internal' => true
+            ]);
 
             $above_limit = $transactions_out->count();
             $above_limit_amount = sprintf("%.8f", $transactions_out->sum('amount')
@@ -309,8 +311,9 @@ class DashboardController extends Controller
             $transactions_out = Transaction::where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress NOT IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+                'coin_id' => $coin->id,
+                'is_internal' => false
+            ]);
 
             $out = $transactions_out->count();
             $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
@@ -334,8 +337,9 @@ class DashboardController extends Controller
             $transactions_out = Transaction::where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'type' => EnumTransactionType::OUT,
-                'coin_id' => $coin->id
-            ])->whereRaw("toAddress IN (SELECT address FROM user_wallets WHERE coin_id = $coin->id)");
+                'coin_id' => $coin->id,
+                'is_internal' => true
+            ]);
 
             $out = $transactions_out->count();
             $out_amount = sprintf("%.8f", $transactions_out->sum('amount')
