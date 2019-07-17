@@ -34,7 +34,7 @@ class ActivityLogger extends Model
 
     protected $dates = ['created_at'];
 
-    protected $appends = ['localCreated'];
+    protected $appends = ['localCreated', 'createdLocal'];
 
     protected $table = 'user_activity_log';
 
@@ -43,11 +43,18 @@ class ActivityLogger extends Model
         return Carbon::parse($this->created_at)->diffForHumans();
     }
 
-    public function causer() {
+    public function getCreatedLocalAttribute()
+    {
+        return Carbon::parse($this->created_at)->format("d/m/Y H:i");
+    }
+
+    public function causer()
+    {
         return $this->belongsTo(User::class, 'causer_id');
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class, 'subject_id');
     }
 
