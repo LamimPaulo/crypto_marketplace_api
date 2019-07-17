@@ -180,4 +180,16 @@ class CoinsController extends Controller
         ];
     }
 
+    public function wallet()
+    {
+        try {
+            return Coin::where('is_wallet', true)->orderBy('is_crypto')->get();
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
 }

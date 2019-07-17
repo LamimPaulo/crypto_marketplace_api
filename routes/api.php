@@ -99,7 +99,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
             Route::get('/departments', 'UserTicketController@departments');
         });
 
-        Route::post('/cancel', 'UserController@cancel')->middleware(['pincheck','tokencheck']);
+        Route::post('/cancel', 'UserController@cancel')->middleware(['pincheck', 'tokencheck']);
     });
 
     //Notificações

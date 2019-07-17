@@ -91,6 +91,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'gateway',
                     'desc' => 'Acesso ao Gateway de Pagamentos'
+                ], [
+                    'name' => 'credminer_transactions',
+                    'desc' => 'Aprovações Credminer'
                 ],
             ];
 

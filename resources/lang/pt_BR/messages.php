@@ -106,6 +106,8 @@ return [
     'transaction' => [
         'amount_must_be_grater_than_zero' => 'A quantidade deve ser maior que 0.',
         'conversion_success' => 'Conversão realizada com sucesso!',
+        'success' => 'Transação aprovada com Sucesso!',
+        'canceled' => 'Transação cancelada!',
         'crypto_sent' => 'Crypto Enviada.',
         'crypto_received' => 'Crypto Recebida.',
         'invalid' => 'Transação inválida.',

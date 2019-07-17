@@ -77,6 +77,20 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'TransactionsController@accept')->middleware('can_execute:crypto_above_limit');
         });
 
+        Route::group([
+            'prefix' => 'transactions/credminer',
+            'middleware' => 'can_access:credminer_transactions'
+        ], function () {
+            //transactions list
+            Route::post('/', 'CredminerController@index');
+            Route::post('/by-status', 'CredminerController@byStatus');
+            Route::post('/by-coin', 'CredminerController@byCoin');
+            //transaction cancel
+            Route::post('/cancel', 'CredminerController@cancel')->middleware('can_execute:credminer_transactions');
+            //transaction accept
+            Route::post('/accept', 'CredminerController@accept')->middleware('can_execute:credminer_transactions');
+        });
+
         Route::get('/balance/verify/{user_email}', 'TransactionsController@balanceVerify')->middleware('is_dev');
 
     });
@@ -217,6 +231,9 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/update/{id}', 'MessageController@update');
         Route::delete('/delete/{id}', 'MessageController@delete');
     });
+
+
+    Route::get('/wallet/coins', 'CoinsController@wallet');
 
     Route::group([
         'prefix' => 'config',

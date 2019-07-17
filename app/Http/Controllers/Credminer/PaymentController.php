@@ -118,7 +118,14 @@ class PaymentController extends Controller
     {
         try {
 
-            $user = User::where('api_key', '=', $request->get('api_key'))->firstOrFail();
+            $user = User::where('api_key', '=', $request->get('api_key'))->first();
+
+            if(!$user){
+                throw new \Exception("Api Key Inválida.");
+            }
+
+            $quote_coin = $user->country_id == 31 ? Coin::getByAbbr("BRL")->id : Coin::getByAbbr("USD")->id;
+
             $coin = Coin::getByAbbr($request->coin);
 
             $wallet = UserWallet::where([
@@ -132,7 +139,7 @@ class PaymentController extends Controller
 
             $cotacao = CoinQuote::where([
                 'coin_id' => $coin->id,
-                'quote_coin_id' => 2,//BRL
+                'quote_coin_id' => $quote_coin,
             ])->first();
 
             DB::beginTransaction();
@@ -143,7 +150,7 @@ class PaymentController extends Controller
                 'wallet_id' => $wallet->id,
                 'toAddress' => $wallet->address,
                 'amount' => $request->amount,
-                'status' => EnumTransactionsStatus::SUCCESS,
+                'status' => EnumTransactionsStatus::PENDING,
                 'type' => EnumTransactionType::IN,
                 'category' => EnumTransactionCategory::CREDMINER,
                 'fee' => 0,
@@ -154,8 +161,6 @@ class PaymentController extends Controller
                 'price' => $cotacao->buy_quote,
                 'market' => $cotacao->average_quote,
             ]);
-
-            BalanceService::increments($transaction);
 
             DB::commit();
 

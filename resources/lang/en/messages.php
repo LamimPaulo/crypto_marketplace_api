@@ -106,6 +106,8 @@ return [
     'transaction' => [
         'amount_must_be_grater_than_zero' => 'Amount must be greater than 0.',
         'conversion_success' => 'Conversion successful!',
+        'success' => 'Successful Transaction!',
+        'canceled' => 'Transaction Canceled!',
         'crypto_sent' => 'Crypto Sent.',
         'crypto_received' => 'Crypto Received.',
         'invalid' => 'Invalid transaction.',
