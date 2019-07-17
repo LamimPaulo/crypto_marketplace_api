@@ -273,7 +273,7 @@ Route::get('/time', function () {
     return response(['time' => \Carbon\Carbon::now()->toIso8601ZuluString()], 200);
 });
 
-Route::post('operation', 'OperationController@index');
+Route::get('public/lqx', 'ApiController@lqx');
 
 //credminer products
 Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
