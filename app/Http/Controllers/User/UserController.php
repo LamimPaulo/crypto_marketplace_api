@@ -423,7 +423,7 @@ class UserController extends Controller
         return [
             'value_brl' => $nanotech_btc_to_brl['amount'],
             'value_lqx' => $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX")['amount'],
-            'value_usd' => $nanotech_btc_to_usd
+            'value_usd' => $nanotech_btc_to_usd['amount']
         ];
     }
 
