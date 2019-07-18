@@ -3,6 +3,8 @@
 namespace App\Services;
 
 
+use App\Permission;
+use App\RolePermission;
 use App\UserRole;
 
 class PermissionService
@@ -32,30 +34,21 @@ class PermissionService
         return $up;
     }
 
-    public static function permission($name, $user = null)
+    public static function permission($permission_name, $user = null)
     {
         if (is_null($user)) {
             $user = auth()->user()->id;
         }
 
-        $user_role = UserRole::with([
-            'role' => function ($role) {
-                return $role->with([
-                    'permissions' => function ($permissions) {
-                        return $permissions->with('permission');
-                    }
-                ]);
-            }
-        ])
-            ->whereHas('role', function ($role) use ($name) {
-                return $role->whereHas('permissions', function ($permissions) use ($name) {
-                    return $permissions->whereHas('permission', function ($permission) use ($name) {
-                        return $permission->where('name', 'LIKE', $name);
-                    });
-                });
-            })
-            ->where('user_id', $user)->first();
 
-        return $user_role ? $user_role->role->permissions[0]->type : 0 ;
+        $user_role = UserRole::where('user_id', $user)->first();
+        $permission = Permission::where('name', $permission_name)->first();
+
+        $type = RolePermission::where([
+            'role_id' => $user_role->role_id,
+            'permission_id' => $permission->id
+        ])->first();
+
+        return $type ? $type->type : 0;
     }
 }
