@@ -30,6 +30,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('funds:profits')->monthlyOn(10, '00:30');
         $schedule->command('funds:expiration')->dailyAt('01:00');
+        $schedule->command('lqx:withdrawals')->dailyAt('01:00');
 
         $schedule->command('gateway:expirepayments')->everyMinute();
         $schedule->command('pool:refresh')->everyMinute();

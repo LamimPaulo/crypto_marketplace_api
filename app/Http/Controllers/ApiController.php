@@ -4,11 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\Coin;
 use App\Models\CoinQuote;
+use App\Models\LqxWithdrawal;
+use App\Models\User\UserWallet;
 use App\Services\ConversorService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
+    public function index()
+    {
+        $withdrawal_pending = LqxWithdrawal::where('is_executed', false)->sum('percent');
+
+        $withdrawal = LqxWithdrawal::where('is_executed', false)
+            ->whereDate('date', Carbon::now()->format('Y-m-d'))
+            ->first();
+
+        if (!$withdrawal) {
+            return;
+        }
+
+        $wallet = UserWallet::where([
+            'coin_id' => Coin::getByAbbr("LQXD")->id,
+            'user_id' => "408402ea-b31e-4c2f-b823-06a1946f3ea3",
+        ])->first();
+
+        $balancePercent = 0;
+
+        $old_balance = ($wallet->balance * 100) / $withdrawal_pending;
+        $balancePercent = $old_balance * ($withdrawal->percent / 100);
+        dd($withdrawal_pending, $wallet->balance, $old_balance, $balancePercent);
+
+        if ($wallet->balance > 0) {
+            $old_balance = ($wallet->balance * 100) / $withdrawal_pending;
+            $balancePercent = $old_balance * ($withdrawal->percent / 100);
+            dd($old_balance, $balancePercent);
+        }
+
+        $lqx_wallet = UserWallet::with('coin')
+            ->whereHas('coin', function ($coin) {
+                return $coin->where('abbr', 'LIKE', 'LQX');
+            })
+            ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
+    }
+
+
     public function lqx()
     {
         $lqx = Coin::getByAbbr("LQX")->id;

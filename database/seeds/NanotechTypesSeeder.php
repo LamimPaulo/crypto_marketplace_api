@@ -16,7 +16,7 @@ class NanotechTypesSeeder extends Seeder
                 'id' => 1,
                 'type' => 'Nanotech LQX',
                 'montly_return' => 1,
-                'coin_id' => 3
+                'coin_id' => 10
             ], [
                 'id' => 2,
                 'type' => 'Nanotech BTC',
@@ -26,7 +26,7 @@ class NanotechTypesSeeder extends Seeder
                 'id' => 3,
                 'type' => 'Masternodes',
                 'montly_return' => 3,
-                'coin_id' => 3
+                'coin_id' => 10
             ],
         ];
         foreach ($types as $type) {

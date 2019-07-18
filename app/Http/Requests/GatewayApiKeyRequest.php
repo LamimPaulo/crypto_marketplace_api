@@ -37,7 +37,7 @@ class GatewayApiKeyRequest extends FormRequest
             'user_email' => 'required|exists:users,email',
             'payment_coin' => [
                 'required',
-                Rule::in([1, 2, 3]), //coin_id: BTC, BRL, USD respectivamente
+                Rule::in([1, 2, 9]), //coin_id: BTC, BRL, USD respectivamente
             ],
             'ip' => 'nullable|ip'
         ];

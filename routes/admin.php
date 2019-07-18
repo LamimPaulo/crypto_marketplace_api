@@ -319,6 +319,9 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/delete/{role_id}/{user_email}', 'PermissionsController@deleteUserRole')->middleware('can_execute:assign_permission');
     });
 
+    Route::get('/lqx/withdrawals', 'LqxWithdrawalController@index')->middleware('can_access:lqx_withdrawals');
+    Route::post('/lqx/withdrawals/update', 'LqxWithdrawalController@update')->middleware('can_execute:lqx_withdrawals');
+
 });
 
 

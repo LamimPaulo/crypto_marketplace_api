@@ -31,8 +31,6 @@ class ProductController extends Controller
             $amount = $level->product->value - ($actualLevelValue->value * $level->product->bonus_percent / 100);
 
             if ($coin->abbr == 'LQX') {
-                throw new \Exception("Compra de Produtos com LQX está indisponível no momento.");
-
                 $amount = $level->product->value_lqx - ($actualLevelValue->value_lqx * $level->product->bonus_percent / 100);
             }
 
@@ -90,8 +88,6 @@ class ProductController extends Controller
     public function buyLevelLqx(BuyLevelRequest $request)
     {
         try {
-            throw new \Exception("Compra de Produtos com LQX está indisponível no momento.");
-
             $level = UserLevel::with('product')->find($request->level_id);
             $coin = Coin::getByAbbr("LQX");
             $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();

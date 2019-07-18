@@ -94,6 +94,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'credminer_transactions',
                     'desc' => 'Aprovações Credminer'
+                ], [
+                    'name' => 'lqx_withdrawals',
+                    'desc' => 'Retirada Automática LQX'
                 ],
             ];
 

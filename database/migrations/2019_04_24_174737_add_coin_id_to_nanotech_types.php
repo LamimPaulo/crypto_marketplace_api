@@ -14,7 +14,7 @@ class AddCoinIdToNanotechTypes extends Migration
     public function up()
     {
         Schema::table('nanotech_types', function (Blueprint $table) {
-            $table->uuid('coin_id')->default(3);
+            $table->uuid('coin_id')->default(10);
             $table->dropColumn(['brokerage_fee']);
         });
     }

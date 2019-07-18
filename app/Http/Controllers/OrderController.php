@@ -538,7 +538,7 @@ class OrderController extends Controller
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($request->base === 'LQX') {
+        if ($request->base === 'LQXD') {
             return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
         }
 
