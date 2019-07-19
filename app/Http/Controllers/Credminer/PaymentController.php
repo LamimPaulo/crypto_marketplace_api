@@ -45,6 +45,7 @@ class PaymentController extends Controller
                 'user' => $user->name,
                 'user_type' => $user->country_id==31 ? 1 : 2,
                 'user_type_name' => $user->country_id==31 ? 'brasileiro' : 'internacional',
+                'document' => $user->document,
                 'level' => [
                     'name' => $user->level->name,
                     'nanotech_lqx_fee' => $user->level->nanotech_lqx_fee,

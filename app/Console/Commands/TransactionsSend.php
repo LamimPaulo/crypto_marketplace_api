@@ -55,11 +55,6 @@ class TransactionsSend extends Command
         foreach ($pendingTransaction as $pending) {
             $this->BTC($pending);
         }
-
-        $authorizedTransaction = Transaction::listAuthorized();
-        foreach ($authorizedTransaction as $authorized) {
-            $this->sendBTC($authorized);
-        }
     }
 
     /**
@@ -95,7 +90,9 @@ class TransactionsSend extends Command
             return false;
         }
 
-        $this->sendBTC($pending);
+        $pending->update([
+            'status' => EnumTransactionsStatus::AUTHORIZED
+        ]);
     }
 
     /**
@@ -106,14 +103,8 @@ class TransactionsSend extends Command
     public function sendBTC($pending)
     {
         $wallet = UserWallet::findOrFail($pending->wallet_id);
-        $user = User::where(['id' => $wallet->user_id])->first();
 
         try {
-
-            if ($user->is_under_analysis) {
-                throw new \Exception('Usuario em analise atualmente, transacao nao sera enviada ate o fim da analise.');
-            }
-
             $coin_abbr = Coin::find($pending->coin_id)->abbr;
             $data = [
                 'fromAddress' => $pending->address,
@@ -139,7 +130,10 @@ class TransactionsSend extends Command
             if (env('CHECK_WALLETS_BALANCES')) {
 
                 if ($ex->getMessage() == 155) {
-                    $user = User::where(['id' => $wallet->user_id, 'is_under_analysis' => false])->first();
+                    $user = User::where([
+                        'id' => $wallet->user_id,
+                        'is_under_analysis' => false
+                    ])->first();
 
                     if ($user) {
                         $user->is_under_analysis = true;
@@ -156,9 +150,14 @@ class TransactionsSend extends Command
 
             $pending->update([
                 'status' => EnumTransactionsStatus::ERROR,
-                'error' => $ex->getMessage(),
+                'error' => 'Usuario em analise atualmente, transacao nao sera enviada ate o fim da analise.',
             ]);
         }
+    }
+
+    public function sendTransactions()
+    {
+
     }
 
     public function _checkLimits($pending)

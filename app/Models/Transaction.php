@@ -234,13 +234,14 @@ class Transaction extends Model
             ->get();
     }
 
-    public static function listAuthorized()
+    public static function listAuthorized($coin_id)
     {
-        return self::join('user_wallets', 'user_wallets.id', '=', 'transactions.wallet_id')
-            ->whereIn('transactions.status', [EnumTransactionsStatus::AUTHORIZED])
-            ->where('transactions.type', '=', EnumTransactionType::OUT)
-            ->where('transactions.category', '=', EnumTransactionCategory::TRANSACTION)
-            ->select(DB::raw('transactions.*, user_wallets.address'))
+        return self::where([
+            'status' => EnumTransactionsStatus::AUTHORIZED,
+            'type' => EnumTransactionType::OUT,
+            'category' => EnumTransactionCategory::TRANSACTION,
+            'coin_id' => $coin_id
+        ])->with(['wallet', 'user'])
             ->get();
     }
 
