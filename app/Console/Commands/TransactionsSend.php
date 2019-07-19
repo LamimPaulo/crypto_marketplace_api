@@ -4,13 +4,11 @@ namespace App\Console\Commands;
 
 use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionsStatus;
-use App\Enum\EnumUserLevelLimitType;
 use App\Http\Controllers\OffScreenController;
 use App\Mail\UnderAnalysisMail;
 use App\Models\Coin;
 use App\Models\Transaction;
-use App\Models\User\UserLevelLimit;
-use App\Models\User\UserWallet;
+use App\Models\TransactionFee;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
@@ -50,133 +48,173 @@ class TransactionsSend extends Command
      */
     public function handle()
     {
+        $coins = Coin::where([
+            'is_crypto' => true,
+            'is_wallet' => true,
+            'is_active' => true,
+        ])->get();
 
-        $pendingTransaction = Transaction::listPending();
-        foreach ($pendingTransaction as $pending) {
-            $this->BTC($pending);
+        $authorizedTransactions = [];
+
+        foreach ($coins as $coin) {
+            $authorizedTransactions[$coin->abbr] = Transaction::listAuthorized($coin->id);
         }
-    }
 
-    /**
-     * Execute the console command.
-     *
-     * @param $id
-     * @return mixed
-     * @throws \Exception
-     */
-    public function connectionSendBTC($id)
-    {
         try {
-            $pending = Transaction::listUnique($id);
-            return $this->sendBTC($pending);
+
+            foreach ($authorizedTransactions as $coin_abbr => $transactionsList) {
+                $data = [];
+                foreach ($transactionsList as $transaction) {
+                    $data[] = [
+                        'fromAddress' => $transaction->wallet->address,
+                        'toAddress' => $transaction->toAddress,
+                        'fee' => $transaction->fee,
+                        'amount' => $transaction->amount,
+                        'balance' => sprintf("%.8f", $transaction->wallet->balance)
+                    ];
+                }
+
+                $tx = OffScreenController::post(EnumOperationType::FIRST_SIGN_TRANSACTION, $data, $coin_abbr);
+//                $tx = [
+//                    "txid" => "21c61bb437829fe68ae231bfe834176d21755b32b7a1a956cd6d6df9d6d84031",
+//                    "errors" => [
+//                        [
+//                            "fromAddress" => "3GvvqyKfaRQz7CctzvcLtLSF3JM98KVMR9",
+//                            "toAddress" => "3EXcfhsAmABCxeDozyc3KPJVgYnBMtYLXQ",
+//                            "fee" => "0.00122878",
+//                            "amount" => "0.07247000",
+//                            "balance" => "0.00000242",
+//                            "errors" => [
+//                                [
+//                                    'id' => 'err-546',
+//                                    'message' => 'Erro: Autenticidade não comprovada'
+//                                ],
+//                                [
+//                                    'id' => 'err-547',
+//                                    'message' => 'Erro: Balance da aplicação e core são diferentes'
+//                                ],
+//                                [
+//                                    'id' => 'err-548',
+//                                    'message' => 'Erro: Saldo insuficiente no momento'
+//                                ]
+//                            ],
+//                        ]
+//                    ],
+//                    "send" => [
+//                        [
+//                            "fromAddress" => "3L4qtkEoLEXTTEgrMYbqC5mBqUo7MCH6Yb",
+//                            "toAddress" => "18xShegQm6dCBNnpidsm2DoDCz8JraCYDq",
+//                            "fee" => "0.00122727",
+//                            "amount" => "0.50000000",
+//                            "balance" => "0.35661581"
+//                        ],
+//                        [
+//                            "fromAddress" => "36ZdjTU767kpWLLkw5RjbEcgktEYyTD734",
+//                            "toAddress" => "1N9PJA6tPY4MeTFUnTkNeAdQP7ayedWXg6",
+//                            "fee" => "0.00116796",
+//                            "amount" => "0.09000000",
+//                            "balance" => "0.00252614"
+//                        ]
+//                    ],
+//                    "feeDiff" => 0.0002729
+//                ];
+
+                if (count($tx['errors'])) {
+                    $this->proccessErrors($tx['errors']);
+                }
+
+                if (count($tx['send'])) {
+                    $this->proccessSent($tx['send'], $tx['txid']);
+                }
+
+                TransactionFee::create([
+                    'txid' => $tx['txid'],
+                    'is_paid' => false,
+                    'amount' => $tx['feeDiff'],
+                ]);
+
+            }
+
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
         }
     }
 
-    /**
-     * Envia transações baseadas em BitCoin
-     * @param type $pending
-     * @return bool
-     * @throws \Exception
-     */
-    private function BTC($pending)
+    private function proccessErrors($errors)
     {
-        if (!$this->_checkLimits($pending)) {
-            $pending->update([
-                'status' => EnumTransactionsStatus::ABOVELIMIT
-            ]);
+        foreach ($errors as $error) {
+            $transactionR = Transaction::whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::AUTHORIZED])
+                ->where([
+                    'toAddress' => $error['toAddress'],
+                    'fee' => $error['fee'],
+                    'amount' => $error['amount'],
+                ])->whereHas('wallet', function ($wallet) use ($error) {
+                    return $wallet->where('address', $error['fromAddress']);
+                })->first();
 
-            return false;
-        }
-
-        $pending->update([
-            'status' => EnumTransactionsStatus::AUTHORIZED
-        ]);
-    }
-
-    /**
-     *
-     * @param type $pending
-     * @throws \Exception
-     */
-    public function sendBTC($pending)
-    {
-        $wallet = UserWallet::findOrFail($pending->wallet_id);
-
-        try {
-            $coin_abbr = Coin::find($pending->coin_id)->abbr;
-            $data = [
-                'fromAddress' => $pending->address,
-                'toAddress' => $pending->toAddress,
-                'fee' => $pending->fee,
-                'amount' => $pending->amount,
-                'balance' => sprintf("%.8f", $wallet->balance)
-            ];
-
-            $tx = OffScreenController::post(EnumOperationType::FIRST_SIGN_TRANSACTION, $data, $coin_abbr);
-
-            if ($tx == 155) {
-                throw new \Exception(155);
+            if (!$transactionR) {
+                continue;
             }
 
-            $pending->update([
-                'tx' => $tx,
-                'error' => '',
-                'status' => EnumTransactionsStatus::SUCCESS
-            ]);
-        } catch (\Exception $ex) {
+            $_errors = '';
+            foreach ($error['errors'] as $_error) {
+                $_errors .= "(" . $_error['id'] . ") " . $_error['message'] . " / ";
 
-            if (env('CHECK_WALLETS_BALANCES')) {
-
-                if ($ex->getMessage() == 155) {
-                    $user = User::where([
-                        'id' => $wallet->user_id,
-                        'is_under_analysis' => false
-                    ])->first();
-
-                    if ($user) {
-                        $user->is_under_analysis = true;
-                        $user->save();
-
-                        $user->tokens()->each(function ($token) {
-                            $token->delete();
-                        });
-
-                        Mail::to($user->email)->send(new UnderAnalysisMail($user));
-                    }
+                if ($_error['id'] == "err-547") {
+                    $this->blockUser($transactionR);
                 }
             }
 
-            $pending->update([
-                'status' => EnumTransactionsStatus::ERROR,
-                'error' => 'Usuario em analise atualmente, transacao nao sera enviada ate o fim da analise.',
+            $transactionR->update([
+                'error' => $_errors,
+                'status' => EnumTransactionsStatus::ERROR
             ]);
         }
     }
 
-    public function sendTransactions()
+    private function proccessSent($transactions_sent, $txid)
     {
+        foreach ($transactions_sent as $sent) {
+            $transactionR = Transaction::whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::AUTHORIZED])
+                ->where([
+                    'toAddress' => $sent['toAddress'],
+                    'fee' => $sent['fee'],
+                    'amount' => $sent['amount'],
+                ])->whereHas('wallet', function ($wallet) use ($sent) {
+                    return $wallet->where('address', $sent['fromAddress']);
+                })->first();
 
-    }
+            if (!$transactionR) {
+                continue;
+            }
 
-    public function _checkLimits($pending)
-    {
-        $wallet = UserWallet::findOrFail($pending->wallet_id);
-
-        if ($wallet->user_id === env("NAVI_USER")) {
-            return true;
+            $transactionR->update([
+                'tx' => $txid,
+                'error' => '',
+                'status' => EnumTransactionsStatus::SUCCESS
+            ]);
         }
-
-        $user = User::find($wallet->user_id);
-        $limits = UserLevelLimit::where([
-            'user_level_id' => $user->user_level_id,
-            'coin_id' => $wallet->coin_id,
-            'type' => EnumUserLevelLimitType::EXTERNAL,
-        ])->first();
-        $auto = floatval($limits->limit_auto);
-        $amount = floatval($pending->amount);
-        return ($auto >= $amount) ? true : false;
     }
 
+    private function blockUser($transaction)
+    {
+        if (env('CHECK_WALLETS_BALANCES')) {
+
+            $user = User::where([
+                'id' => $transaction->user_id,
+                'is_under_analysis' => false
+            ])->first();
+
+            if ($user) {
+                $user->is_under_analysis = true;
+                $user->save();
+
+                $user->tokens()->each(function ($token) {
+                    $token->delete();
+                });
+
+                Mail::to($user->email)->send(new UnderAnalysisMail($user));
+            }
+        }
+    }
 }
