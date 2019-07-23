@@ -112,7 +112,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'username' => 'required|min:4|max:20|regex:/(^[A-Za-z0-9_]+$)+/',
+            'username' => 'required|min:4|max:20|unique:users,username|regex:/(^[A-Za-z0-9_]+$)+/',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|confirmed|min:6|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
             'phone' => 'required|numeric|min:8|unique:users',
@@ -120,6 +120,7 @@ class AuthController extends Controller
         ], [
             'username.required' => 'O username é obrigatório.',
             'username.regex' => 'O username só pode conter letras Maíusculas, mínusculas, números e _.',
+            'username.unique' => 'O username já está em uso, por favor escolha um diferente.',
             'phone.required' => 'O número de celular é obrigatório.',
             'phone.numeric' => 'O número de celular deve conter somente números e o ddd deve ser informado.',
             'phone.unique' => 'O telefone informado já está em uso.',
