@@ -95,6 +95,9 @@ class TransactionsSend extends Command
             return false;
         }
 
+        $pending->status = EnumTransactionsStatus::AUTHORIZED;
+        $pending->save();
+        
         $this->sendBTC($pending);
     }
 

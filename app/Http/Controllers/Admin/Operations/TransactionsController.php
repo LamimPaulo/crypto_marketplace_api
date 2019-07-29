@@ -230,7 +230,7 @@ class TransactionsController extends Controller
 
                 DB::commit();
                 return response([
-                    'message' => 'Transação aprovada.',
+                    'message' => 'Transação Interna aprovada.',
                 ], Response::HTTP_OK);
 
             }
@@ -244,7 +244,7 @@ class TransactionsController extends Controller
                 'transaction_id' => $transaction->id
             ]);
 
-            ActivityLogger::log(trans('messages.transaction.sent_blockchain'), $transaction->user_id);
+            ActivityLogger::log("Transação Aprovada", $transaction->user_id);
 
             DB::commit();
             return response([
