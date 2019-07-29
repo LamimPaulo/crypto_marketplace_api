@@ -39,11 +39,11 @@ class CoinQuoteController extends Controller
                 $last = CoinQuoteHist::where(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id])->orderBy('created_at', 'DESC')->first();
 
                 $brl_usd = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("BRL")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id]);
-                $brl_usd->average_quote = $result->data->rates->BRL;
+                $brl_usd->average_quote = 1 / $result->data->rates->BRL;
                 $brl_usd->last_quote = $last->average_quote ?? 0;
-                $usd_brl->buy_quote = $result->data->rates->BRL;
-                $usd_brl->sell_quote = $result->data->rates->BRL;
-                $usd_brl->save();
+                $brl_usd->buy_quote = 1 / $result->data->rates->BRL;
+                $brl_usd->sell_quote = 1 / $result->data->rates->BRL;
+                $brl_usd->save();
 
                 CoinQuoteHist::create([
                     'coin_id' => Coin::getByAbbr("BRL")->id,
