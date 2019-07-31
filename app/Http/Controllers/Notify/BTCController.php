@@ -67,10 +67,9 @@ class BTCController extends Controller
 
     public static function notify($data)
     {
-        DB::beginTransaction();
         try {
             $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toAddress', $data['toAddress'])->first();
-            if (is_null($transactionController)) {
+            if (!$transactionController) {
 
                 $wallet = UserWallet::where('address', $data['toAddress'])->first();
 
@@ -86,11 +85,9 @@ class BTCController extends Controller
                 $data['coin_id'] = $wallet->coin_id;
                 $data['wallet_id'] = $wallet->id;
                 $transactionsCreate = self::create($data);
-                DB::commit();
                 return $transactionsCreate;
             }
         } catch (\Exception $ex) {
-            DB::rollBack();
             throw new \Exception($ex->getMessage());
         }
     }
