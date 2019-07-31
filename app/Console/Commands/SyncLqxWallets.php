@@ -52,7 +52,7 @@ class SyncLqxWallets extends Command
         try {
 
             $wallets = UserWallet::where('coin_id', Coin::getByAbbr("LQXD")->id)
-                ->get()->makeVisible('user_id');
+                ->get();
 
             foreach ($wallets as $wallet) {
 
@@ -73,7 +73,7 @@ class SyncLqxWallets extends Command
                     ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
 
                 if (!$lqx_wallet) {
-                    UserWallet::create([
+                    $lqx_wallet = UserWallet::create([
                         'user_id' => $wallet->user_id,
                         'coin_id' => Coin::getByAbbr('LQX')->id,
                         'address' => $address,
