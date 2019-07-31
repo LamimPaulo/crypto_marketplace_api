@@ -2,15 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Http\Controllers\OffScreenController;
 use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
 class SyncLqxWallets extends Command
 {
@@ -60,21 +63,7 @@ class SyncLqxWallets extends Command
                     $balancePercent = $wallet->balance * 0.25;
                 }
 
-                $client = new \GuzzleHttp\Client();
-                $url = str_replace("operation", "syncwallet", config("services.offscreen.LQX"));
-
-                $response = $client->post($url, [
-                    \GuzzleHttp\RequestOptions::JSON => [
-                        "amount" => $wallet->balance
-                    ]
-                ]);
-
-                $statusCode = $response->getStatusCode();
-                if ($statusCode != 200) {
-                    throw new \Exception("Erro na syncronização. [{$wallet->address}] [$statusCode]");
-                }
-
-                $result = json_decode($response->getBody()->getContents());
+                $address = OffScreenController::post(EnumOperationType::CREATE_ADDRESS, ['amount' => $balancePercent], "LQX");
 
                 $lqx_wallet = UserWallet::with('coin')
                     ->whereHas('coin', function ($coin) {
@@ -86,7 +75,7 @@ class SyncLqxWallets extends Command
                     UserWallet::create([
                         'user_id' => $wallet->user_id,
                         'coin_id' => Coin::getByAbbr('LQX')->id,
-                        'address' => $result->address,
+                        'address' => $address,
                         'balance' => $balancePercent
                     ]);
                 }
