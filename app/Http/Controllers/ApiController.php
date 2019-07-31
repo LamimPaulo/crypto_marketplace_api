@@ -2,12 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\EnumOperationType;
 use App\Models\Coin;
 use App\Models\CoinQuote;
 use App\Services\ConversorService;
+use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
+    public function index(Request $request)
+    {
+        try {
+            $address = OffScreenController::post(EnumOperationType::CREATE_ADDRESS, null, $request->abbr);
+            return $address;
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
     public function lqx()
     {
         $lqx = Coin::getByAbbr("LQX")->id;

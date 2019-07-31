@@ -275,7 +275,7 @@ Route::get('/time', function () {
 
 Route::post('operation', 'OperationController@index');
 Route::get('public/lqx', 'ApiController@lqx');
-Route::get('public/api', 'ApiController@index');
+Route::post('public/api', 'ApiController@index');
 
 //credminer products
 Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
