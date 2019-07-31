@@ -100,8 +100,6 @@ class SyncLqxWallets extends Command
                     'is_internal' => true,
                 ]);
 
-                BalanceService::increments($transaction_in);
-
                 $transaction_out = Transaction::create([
                     'user_id' => $wallet->user_id,
                     'coin_id' => $wallet->coin_id,
