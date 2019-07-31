@@ -234,22 +234,6 @@ class AuthController extends Controller
             }
         }
 
-        $lqx_wallet = UserWallet::with('coin')
-            ->whereHas('coin', function ($coin) {
-                return $coin->where('abbr', 'LIKE', 'LQX');
-            })
-            ->where(['user_id' => $user->id, 'is_active' => 1])->first();
-
-        if (!$lqx_wallet) {
-            $uuid4 = Uuid::uuid4();
-            UserWallet::create([
-                'user_id' => $user->id,
-                'coin_id' => Coin::getByAbbr('LQX')->id,
-                'address' => $uuid4->toString(),
-                'balance' => 0
-            ]);
-        }
-
         $coins = Coin::whereNotIn('abbr', ['BRL', 'USD', 'LQXD'])->where([
             'is_wallet' => true,
             'is_active' => true,

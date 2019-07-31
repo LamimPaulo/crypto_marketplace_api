@@ -187,7 +187,6 @@ class TransactionsController extends Controller
 
             User::findOrFail($transaction->user_id);
 
-
             if ($transaction->is_internal) {
                 $to = UserWallet::where('address', $transaction->toAddress)->firstOrFail();
 
@@ -234,7 +233,6 @@ class TransactionsController extends Controller
                 ], Response::HTTP_OK);
 
             }
-
 
             $transaction->status = EnumTransactionsStatus::AUTHORIZED;
             $transaction->save();

@@ -122,8 +122,10 @@ class TransactionsController extends Controller
                 'is_internal' => $fee['is_internal'],
             ]);
 
-            $this->internalTransaction($transaction);
-            $this->internalPayment($transaction);
+            if($transaction->coin->abbr!="LQX") {
+                $this->internalTransaction($transaction);
+                $this->internalPayment($transaction);
+            }
 
             $transactionStatus = TransactionStatus::create([
                 'status' => $transaction->status,

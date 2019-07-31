@@ -51,12 +51,13 @@ class SyncLqxWallets extends Command
     {
         try {
 
-            $wallets = UserWallet::where('coin_id', Coin::getByAbbr("LQXD")->id)
+            $wallets = UserWallet::where([
+                'coin_id' => Coin::getByAbbr("LQXD")->id,
+                'sync' => false
+            ])
                 ->get();
 
             foreach ($wallets as $wallet) {
-
-                DB::beginTransaction();
 
                 $balancePercent = 0;
 
@@ -73,6 +74,8 @@ class SyncLqxWallets extends Command
                     ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
 
                 if (!$lqx_wallet) {
+                    DB::beginTransaction();
+
                     $lqx_wallet = UserWallet::create([
                         'user_id' => $wallet->user_id,
                         'coin_id' => Coin::getByAbbr('LQX')->id,
@@ -118,6 +121,9 @@ class SyncLqxWallets extends Command
                     ]);
 
                     BalanceService::decrements($transaction_out);
+
+                    $wallet->sync = 1;
+                    $wallet->save();
 
                     DB::commit();
                 }
