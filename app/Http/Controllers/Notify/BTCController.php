@@ -67,7 +67,7 @@ class BTCController extends Controller
 
     public static function notify($data)
     {
-        sleep(rand(1,5));
+        usleep(rand(1000000,5000000));//previne tx duplicadas :(
         try {
             $transactionController = Transaction::where('tx', '=', $data['txid'])->where('toAddress', $data['toAddress'])->first();
             if (!$transactionController) {
