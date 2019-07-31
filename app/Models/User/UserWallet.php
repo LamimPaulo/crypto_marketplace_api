@@ -11,7 +11,7 @@ class UserWallet extends Model
 {
     protected $fillable = ['balance', 'address', 'user_id', 'coin_id', 'type', 'conversion_priority', 'sync'];
 
-    protected $hidden = ['created_at', 'updated_at', 'user_id', 'coin_id'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     protected $appends = ['balance_rounded'];
 
