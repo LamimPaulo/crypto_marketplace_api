@@ -45,7 +45,7 @@ class GetCoreBalances extends Command
             'is_wallet' => true,
             'is_crypto' => true
         ])
-            ->where('id', '<>', Coin::getByAbbr('LQX')->id)->get();
+            ->where('id', '<>', Coin::getByAbbr('LQXD')->id)->get();
 
         foreach ($coins as $coin) {
             try {
