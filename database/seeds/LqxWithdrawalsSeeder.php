@@ -15,19 +15,19 @@ class LqxWithdrawalsSeeder extends Seeder
         if (!LqxWithdrawal::first()) {
             $dates = [
                 [
-                    'date' => '2019-07-19',
+                    'date' => '2019-07-31',
                     'is_executed' => true,
                     'percent' => 25,
                 ], [
-                    'date' => '2019-10-15',
+                    'date' => '2019-10-31',
                     'is_executed' => false,
                     'percent' => 25,
                 ], [
-                    'date' => '2020-01-15',
+                    'date' => '2020-01-31',
                     'is_executed' => false,
                     'percent' => 25,
                 ], [
-                    'date' => '2020-04-15',
+                    'date' => '2020-04-30',
                     'is_executed' => false,
                     'percent' => 25,
                 ],
