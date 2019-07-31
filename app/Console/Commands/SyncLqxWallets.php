@@ -79,47 +79,48 @@ class SyncLqxWallets extends Command
                         'address' => $address,
                         'balance' => $balancePercent
                     ]);
+
+
+                    $tx = Uuid::uuid4()->toString();
+
+                    $transaction_in = Transaction::create([
+                        'user_id' => $lqx_wallet->user_id,
+                        'coin_id' => $lqx_wallet->coin_id,
+                        'wallet_id' => $lqx_wallet->id,
+                        'toAddress' => $lqx_wallet->address,
+                        'amount' => $balancePercent,
+                        'status' => EnumTransactionsStatus::SUCCESS,
+                        'type' => EnumTransactionType::IN,
+                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
+                        'fee' => 0,
+                        'tax' => 0,
+                        'tx' => $tx,
+                        'info' => '',
+                        'error' => '',
+                        'is_internal' => true,
+                    ]);
+
+                    $transaction_out = Transaction::create([
+                        'user_id' => $wallet->user_id,
+                        'coin_id' => $wallet->coin_id,
+                        'wallet_id' => $wallet->id,
+                        'toAddress' => $lqx_wallet->address,
+                        'amount' => $balancePercent,
+                        'status' => EnumTransactionsStatus::SUCCESS,
+                        'type' => EnumTransactionType::OUT,
+                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
+                        'fee' => 0,
+                        'tax' => 0,
+                        'tx' => $tx,
+                        'info' => '',
+                        'error' => '',
+                        'is_internal' => true,
+                    ]);
+
+                    BalanceService::decrements($transaction_out);
+
+                    DB::commit();
                 }
-
-                $tx = Uuid::uuid4()->toString();
-
-                $transaction_in = Transaction::create([
-                    'user_id' => $lqx_wallet->user_id,
-                    'coin_id' => $lqx_wallet->coin_id,
-                    'wallet_id' => $lqx_wallet->id,
-                    'toAddress' => $lqx_wallet->address,
-                    'amount' => $balancePercent,
-                    'status' => EnumTransactionsStatus::SUCCESS,
-                    'type' => EnumTransactionType::IN,
-                    'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                    'fee' => 0,
-                    'tax' => 0,
-                    'tx' => $tx,
-                    'info' => '',
-                    'error' => '',
-                    'is_internal' => true,
-                ]);
-
-                $transaction_out = Transaction::create([
-                    'user_id' => $wallet->user_id,
-                    'coin_id' => $wallet->coin_id,
-                    'wallet_id' => $wallet->id,
-                    'toAddress' => $lqx_wallet->address,
-                    'amount' => $balancePercent,
-                    'status' => EnumTransactionsStatus::SUCCESS,
-                    'type' => EnumTransactionType::OUT,
-                    'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                    'fee' => 0,
-                    'tax' => 0,
-                    'tx' => $tx,
-                    'info' => '',
-                    'error' => '',
-                    'is_internal' => true,
-                ]);
-
-                BalanceService::decrements($transaction_out);
-
-                DB::commit();
             }
 
         } catch
