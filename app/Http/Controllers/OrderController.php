@@ -589,6 +589,11 @@ class OrderController extends Controller
 
     public function convertAmount(ConvertRequest $request)
     {
+
+        if ($request->base === 'LQX') {
+            return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
+        }
+
         if ($request->base === $request->quote) {
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }

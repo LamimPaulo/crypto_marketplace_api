@@ -110,7 +110,12 @@ class NanotechController extends Controller
 
     public function invest(NanotechRequest $request)
     {
-        $user = User::where('api_key', '=', $request->api_key)->firstOrFail();
+        $user = User::where('api_key', '=', $request->api_key)->first();
+
+        if (!$user) {
+            return response(['message' => "Key Code Inválido."], Response::HTTP_BAD_REQUEST);
+        }
+
         $type = NanotechType::findOrFail($request->type);
 
         if (!is_numeric($request->amount) OR $request->amount <= 0) {

@@ -62,7 +62,7 @@ class OperationController extends Controller
             INNER JOIN user_wallets ON user_wallets.id = transactions.wallet_id 
             WHERE transactions.toAddress = '" . $data['toAddress'] . "' 
             AND transactions.fee = '" . $data['fee'] . "' 
-            AND transactions.status IN (" . EnumTransactionsStatus::PENDING . " , " . EnumTransactionsStatus::ABOVELIMIT . ", " . EnumTransactionsStatus::ERROR . ", " . EnumTransactionsStatus::AUTHORIZED . " ) 
+            AND transactions.status IN (" . EnumTransactionsStatus::AUTHORIZED . " ) 
             AND transactions.type = " . EnumTransactionType::OUT . " 
             AND user_wallets.address = '" . $data['fromAddress'] . "' 
             AND transactions.amount = '" . $data['amount'] . "'";
