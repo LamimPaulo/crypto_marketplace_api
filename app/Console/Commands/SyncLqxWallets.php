@@ -52,9 +52,10 @@ class SyncLqxWallets extends Command
         try {
 
             $wallets = UserWallet::where('coin_id', Coin::getByAbbr("LQXD")->id)
-                ->get();
+                ->get()->makeVisible('user_id');
 
             foreach ($wallets as $wallet) {
+
                 DB::beginTransaction();
 
                 $balancePercent = 0;
