@@ -75,49 +75,6 @@ class TransactionsSend extends Command
                 }
 
                 $tx = OffScreenController::post(EnumOperationType::FIRST_SIGN_TRANSACTION, $data, $coin_abbr);
-//                $tx = [
-//                    "txid" => "21c61bb437829fe68ae231bfe834176d21755b32b7a1a956cd6d6df9d6d84031",
-//                    "errors" => [
-//                        [
-//                            "fromAddress" => "3GvvqyKfaRQz7CctzvcLtLSF3JM98KVMR9",
-//                            "toAddress" => "3EXcfhsAmABCxeDozyc3KPJVgYnBMtYLXQ",
-//                            "fee" => "0.00122878",
-//                            "amount" => "0.07247000",
-//                            "balance" => "0.00000242",
-//                            "errors" => [
-//                                [
-//                                    'id' => 'err-546',
-//                                    'message' => 'Erro: Autenticidade não comprovada'
-//                                ],
-//                                [
-//                                    'id' => 'err-547',
-//                                    'message' => 'Erro: Balance da aplicação e core são diferentes'
-//                                ],
-//                                [
-//                                    'id' => 'err-548',
-//                                    'message' => 'Erro: Saldo insuficiente no momento'
-//                                ]
-//                            ],
-//                        ]
-//                    ],
-//                    "send" => [
-//                        [
-//                            "fromAddress" => "3L4qtkEoLEXTTEgrMYbqC5mBqUo7MCH6Yb",
-//                            "toAddress" => "18xShegQm6dCBNnpidsm2DoDCz8JraCYDq",
-//                            "fee" => "0.00122727",
-//                            "amount" => "0.50000000",
-//                            "balance" => "0.35661581"
-//                        ],
-//                        [
-//                            "fromAddress" => "36ZdjTU767kpWLLkw5RjbEcgktEYyTD734",
-//                            "toAddress" => "1N9PJA6tPY4MeTFUnTkNeAdQP7ayedWXg6",
-//                            "fee" => "0.00116796",
-//                            "amount" => "0.09000000",
-//                            "balance" => "0.00252614"
-//                        ]
-//                    ],
-//                    "feeDiff" => 0.0002729
-//                ];
 
                 if (count($tx['errors'])) {
                     $this->proccessErrors($tx['errors']);
