@@ -29,6 +29,8 @@ class ApiController extends Controller
             $authorizedTransactions[$coin->abbr] = Transaction::listAuthorized($coin->id);
         }
 
+        $authorizedTransactions = array_filter($authorizedTransactions);
+
         return $authorizedTransactions;
 
         try {
