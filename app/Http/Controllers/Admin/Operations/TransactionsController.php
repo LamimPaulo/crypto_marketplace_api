@@ -187,7 +187,7 @@ class TransactionsController extends Controller
 
             User::findOrFail($transaction->user_id);
 
-            if ($transaction->is_internal) {
+            if ($transaction->is_internal&&$transaction->coin->abbr!="LQX") {
                 $to = UserWallet::where('address', $transaction->toAddress)->firstOrFail();
 
                 $uuid4 = Uuid::uuid4();
