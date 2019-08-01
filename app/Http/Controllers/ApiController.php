@@ -29,14 +29,15 @@ class ApiController extends Controller
             $authorizedTransactions[$coin->abbr] = Transaction::listAuthorized($coin->id);
         }
 
-        $authorizedTransactions = array_filter($authorizedTransactions);
-
-        return $authorizedTransactions;
-
         try {
 
             foreach ($authorizedTransactions as $coin_abbr => $transactionsList) {
                 $data = [];
+
+                if(!count($transactionsList)){
+                    continue;
+                }
+
                 foreach ($transactionsList as $transaction) {
                     $data[] = [
                         'fromAddress' => $transaction->wallet->address,

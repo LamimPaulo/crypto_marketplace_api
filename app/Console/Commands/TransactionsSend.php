@@ -63,6 +63,11 @@ class TransactionsSend extends Command
         try {
 
             foreach ($authorizedTransactions as $coin_abbr => $transactionsList) {
+
+                if (!count($transactionsList)) {
+                    continue;
+                }
+                
                 $data = [];
                 foreach ($transactionsList as $transaction) {
                     $data[] = [
