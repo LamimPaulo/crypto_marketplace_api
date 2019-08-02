@@ -52,7 +52,7 @@ class BalanceService
             }
         }
 
-        if ($to) {
+        if ($to && $address->coin->abbr != "LQX") {
             return [
                 'fromAddress' => $request->fromAddress,
                 'toAddress' => $request->toAddress,
