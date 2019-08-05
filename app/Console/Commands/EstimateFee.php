@@ -47,7 +47,7 @@ class estimateFee extends Command
                 'is_wallet' => true,
                 'is_active' => true
             ])
-                ->where('id', '<>', Coin::getByAbbr('LQX')->id)->get();
+                ->where('id', '<>', Coin::getByAbbr('LQXD')->id)->get();
 
             foreach ($coins as $coin) {
                 $fee_1 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 1, $coin->abbr);
