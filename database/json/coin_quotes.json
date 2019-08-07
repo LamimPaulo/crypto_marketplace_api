@@ -1,72 +1,189 @@
 [
   {
+    "id": "1",
     "coin_id": "1",
     "quote_coin_id": "2",
-    "average_quote": "14189.04",
-    "last_quote": "14189.04",
-    "buy_quote": "14231.61",
-    "sell_quote": "14146.47",
-    "created_at": "2019-03-19 18:32:36",
-    "updated_at": "2019-03-19 18:32:36"
+    "average_quote": "46254.62",
+    "last_quote": "46254.62",
+    "buy_quote": "48567.35",
+    "sell_quote": "43016.8",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "6/8/2019 12:15:04"
   },
   {
+    "id": "2",
     "coin_id": "2",
     "quote_coin_id": "2",
-    "average_quote": "1.00",
-    "last_quote": "1.00",
-    "buy_quote": "1.00",
-    "sell_quote": "1.00",
-    "created_at": null,
-    "updated_at": null
+    "average_quote": "1",
+    "last_quote": "1",
+    "buy_quote": "1",
+    "sell_quote": "1",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": ""
   },
   {
+    "id": "3",
     "coin_id": "3",
     "quote_coin_id": "2",
-    "average_quote": "3.80",
-    "last_quote": "3.80",
-    "buy_quote": "3.80",
-    "sell_quote": "3.80",
-    "created_at": null,
-    "updated_at": null
+    "average_quote": "3.8",
+    "last_quote": "3.2",
+    "buy_quote": "3.8",
+    "sell_quote": "3.8",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "23/6/2019 16:43:45"
   },
   {
+    "id": "4",
     "coin_id": "6",
     "quote_coin_id": "2",
-    "average_quote": "167.56",
-    "last_quote": "167.56",
-    "buy_quote": "169.23",
-    "sell_quote": "165.88",
-    "created_at": "2019-03-19 18:32:36",
-    "updated_at": "2019-03-19 18:32:36"
+    "average_quote": "420.91",
+    "last_quote": "425.59",
+    "buy_quote": "433.53",
+    "sell_quote": "391.44",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "6/8/2019 12:10:13"
   },
   {
+    "id": "5",
     "coin_id": "7",
     "quote_coin_id": "2",
-    "average_quote": "160.77",
-    "last_quote": "0.00",
-    "buy_quote": "162.38",
-    "sell_quote": "159.16",
-    "created_at": "2019-03-19 18:32:36",
-    "updated_at": "2019-03-19 18:32:36"
+    "average_quote": "1349.36",
+    "last_quote": "1349.36",
+    "buy_quote": "1389.85",
+    "sell_quote": "1254.91",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "6/8/2019 12:15:04"
   },
   {
+    "id": "6",
     "coin_id": "8",
     "quote_coin_id": "2",
     "average_quote": "249.63",
-    "last_quote": "0.00",
+    "last_quote": "0",
     "buy_quote": "252.13",
     "sell_quote": "247.14",
-    "created_at": "2019-03-19 18:32:36",
-    "updated_at": "2019-03-19 18:32:36"
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": ""
   },
   {
+    "id": "7",
     "coin_id": "9",
     "quote_coin_id": "2",
-    "average_quote": "494.12",
-    "last_quote": "494.12",
-    "buy_quote": "499.06",
-    "sell_quote": "489.18",
-    "created_at": "2019-03-19 18:32:36",
-    "updated_at": "2019-03-19 18:32:36"
+    "average_quote": "3.94",
+    "last_quote": "3.94",
+    "buy_quote": "3.94",
+    "sell_quote": "3.94",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "6/8/2019 12:15:03"
+  },
+  {
+    "id": "8",
+    "coin_id": "4",
+    "quote_coin_id": "2",
+    "average_quote": "373.01",
+    "last_quote": "373.01",
+    "buy_quote": "384.2",
+    "sell_quote": "346.9",
+    "created_at": "27/4/2019 19:45:10",
+    "updated_at": "6/8/2019 12:15:04"
+  },
+  {
+    "id": "11",
+    "coin_id": "3",
+    "quote_coin_id": "9",
+    "average_quote": "0.99",
+    "last_quote": "0.8",
+    "buy_quote": "0.99",
+    "sell_quote": "0.99",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": "23/6/2019 16:43:45"
+  },
+  {
+    "id": "17",
+    "coin_id": "9",
+    "quote_coin_id": "9",
+    "average_quote": "1",
+    "last_quote": "1",
+    "buy_quote": "1",
+    "sell_quote": "1",
+    "created_at": "15/4/2019 18:25:05",
+    "updated_at": ""
+  },
+  {
+    "id": "18",
+    "coin_id": "1",
+    "quote_coin_id": "9",
+    "average_quote": "11746.33",
+    "last_quote": "11746.33",
+    "buy_quote": "12333.64",
+    "sell_quote": "10924.08",
+    "created_at": "30/5/2019 19:46:00",
+    "updated_at": "6/8/2019 12:15:04"
+  },
+  {
+    "id": "19",
+    "coin_id": "4",
+    "quote_coin_id": "9",
+    "average_quote": "94.73",
+    "last_quote": "94.73",
+    "buy_quote": "97.57",
+    "sell_quote": "88.09",
+    "created_at": "30/5/2019 19:46:00",
+    "updated_at": "6/8/2019 12:15:04"
+  },
+  {
+    "id": "20",
+    "coin_id": "7",
+    "quote_coin_id": "9",
+    "average_quote": "342.67",
+    "last_quote": "342.67",
+    "buy_quote": "352.95",
+    "sell_quote": "318.68",
+    "created_at": "30/5/2019 19:46:00",
+    "updated_at": "6/8/2019 12:15:04"
+  },
+  {
+    "id": "21",
+    "coin_id": "6",
+    "quote_coin_id": "9",
+    "average_quote": "106.84",
+    "last_quote": "107.06",
+    "buy_quote": "110.05",
+    "sell_quote": "99.37",
+    "created_at": "30/5/2019 19:46:06",
+    "updated_at": "6/8/2019 12:10:13"
+  },
+  {
+    "id": "22",
+    "coin_id": "2",
+    "quote_coin_id": "9",
+    "average_quote": "0.25",
+    "last_quote": "3.94",
+    "buy_quote": "0.25",
+    "sell_quote": "0.25",
+    "created_at": "29/7/2019 17:25:04",
+    "updated_at": "6/8/2019 12:15:04"
+  },
+  {
+    "id": "23",
+    "coin_id": "10",
+    "quote_coin_id": "2",
+    "average_quote": "3.8",
+    "last_quote": "3.2",
+    "buy_quote": "3.8",
+    "sell_quote": "3.8",
+    "created_at": "30/5/2019 19:46:06",
+    "updated_at": "30/5/2019 19:46:06"
+  },
+  {
+    "id": "24",
+    "coin_id": "10",
+    "quote_coin_id": "9",
+    "average_quote": "0.99",
+    "last_quote": "0.8",
+    "buy_quote": "0.99",
+    "sell_quote": "0.99",
+    "created_at": "30/5/2019 19:46:06",
+    "updated_at": "30/5/2019 19:46:06"
   }
 ]

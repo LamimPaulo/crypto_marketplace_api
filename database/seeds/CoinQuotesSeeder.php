@@ -19,6 +19,7 @@ class CoinQuotesSeeder extends Seeder
         $data = json_decode($json);
         foreach ($data as $obj) {
             CoinQuote::create([
+                'id' => $obj->id,
                 'coin_id' => $obj->coin_id,
                 'quote_coin_id' => $obj->quote_coin_id,
                 'average_quote' => $obj->average_quote,
