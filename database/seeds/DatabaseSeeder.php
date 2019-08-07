@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         }
 
         if(!\App\Models\CoinQuote::first()){
-            $this->call(CoinQuoteSeeder::class);
+            $this->call(CoinQuotesSeeder::class);
         }
 
         if(!\App\Models\Coin::first()){

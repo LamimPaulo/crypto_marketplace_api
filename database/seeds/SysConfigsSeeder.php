@@ -21,7 +21,7 @@ class SysConfigsSeeder extends Seeder
                 'ip' => '192.168.10.1',
                 'secret' => 'root',
                 'time_gateway' => 30,
-                'investiment_return' => 5,
+                //investiment_return' => 5,
             ]
         ];
         foreach ($configs as $cfg) {
