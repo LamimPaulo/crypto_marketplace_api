@@ -393,33 +393,40 @@ class GatewayController extends Controller
     public function new(Request $request)
     {
         $request->validate([
-            'amount' => 'required',
-            'abbr' => [
+            'fiat_amount' => 'required|numeric',
+            'fiat_abbr' => [
                 'required',
                 Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr])
+            ],
+            'crypto_abbr' => [
+                'required',
+                Rule::in(Coin::where([
+                    'is_crypto' => true,
+                    'is_wallet' => true,
+                    'is_active' => true,
+                ])->pluck('abbr'))
             ]
         ]);
 
         try {
+
             DB::beginTransaction();
 
-            $amount = floatval($request->amount);
-            $gateway_coin = "BTC";
+            $amount = floatval($request->fiat_amount);
             $time = SysConfig::first()->time_gateway ?? 30;
             $tx = Uuid::uuid4()->toString();
 
-            //criar address na moeda necessária
-            $quote = $this->conversorService::FIAT2CRYPTO_MAX($amount, $gateway_coin, $request->abbr);
+            $quote = $this->conversorService::FIAT2CRYPTO_MAX($amount, $request->crypto_abbr, $request->fiat_abbr);
 
             $gateway = Gateway::create([
                 'gateway_api_key_id' => 0,
-                'coin_id' => Coin::getByAbbr($gateway_coin)->id,
-                'address' => $this->newAddress($request->abbr),
+                'coin_id' => Coin::getByAbbr($request->crypto_abbr)->id,
+                'address' => $this->newAddress($request->fiat_abbr),
                 'amount' => $quote['amount'],
                 'value' => $quote['quote'],
 
                 'user_id' => '',
-                'fiat_coin_id' => Coin::getByAbbr($request->abbr)->id,
+                'fiat_coin_id' => Coin::getByAbbr($request->fiat_abbr)->id,
                 'fiat_amount' => $amount,
                 'tx' => $tx,
                 'status' => EnumGatewayStatus::NEWW,
@@ -442,9 +449,9 @@ class GatewayController extends Controller
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
                 'amount' => $gateway->amount,
-                'fiat' => $request->abbr,
+                'fiat' => $request->fiat_abbr,
                 'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => strtolower(Coin::getByAbbr($gateway_coin)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
