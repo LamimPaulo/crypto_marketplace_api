@@ -32,8 +32,6 @@ class CoinSeeder extends Seeder
                 'is_active' => $obj->is_active,
                 'is_crypto' => $obj->is_crypto,
                 'icon' => $obj->icon,
-                'created_at' => $obj->created_at,
-                'updated_at' => $obj->updated_at,
                 'tx_explorer' => $obj->tx_explorer,
                 'wallet_order' => $obj->wallet_order,
                 'core_limit_balance' => $obj->core_limit_balance,
