@@ -93,6 +93,7 @@ class TransactionsSend extends Command
                     'txid' => $tx['txid'],
                     'is_paid' => false,
                     'amount' => $tx['feeDiff'],
+                    'coin_id' => Coin::getByAbbr($coin_abbr)->id
                 ]);
 
             }

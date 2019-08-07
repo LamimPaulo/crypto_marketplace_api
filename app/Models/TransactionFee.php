@@ -10,5 +10,6 @@ class TransactionFee extends Model
         'txid',
         'is_paid',
         'amount',
+        'coin_id'
     ];
 }
