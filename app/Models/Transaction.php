@@ -243,6 +243,7 @@ class Transaction extends Model
             'coin_id' => $coin_id
         ])->with(['wallet', 'user'])
             ->take(2)
+            ->orderBy('amount')
             ->get();
     }
 
