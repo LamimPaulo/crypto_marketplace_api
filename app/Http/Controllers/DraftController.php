@@ -291,15 +291,15 @@ class DraftController extends Controller
             $statuscode = $response->getStatusCode();
 
             if (401 === $statuscode) {
-                throw new \Exception('Key Inválida.');
+                throw new \Exception('Invalid Key.');
             }
 
             if (422 === $statuscode) {
-                throw new \Exception('Login não encontrado.');
+                throw new \Exception('Login Not Found.');
             }
 
             if (200 !== $statuscode && 201 !== $statuscode) {
-                throw new \Exception('Erro desconhecido [' . $statuscode . ']');
+                throw new \Exception('Unknown Error [' . $statuscode . ']');
             }
 
             $result = $response->getBody()->getContents();
@@ -319,7 +319,7 @@ class DraftController extends Controller
                 'tax' => 0,
                 'payment_at' => Carbon::now(),
                 'tx' => $uuid->toString(),
-                'info' => "Envio pra Login: '{$request->toAddress}'",
+                'info' => "Sent to Login: '{$request->toAddress}'",
                 'error' => '',
             ]);
 
@@ -328,12 +328,12 @@ class DraftController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            ActivityLogger::log('R$ Enviado para Credminer: ' . $request->toAddress, $transaction->id, Transaction::class, $transaction);
+            ActivityLogger::log('USD Sent to Credminer: ' . $request->toAddress, $transaction->id, Transaction::class, $transaction);
 
             $this->balanceService::decrements($transaction);
             DB::commit();
             return response([
-                'message' => 'R$ Enviado para Credminer: ' . $request->toAddress,
+                'message' => 'USD Sent to Credminer: ' . $request->toAddress,
                 'transaction' => $transaction,
                 'transactionStatus' => $transactionStatus
             ], Response::HTTP_CREATED);
