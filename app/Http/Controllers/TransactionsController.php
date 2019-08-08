@@ -84,7 +84,8 @@ class TransactionsController extends Controller
             $pending = Transaction::where([
                 'category' => EnumTransactionCategory::TRANSACTION,
                 'coin_id' => $from->coin_id,
-                'type' => EnumTransactionType::OUT
+                'type' => EnumTransactionType::OUT,
+                'user_id' => auth()->user()->id,
             ])->whereIn('status', [
                 EnumTransactionsStatus::PENDING,
                 EnumTransactionsStatus::PROCESSING,
@@ -138,7 +139,7 @@ class TransactionsController extends Controller
                 'is_internal' => $fee['is_internal'],
             ]);
 
-            if($transaction->coin->abbr!="LQX") {
+            if ($transaction->coin->abbr != "LQX") {
                 $this->internalTransaction($transaction);
                 $this->internalPayment($transaction);
             }
