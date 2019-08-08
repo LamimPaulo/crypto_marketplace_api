@@ -67,7 +67,7 @@ class TransactionsSend extends Command
                 if (!count($transactionsList)) {
                     continue;
                 }
-                
+
                 $data = [];
                 foreach ($transactionsList as $transaction) {
                     $data[] = [
@@ -87,15 +87,13 @@ class TransactionsSend extends Command
 
                 if (count($tx['send'])) {
                     $this->proccessSent($tx['send'], $tx['txid']);
+                    TransactionFee::create([
+                        'txid' => $tx['txid'],
+                        'is_paid' => false,
+                        'amount' => $tx['feeDiff'],
+                        'coin_id' => Coin::getByAbbr($coin_abbr)->id
+                    ]);
                 }
-
-                TransactionFee::create([
-                    'txid' => $tx['txid'],
-                    'is_paid' => false,
-                    'amount' => $tx['feeDiff'],
-                    'coin_id' => Coin::getByAbbr($coin_abbr)->id
-                ]);
-
             }
 
         } catch (\Exception $ex) {

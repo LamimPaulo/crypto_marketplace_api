@@ -242,6 +242,7 @@ class Transaction extends Model
             'category' => EnumTransactionCategory::TRANSACTION,
             'coin_id' => $coin_id
         ])->with(['wallet', 'user'])
+            ->take(2)
             ->get();
     }
 
