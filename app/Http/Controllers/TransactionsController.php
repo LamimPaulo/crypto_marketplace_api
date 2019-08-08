@@ -81,6 +81,22 @@ class TransactionsController extends Controller
                 throw new \Exception(trans('messages.coin.inactive'));
             }
 
+            $pending = Transaction::where([
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'coin_id' => $from->coin_id,
+                'type' => EnumTransactionType::OUT
+            ])->whereIn('status', [
+                EnumTransactionsStatus::PENDING,
+                EnumTransactionsStatus::PROCESSING,
+                EnumTransactionsStatus::ABOVELIMIT,
+                EnumTransactionsStatus::ERROR,
+                EnumTransactionsStatus::AUTHORIZED,
+            ])->first();
+
+            if ($pending) {
+                throw new \Exception("A transação não pode ser completada. Você já possui um envio pendente na fila, aguarde o processamento.");
+            }
+
             $request['fromAddress'] = $from->address;
             $fee = $this->balanceService->withDrawFee($request);
 
