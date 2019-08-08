@@ -138,6 +138,7 @@ class TransactionsController extends Controller
                 ->firstOrFail();
 
             $transaction->status = EnumTransactionsStatus::REVERSED;
+            $transaction->info = $request->reason;
             $transaction->save();
 
             TransactionStatus::create([
