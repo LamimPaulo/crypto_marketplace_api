@@ -41,4 +41,20 @@ class NanotechOperationController extends Controller
             }
         }
     }
+
+    public function list_pendingOperations()
+    {
+        return $pendingList = NanotechOperation::join('nanotech as nano', 'nano.id', '=', 'nanotech_operations.investment_id')
+        // ->where('nano.coin_id', 1)
+        ->where('nanotech_operations.user_id', auth()->user()->id)
+        ->where('nanotech_operations.status', EnumNanotechOperationStatus::PENDING)
+        ->where('nanotech_operations.type', '>=', EnumNanotechOperationType::WITHDRAWAL)
+        ->where('nanotech_operations.type', '<=' , EnumNanotechOperationType::PROFIT_WITHDRAWAL)
+        ->orderBy('nanotech_operations.created_at', 'ASC')
+        ->get();
+    }
 }
+
+// 
+
+

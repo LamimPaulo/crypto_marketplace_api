@@ -219,9 +219,11 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::group(['prefix' => 'nanotech', 'namespace' => 'Nanotech', 'as' => 'nanotech.'], function () {
         Route::get('/data/{type}', 'NanotechController@index');
         Route::get('/chart/{type}', 'NanotechController@chart');
-
+        
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
         Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
+
+        Route::get('/list', 'NanotechOperationController@list_pendingOperations');
     });
 
     Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
