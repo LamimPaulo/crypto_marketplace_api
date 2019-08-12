@@ -223,7 +223,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
         Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
 
-        Route::get('/list', 'NanotechOperationController@list_pendingOperations');
+        Route::get('/pendinglqx', 'NanotechOperationController@lqx_pendingOperations');
+        Route::get('/pendingbtc', 'NanotechOperationController@btc_pendingOperations');
     });
 
     Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
