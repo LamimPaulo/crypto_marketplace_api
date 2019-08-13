@@ -396,7 +396,7 @@ class OrderController extends Controller
 
     public function convertBuy(Request $request)
     {
-        if ($request->quote === 'LQXD') {
+        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
             return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -437,7 +437,7 @@ class OrderController extends Controller
 
     public function convertBuyAmount(ConvertRequest $request)
     {
-        if ($request->quote === 'LQXD') {
+        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
             return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -546,7 +546,7 @@ class OrderController extends Controller
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($request->base === 'LQXD') {
+        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
             return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -598,7 +598,7 @@ class OrderController extends Controller
     public function convertAmount(ConvertRequest $request)
     {
 
-        if ($request->base === 'LQXD') {
+        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
             return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
         }
 
