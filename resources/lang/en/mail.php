@@ -73,6 +73,11 @@ return [
         'subject' => 'Account Cancellation Request.',
         'main_message' => 'Your account has been successfully canceled. You do not need to reply to this message.',
         'message' => 'Cancellation was effected by your pin confirmation and security token on the date of receipt of this message.'
-    ]
+    ],
+    'reactivate_account' => [
+        'subject' => 'Account Reactivated successfully.',
+        'main_message' => 'Your account has been Successfully Reactivated. There are no need to reply to this message.',
+        'message' => 'If you have not made this request or are not our customer, please contact Liquidex immediately.'
+    ],
 
 ];
