@@ -300,9 +300,9 @@ class NanotechController extends Controller
     {
         $type = NanotechType::findOrFail($request->type);
 
-        if($type->coin_id==10){
-                return response(['message' => 'Retiradas Nanotech LQX só podem ser efetuadas 60 dias após investimento inicial.'], Response::HTTP_BAD_REQUEST);
-        }
+//        if($type->coin_id==10){
+//                return response(['message' => 'Retiradas Nanotech LQX só podem ser efetuadas 60 dias após investimento inicial.'], Response::HTTP_BAD_REQUEST);
+//        }
 
         if ($request->operation_type != EnumNanotechOperationType::TOTAL_WITHDRAWAL) {
             if (!is_numeric($request->amount) OR $request->amount <= 0) {
