@@ -117,7 +117,7 @@ class TransactionsController extends Controller
                 $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::TRANSACTION, $fee['is_internal']);
                 $valorDiario = floatval($valorDiario);
 
-                if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id, $fee['is_internal'])) {
+                if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id, $fee['is_internal'], $from->user_id)) {
                     throw new \Exception(trans('messages.transaction.value_exceeds_level_limits'));
                 }
             }
@@ -322,8 +322,9 @@ class TransactionsController extends Controller
     public function verifyBalance(Request $request)
     {
         $from = UserWallet::where(['address' => $request->address, 'user_id' => auth()->user()->id, 'type' => EnumUserWalletType::WALLET])->first();
+        $fee = $this->balanceService->withDrawFee($request);
 
-        $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::TRANSACTION);
+        $valorDiario = $this->getValueByDayUser($from->coin_id, EnumTransactionCategory::TRANSACTION, $fee['is_internal']);
         $valorDiario = floatval($valorDiario);
 
         $cotacao = $this->conversorService::BRLTAX2BTCMAX($request->amount);
@@ -331,7 +332,7 @@ class TransactionsController extends Controller
 
         $sumTaxas = $this->taxCoinService->sumTax($taxCoin);
 
-        $fee = $this->balanceService->withDrawFee($request);
+
         $sumValueTransaction = floatval($sumTaxas + $request->amount + $fee);
 
         if (!((float)$sumValueTransaction <= (float)$from->balance)) {
@@ -340,7 +341,7 @@ class TransactionsController extends Controller
             ], Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id)) {
+        if (!$this->_calcLimits($valorDiario, $request->amount, $from->coin_id, $fee['is_internal'], $from->user_id)) {
             return response([
                 'message' => trans('messages.transaction.value_exceeds_day_limits')
             ], Response::HTTP_NOT_ACCEPTABLE);
@@ -364,8 +365,12 @@ class TransactionsController extends Controller
         return $value;
     }
 
-    private function _calcLimits($valorDiario, $valorTransaction, $coin_id, $is_internal)
+    private function _calcLimits($valorDiario, $valorTransaction, $coin_id, $is_internal, $user_id)
     {
+        if ($user_id == env("NAVI_USER")) {
+            return true;
+        }
+
         $limits = UserLevelLimit::where(
             [
                 'user_level_id' => auth()->user()->user_level_id,
