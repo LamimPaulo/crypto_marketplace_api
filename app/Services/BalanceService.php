@@ -35,7 +35,7 @@ class BalanceService
 
         $user = User::findOrFail($address->user_id);
 
-        if (auth()->user()->id === env("NAVI_USER")) {
+        if (auth()->user()->id == env("NAVI_USER")) {
             $tax = 0;
         } else {
             $tax = TaxCoinService::sumTaxSendCrypto($user->user_level_id, $request->amount);
