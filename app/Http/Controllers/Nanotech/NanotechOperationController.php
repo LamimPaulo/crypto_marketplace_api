@@ -41,4 +41,28 @@ class NanotechOperationController extends Controller
             }
         }
     }
+
+    public function lqx_pendingOperations()
+    {
+        return $pendingLqx = NanotechOperation::where('nano.coin_id', 10)
+        ->where('nanotech_operations.user_id', auth()->user()->id)
+        ->where('nanotech_operations.status', EnumNanotechOperationStatus::PENDING)
+        ->where('nanotech_operations.type', '>=', EnumNanotechOperationType::WITHDRAWAL)
+        ->where('nanotech_operations.type', '<=' , EnumNanotechOperationType::PROFIT_WITHDRAWAL)
+        ->join('nanotech as nano', 'nanotech_operations.investment_id', '=', 'nano.id')
+        ->orderBy('nanotech_operations.created_at', 'ASC')
+        ->get('nanotech_operations.*');
+    }
+
+    public function btc_pendingOperations()
+    {
+        return $pendingBtc = NanotechOperation::where('nano.coin_id', 1)
+        ->where('nanotech_operations.user_id', auth()->user()->id)
+        ->where('nanotech_operations.status', EnumNanotechOperationStatus::PENDING)
+        ->where('nanotech_operations.type', '>=', EnumNanotechOperationType::WITHDRAWAL)
+        ->where('nanotech_operations.type', '<=' , EnumNanotechOperationType::PROFIT_WITHDRAWAL)
+        ->join('nanotech as nano', 'nanotech_operations.investment_id', '=', 'nano.id')
+        ->orderBy('nanotech_operations.created_at', 'ASC')
+        ->get('nanotech_operations.*');
+    }
 }
