@@ -607,7 +607,7 @@ class TransactionsController extends Controller
     {
         $wallet = UserWallet::findOrFail($transaction->wallet_id);
 
-        if ($wallet->user_id === env("NAVI_USER")) {
+        if ($wallet->user_id == env("NAVI_USER")) {
             return true;
         }
 

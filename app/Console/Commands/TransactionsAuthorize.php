@@ -82,7 +82,7 @@ class TransactionsAuthorize extends Command
     {
         $wallet = UserWallet::findOrFail($pending->wallet_id);
 
-        if ($wallet->user_id === env("NAVI_USER")) {
+        if ($wallet->user_id == env("NAVI_USER")) {
             return true;
         }
 
