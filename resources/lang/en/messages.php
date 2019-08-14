@@ -34,6 +34,7 @@ return [
     'account' => [
         'updated' => 'Account updated successfully.',
         'created' => 'Account created successfully.',
+        'reactivated' => 'Account reactivated successfuly.',
         'deleted' => 'Account deleted successfully.',
         'not_found' => 'No account found.',
 

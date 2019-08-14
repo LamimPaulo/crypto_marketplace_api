@@ -113,6 +113,7 @@ Route::group(['namespace' => 'Admin'], function () {
     ], function () {
         //user list
         Route::get('/list', 'UserController@list');
+        Route::get('/list/deactivated', 'UserController@listDeactivated');
         Route::post('/update-email', 'UserController@updateEmail')->middleware('can_execute:user_mail_change');
         //user hist
         Route::post('/hist', 'UserController@hist');
@@ -122,6 +123,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/deposits', 'UserController@deposits');
         //busca de usuarios
         Route::post('/search', 'UserController@search');
+        Route::post('/search/deactivated', 'UserController@searchDeactivated')->middleware('can_execute:user_reactivate');
         //listagem de usuários que nao completaram o cadastro
         Route::get('/incomplete', 'UserController@incomplete');
         //listagem de ações(logs) dos usuários
@@ -130,6 +132,8 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/documents', 'UserController@documents')->middleware('can_access:user_documents');
         //remove 2FA
         Route::get('/remove2fa/{email}', 'UserController@remove2fa')->middleware('can_execute:user_2fa_disable');
+        //reativa o usuario
+        Route::get('/reactivateuser/{email}', 'UserController@reactivateUser')->middleware('can_execute:user_reactivate');
         //levels
         Route::group([
             'prefix' => 'levels',

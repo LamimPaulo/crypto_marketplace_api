@@ -11,6 +11,7 @@ use App\Helpers\ActivityLogger;
 use App\Models\System\ActivityLogger as UserLogger;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyMail;
+use App\Mail\UserReactivatedMail;
 use App\Models\Funds\FundBalances;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
@@ -55,7 +56,23 @@ class UserController extends Controller
             $users = User::with(['level'])
                 ->where('email_verified_at', '<>', '')
                 ->where('is_admin', 0)
+                ->where('is_canceled', 0)
                 ->orderBy('created_at', 'DESC')->paginate(10);
+
+            return response($users
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function listDeactivated()
+    {
+        try {
+            $users = User::where('is_canceled', 1)
+                ->orderBy('updated_at', 'DESC')->paginate(10);
 
             return response($users
                 , Response::HTTP_OK);
@@ -88,12 +105,44 @@ class UserController extends Controller
 
         try {
             $users = User::with(['level'])
+                ->orderBy('name', 'ASC')
+                ->where('is_canceled', 0)
                 ->where('email_verified_at', '<>', '')
-                ->where('name', 'like', "%{$request->name}%")
-                ->orWhere('email', 'like', "%{$request->name}%")
-                ->orWhere('document', 'like', "%{$request->name}%")
-                ->orderBy('name', 'ASC')->get();
+                ->Where(function($q) use ($request){
+                    $q->where('name', 'like', "%{$request->name}%");
+                    $q->orWhere('email', 'like', "%{$request->name}%");
+                    $q->orWhere('document', 'like', "%{$request->name}%");
+                })
+                ->get();
 
+            return response(['data' => $users]
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function searchDeactivated(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|min:3'
+        ]);
+        
+
+        try {
+            $users = User::with(['level'])
+                ->orderBy('name', 'ASC')
+                ->where('is_canceled', 1)
+                ->where('email_verified_at', '<>', '')
+                ->Where(function($q) use ($request){
+                    $q->where('name', 'like', "%{$request->name}%");
+                    $q->orWhere('email', 'like', "%{$request->name}%");
+                    $q->orWhere('document', 'like', "%{$request->name}%");
+                })
+                ->get();
+                
             return response(['data' => $users]
                 , Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -380,6 +429,36 @@ class UserController extends Controller
             }
 
             throw new \Exception(trans('messages.2fa.not_activated'));
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function reactivateUser($email)
+    {
+
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+
+            if ($user->is_canceled) {
+
+                $user->is_canceled = false;
+                $user->save();
+
+                ActivityLogger::log(trans('messages.account.reactivated'), $user->id);
+                Mail::to($user->email)->send(new UserReactivatedMail($user));
+                
+                return response([
+                    'message' => trans('messages.account.reactivated'),
+                ], Response::HTTP_OK);
+                
+                
+            }
+
+            throw new \Exception(trans(''));
 
         } catch (\Exception $e) {
             return response([

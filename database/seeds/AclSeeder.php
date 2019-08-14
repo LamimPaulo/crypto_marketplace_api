@@ -97,6 +97,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'lqx_withdrawals',
                     'desc' => 'Retirada Automática LQX'
+                ], [
+                    'name' => 'user_reactivate',
+                    'desc' => 'Reativaçao de Usúario'
                 ],
             ];
 

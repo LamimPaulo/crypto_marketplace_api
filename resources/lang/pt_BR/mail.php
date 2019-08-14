@@ -73,5 +73,11 @@ return [
         'subject' => 'Solicitação de Cancelamento da Conta.',
         'main_message' => 'Sua conta foi cancelada com sucesso. Não é necessário responder esta mensagem.',
         'message' => 'O cancelamento foi efetuado mediante sua confirmação por pin e token de segurança na data de recebimento desta mensagem.'
-    ]
+    ],
+    'reactivate_account' => [
+        'subject' => 'Conta reativada com Sucesso.',
+        'main_message' => 'Sua conta foi reativada com sucesso. Não é necessário responder esta mensagem.',
+        'message' => 'Se você não fez esta solicitação ou não é nosso cliente, entre em contato imediatamente com a Liquidex.'
+    ],
+    
 ];

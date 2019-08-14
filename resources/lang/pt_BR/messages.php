@@ -34,6 +34,7 @@ return [
     'account' => [
         'created' => 'Conta criada com sucesso.',
         'deleted' => 'Conta excluída com sucesso.',
+        'reactivated' => 'Conta reativada com sucesso.',
         'updated' => 'Conta atualizada com sucesso.',
         'not_found' => 'Nenhuma Conta encontrada.',
 
