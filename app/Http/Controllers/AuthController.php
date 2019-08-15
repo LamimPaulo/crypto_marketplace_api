@@ -257,7 +257,7 @@ class AuthController extends Controller
                 UserWallet::create([
                     'user_id' => $user->id,
                     'coin_id' => $loop_coin->id,
-                    'address' => str_replace('bitcoincash:', '', $address),
+                    'address' => $address,
                     'balance' => 0
                 ]);
             }
