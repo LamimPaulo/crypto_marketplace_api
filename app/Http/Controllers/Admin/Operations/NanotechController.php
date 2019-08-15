@@ -181,7 +181,8 @@ class NanotechController extends Controller
         try {
             DB::beginTransaction();
 
-            $operation = NanotechOperation::where('type', $request->type)
+            $operation = NanotechOperation::with('investment')
+                ->where('type', $request->type)
                 ->where('id', $request->id)
                 ->where('status', EnumNanotechOperationStatus::PENDING)
                 ->firstOrFail();
@@ -191,6 +192,7 @@ class NanotechController extends Controller
 
             if (EnumNanotechOperationType::WITHDRAWAL == $operation->type) {
                 $operation->amount = abs($operation->amount);
+                $operation->type_id = $operation->investment->type_id;
                 Nanotech::increments($operation);
             }
 

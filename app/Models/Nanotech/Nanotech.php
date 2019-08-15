@@ -40,10 +40,12 @@ class Nanotech extends Model
 
     public static function increments($operation)
     {
-        return self::where('user_id', $operation->user_id)
-            ->where('coin_id', $operation->coin_id)
-            ->where('type_id', $operation->type_id)
-            ->increment('amount', (string)$operation->amount);
+        $nanotech = Nanotech::where([
+            'user_id' => $operation->user_id,
+            'type_id' => $operation->type_id
+        ]);
+
+        $nanotech->increment('amount', (string)$operation->amount);
     }
 
 }

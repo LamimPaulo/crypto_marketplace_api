@@ -38,9 +38,11 @@ class AuthController extends Controller
                 throw new \Exception('O código 2FA informado é inválido ou expirou. Tente novamente.');
             }
 
-            $user->tokens->each(function ($token) {
-                $token->delete();
-            });
+            if (env('APP_ENV') != 'local') {
+                $user->tokens->each(function ($token) {
+                    $token->delete();
+                });
+            }
 
             $req = Request::create('/oauth/token', 'POST', [
                 'grant_type' => 'password',

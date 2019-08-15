@@ -69,9 +69,11 @@ class AuthController extends Controller
                 }
             }
 
-            $user->tokens->each(function ($token) {
-                $token->delete();
-            });
+            if (env('APP_ENV') != 'local') {
+                $user->tokens->each(function ($token) {
+                    $token->delete();
+                });
+            }
 
             $req = Request::create('/oauth/token', 'POST', [
                 'grant_type' => 'password',
