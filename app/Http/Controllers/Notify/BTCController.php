@@ -72,7 +72,7 @@ class BTCController extends Controller
                 'tx' => $data['txid'],
                 'toAddress' => $data['toAddress']
             ])
-                ->whereNot('type', EnumTransactionType::OUT)
+                ->where('type', '<>',  EnumTransactionType::OUT)
                 ->first();
 
             if (!$transactionController) {
