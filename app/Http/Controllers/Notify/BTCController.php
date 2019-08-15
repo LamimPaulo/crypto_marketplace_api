@@ -17,6 +17,7 @@ use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\TaxCoinService;
 use Illuminate\Support\Facades\DB;
+use mysql_xdevapi\Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 //use App\Http\Controllers\WalletTempController;
@@ -40,30 +41,34 @@ class BTCController extends Controller
 
     public static function create($data)
     {
-        $data = [
-            'toAddress' => $data['toAddress'],
-            'blockHash' => "",
-            'amount' => $data['amount'],
-            'fee' => $data['fee'],
-            'tx' => $data['txid'],
-            'user_id' => $data['user_id'],
-            'coin_id' => $data['coin_id'],
-            'wallet_id' => $data['wallet_id'],
-            'vout' => $data['vout'],
-            'status' => EnumTransactionsStatus::PENDING,
-            'type' => EnumTransactionType::IN,
-            'category' => EnumTransactionCategory::TRANSACTION,
-            'confirmation' => $data['confirmations'] ?? 0,
-            'tax' => 0
-        ];
+        try {
+            $data = [
+                'toAddress' => $data['toAddress'],
+                'blockHash' => "",
+                'amount' => $data['amount'],
+                'fee' => $data['fee'],
+                'tx' => $data['txid'],
+                'user_id' => $data['user_id'],
+                'coin_id' => $data['coin_id'],
+                'wallet_id' => $data['wallet_id'],
+                'vout' => $data['vout'],
+                'status' => EnumTransactionsStatus::PENDING,
+                'type' => EnumTransactionType::IN,
+                'category' => EnumTransactionCategory::TRANSACTION,
+                'confirmation' => $data['confirmations'] ?? 0,
+                'tax' => 0
+            ];
 
-        $transaction = Transaction::create($data);
-        TransactionStatus::create([
-            'transaction_id' => $transaction->id,
-            'status' => $transaction->status
-        ]);
+            $transaction = Transaction::create($data);
+            TransactionStatus::create([
+                'transaction_id' => $transaction->id,
+                'status' => $transaction->status
+            ]);
 
-        return $transaction;
+            return $transaction;
+        }catch (\Exception $ex){
+            throw new \Exception($ex->getFile() . " => " . $ex->getLine());
+        }
     }
 
     public static function notify($data)
@@ -74,7 +79,7 @@ class BTCController extends Controller
                 'toAddress' => $data['toAddress'],
                 'vout' => $data['vout'],
             ])
-                ->where('type', '<>',  EnumTransactionType::OUT)
+                ->where('type', '<>', EnumTransactionType::OUT)
                 ->first();
 
             if (!$transactionController) {
@@ -96,7 +101,7 @@ class BTCController extends Controller
                 return $transactionsCreate;
             }
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+            throw new \Exception($ex->getFile() . " => " . $ex->getLine());
         }
     }
 
