@@ -67,7 +67,7 @@ class BTCController extends Controller
 
             return $transaction;
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getFile() . " => " . $ex->getLine());
+            throw new \Exception($ex->getMessage());
         }
     }
 
@@ -85,10 +85,6 @@ class BTCController extends Controller
             if (!$transactionController) {
 
                 $wallet = UserWallet::where('address', $data['toAddress'])->first();
-
-                if (!$wallet) {
-                    throw new \Exception($data['toAddress']);
-                }
 
                 if (!$wallet) {
                     $result = GatewayController::update($data);
