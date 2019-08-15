@@ -128,7 +128,7 @@ class GatewayController extends Controller
                 'coin_name' => $gateway->coin->name,
                 'fiat_amount' => $gateway->fiat_amount,
                 'fiat' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => strtolower(Coin::getByAbbr($request->abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => $request->abbr=='BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -451,7 +451,7 @@ class GatewayController extends Controller
                 'amount' => $gateway->amount,
                 'fiat' => $request->fiat_abbr,
                 'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => $request->crypto_abbr=='BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
