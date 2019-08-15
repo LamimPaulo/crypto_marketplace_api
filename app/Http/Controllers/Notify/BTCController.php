@@ -105,7 +105,7 @@ class BTCController extends Controller
                 return $transactionsCreate;
             }
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getFile() . " => " . $ex->getLine());
+            throw new \Exception($ex->getMessage());
         }
     }
 
