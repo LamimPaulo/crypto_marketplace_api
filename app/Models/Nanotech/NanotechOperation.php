@@ -36,7 +36,7 @@ class NanotechOperation extends Model
 
     public function getAmountLocalAttribute()
     {
-        return abs($this->amount);
+        return sprintf("%.8f",$this->amount);
     }
 
     public function getStatusNameAttribute()

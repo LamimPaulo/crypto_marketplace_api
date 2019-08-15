@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
 use App\Models\Nanotech\NanotechProfitPercent;
+use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
 
 class NanotechOperationController extends Controller
@@ -54,6 +55,29 @@ class NanotechOperationController extends Controller
         ->get('nanotech_operations.*');
     }
 
+    public function lqx_profitOperations()
+    {
+        try {
+            $profitLqx = NanotechOperation::select('nanotech_operations.*')
+                ->where('nano.coin_id', 10)
+                ->where('nanotech_operations.user_id', auth()->user()->id)
+                ->where('nanotech_operations.status', EnumNanotechOperationStatus::SUCCESS)
+                ->Where(function($q){
+                    $q->Where('nanotech_operations.type', EnumNanotechOperationType::PROFIT);
+                })  
+                ->join('nanotech as nano', 'nanotech_operations.investment_id', '=', 'nano.id')
+                ->orderBy('nanotech_operations.created_at', 'DESC')
+                ->paginate(5);
+                
+                return response($profitLqx, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'profitPaginate' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }  
+    }
+
     public function btc_pendingOperations()
     {
         return $pendingBtc = NanotechOperation::where('nano.coin_id', 1)
@@ -64,5 +88,28 @@ class NanotechOperationController extends Controller
         ->join('nanotech as nano', 'nanotech_operations.investment_id', '=', 'nano.id')
         ->orderBy('nanotech_operations.created_at', 'ASC')
         ->get('nanotech_operations.*');
+    }
+
+    public function btc_profitOperations()
+    {
+        try {
+            $profitLqx = NanotechOperation::select('nanotech_operations.*')
+                ->where('nano.coin_id', 1)
+                ->where('nanotech_operations.user_id', auth()->user()->id)
+                ->where('nanotech_operations.status', EnumNanotechOperationStatus::SUCCESS)
+                ->Where(function($q){
+                    $q->Where('nanotech_operations.type', EnumNanotechOperationType::PROFIT);
+                })  
+                ->join('nanotech as nano', 'nanotech_operations.investment_id', '=', 'nano.id')
+                ->orderBy('nanotech_operations.created_at', 'DESC')
+                ->paginate(5);
+                
+                return response($profitLqx, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'profitPaginate' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }  
     }
 }
