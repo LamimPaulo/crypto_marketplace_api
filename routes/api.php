@@ -222,9 +222,12 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
         Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
-
+        //listagem operaçoes pendentes
         Route::get('/pendinglqx', 'NanotechOperationController@lqx_pendingOperations');
         Route::get('/pendingbtc', 'NanotechOperationController@btc_pendingOperations');
+        //listagem operaçoes de lucro
+        Route::get('/profitlqx', 'NanotechOperationController@lqx_profitOperations');
+        Route::get('/profitbtc', 'NanotechOperationController@btc_profitOperations');
     });
 
     Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
