@@ -189,6 +189,11 @@ class GatewayController extends Controller
     {
         try {
             $gateway = self::show($transaction['toAddress']);
+
+            if(!$gateway){
+                return false;
+            }
+
             if ($gateway->status === EnumGatewayStatus::NEWW) {
                 $amount = abs($transaction['amount']);
                 $status = self::setStatus($gateway, $amount);
