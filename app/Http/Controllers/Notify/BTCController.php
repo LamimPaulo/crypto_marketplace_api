@@ -49,6 +49,7 @@ class BTCController extends Controller
             'user_id' => $data['user_id'],
             'coin_id' => $data['coin_id'],
             'wallet_id' => $data['wallet_id'],
+            'vout' => $data['vout'],
             'status' => EnumTransactionsStatus::PENDING,
             'type' => EnumTransactionType::IN,
             'category' => EnumTransactionCategory::TRANSACTION,
@@ -70,7 +71,8 @@ class BTCController extends Controller
         try {
             $transactionController = Transaction::where([
                 'tx' => $data['txid'],
-                'toAddress' => $data['toAddress']
+                'toAddress' => $data['toAddress'],
+                'vout' => $data['vout'],
             ])
                 ->where('type', '<>',  EnumTransactionType::OUT)
                 ->first();
