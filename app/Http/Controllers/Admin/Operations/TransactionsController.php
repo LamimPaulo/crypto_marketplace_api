@@ -64,6 +64,12 @@ class TransactionsController extends Controller
                 ->where('status', $request->status)
                 ->orderBy('created_at', 'ASC');
 
+            if (!empty($request->coin)) {
+                $transactions->whereHas('coin', function ($coin) use ($request) {
+                    return $coin->where('abbr', "{$request->coin}");
+                });
+            }    
+
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
                     return $user->where('name', 'LIKE', "%{$request->term}%")->orWhere('username', 'LIKE', "%{$request->term}%");
