@@ -277,6 +277,9 @@ Route::group(['namespace' => 'Admin'], function () {
         //configuracoes do sistema
         Route::get('/system', 'SystemConfigController@index')->middleware('can_access:system');
         Route::post('/system', 'SystemConfigController@update')->middleware('can_execute:system');
+        //configuracoes do suporte
+        Route::get('/support', 'SupportConfigController@index')->middleware('can_access:support_config');
+        Route::post('/support', 'SupportConfigController@update')->middleware('can_execute:support_config');
         //configurcoes nanotech
         Route::get('/nanotech', 'NanotechTypeController@index')->middleware('can_access:nanotech_configs');
         Route::post('/nanotech', 'NanotechTypeController@update')->middleware('can_execute:nanotech_configs');

@@ -41,9 +41,10 @@ class UserController extends Controller
                     return $level->with('product');
                 }
             ])->findOrFail(auth()->user()->id);
+
             return response([
                 'message' => trans('messages.general.success'),
-                'user' => $user
+                'user' => $user,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([

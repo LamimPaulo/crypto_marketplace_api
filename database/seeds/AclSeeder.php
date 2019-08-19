@@ -100,6 +100,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'user_reactivate',
                     'desc' => 'Reativaçao de Usúario'
+                ], [
+                    'name' => 'support_config',
+                    'desc' => 'Configurações gerais no suporte'
                 ],
             ];
 
