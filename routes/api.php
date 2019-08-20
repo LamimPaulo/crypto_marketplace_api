@@ -97,6 +97,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
             Route::post('/message', 'UserTicketController@storeMessage');
             Route::get('/status', 'UserTicketController@status');
             Route::get('/departments', 'UserTicketController@departments');
+            Route::get('/config', 'UserTicketController@config');
         });
 
         Route::post('/cancel', 'UserController@cancel')->middleware(['pincheck', 'tokencheck']);

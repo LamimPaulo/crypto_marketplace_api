@@ -7,8 +7,9 @@ use App\Enum\EnumUserTicketsStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserTicketMessageRequest;
 use App\Http\Requests\UserTicketRequest;
-use App\Models\User\UserTicket;
 use App\Models\User\UserTicketMessage;
+use App\Models\User\UserTicket;
+use App\Models\SupportConfig;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
@@ -112,6 +113,21 @@ class UserTicketController extends Controller
             DB::rollBack();
             return response([
                 'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function config() 
+    {
+        try {
+            $config = SupportConfig::first();
+
+        return response([
+            'config' => $config
+        ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
