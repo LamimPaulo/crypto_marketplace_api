@@ -64,7 +64,8 @@ class ProductController extends Controller
                 'tx' => Uuid::uuid4()->toString(),
                 'info' => 'Compra de Keycode: ' . $level->name,
                 'error' => '',
-            ]);
+                'product_id' => $request->level_id,
+                ]);
 
             $user->user_level_id = $request->level_id;
             $user->save();
@@ -126,6 +127,7 @@ class ProductController extends Controller
                 'tx' => Uuid::uuid4()->toString(),
                 'info' => 'Compra de Keycode: ' . $level->name,
                 'error' => '',
+                'product_id' => $request->level_id,
             ]);
 
             $user->user_level_id = $request->level_id;
@@ -188,6 +190,7 @@ class ProductController extends Controller
                 'tx' => Uuid::uuid4()->toString(),
                 'info' => 'Keycode Purchase: ' . $level->name,
                 'error' => '',
+                'product_id' => $request->level_id,
             ]);
 
             $user->user_level_id = $request->level_id;
