@@ -112,6 +112,7 @@ class UserController extends Controller
                     $q->where('name', 'like', "%{$request->name}%");
                     $q->orWhere('email', 'like', "%{$request->name}%");
                     $q->orWhere('document', 'like', "%{$request->name}%");
+                    $q->orWhere('api_key', 'like', "%{$request->name}%");
                 })
                 ->get();
 
