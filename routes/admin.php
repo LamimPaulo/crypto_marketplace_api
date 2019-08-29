@@ -140,7 +140,9 @@ Route::group(['namespace' => 'Admin'], function () {
             'middleware' => 'can_access:levels'
         ], function () {
             Route::get('/', 'UserLevelController@index');
+            Route::post('/report', 'UserLevelController@soldReport');
             Route::get('/enum-types', 'UserLevelController@enumTypes');
+            Route::post('/sold', 'UserLevelController@soldList');
             Route::post('/store', 'UserLevelController@store')->middleware('can_execute:levels');
             Route::post('/update', 'UserLevelController@update')->middleware('can_execute:levels');
         });

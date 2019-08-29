@@ -65,8 +65,8 @@ class Transaction extends Model
         'price',
         'market',
         'payment_at',
-        'is_internal',
         'vout'
+        'product_id'
     ];
 
     protected $hidden = [
