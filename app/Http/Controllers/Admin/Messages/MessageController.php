@@ -188,12 +188,23 @@ class MessageController extends Controller
         }
     }
 
-    public function userList()
+    public function userList(Request $request)
     {
         try {
-            $users = User::where('email_verified_at', '<>', '')
+            if($request->term != null){
+                $users = User::where('email_verified_at', '<>', '')
+                    ->where('is_admin', 0)
+                    ->where(function($q) use($request){
+                        $q->where('name', 'LIKE', "%{$request->term}%")
+                        ->orWhere('username', 'LIKE', "%{$request->term}%");
+                    })
+                    ->orderBy('name')->get();
+            } else{
+                $users = User::where('email_verified_at', '<>', '')
                 ->where('is_admin', 0)
+                ->limit(1)
                 ->orderBy('name')->get();
+            }
 
             return response($users
                 , Response::HTTP_OK);
