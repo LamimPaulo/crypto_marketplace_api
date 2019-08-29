@@ -65,7 +65,7 @@ class Transaction extends Model
         'price',
         'market',
         'payment_at',
-        'vout'
+        'vout',
         'product_id'
     ];
 
