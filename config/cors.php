@@ -25,7 +25,7 @@ if (env('APP_ENV') == 'local') {
 return [
 
     'supportsCredentials' => false,
-    'allowedOrigins' => ['liquidex.com.br'],
+    'allowedOrigins' => ['https://exchange.liquidex.com.br/*','https://admin.liquidex.com.br/*'],
     'allowedHeaders' => ['*'],
     'allowedMethods' => ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
     'exposedHeaders' => [],
