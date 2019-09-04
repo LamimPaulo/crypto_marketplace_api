@@ -9,23 +9,10 @@
 |
 */
 
-
-if (env('APP_ENV') == 'local') {
-    return [
-
-        'supportsCredentials' => false,
-        'allowedOrigins' => ['*'],
-        'allowedHeaders' => ['*'],
-        'allowedMethods' => ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
-        'exposedHeaders' => [],
-        'maxAge' => 0,
-
-    ];
-}
 return [
 
     'supportsCredentials' => false,
-    'allowedOrigins' => ['https://exchange.liquidex.com.br/*','https://admin.liquidex.com.br/*'],
+    'allowedOrigins' => ['*'],
     'allowedHeaders' => ['*'],
     'allowedMethods' => ['*'], // ex: ['GET', 'POST', 'PUT',  'DELETE']
     'exposedHeaders' => [],
