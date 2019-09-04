@@ -49,13 +49,13 @@ class TradesExecution extends Command
     public function handle()
     {
         $this->updateTrades();
-        sleep(10);
+        sleep(2);
         $this->updateTrades();
-        sleep(10);
+        sleep(2);
         $this->updateTrades();
-        sleep(10);
+        sleep(2);
         $this->updateTrades();
-        sleep(10);
+        sleep(2);
         $this->updateTrades();
     }
 

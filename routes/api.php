@@ -271,6 +271,7 @@ Route::group(['prefix' => 'payments', 'middleware' => 'gateway'], function () {
 
 //verificar validade da api key
 Route::post('/payments/check-key', 'GatewayController@checkKey');
+Route::get('/comparison', 'Exchange\ExchangesController@comparison');
 
 Route::get('/uuid', function () {
 

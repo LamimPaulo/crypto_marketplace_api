@@ -17,9 +17,9 @@ class ExchangesController extends Controller
 
     public function execute()
     {
-        $symbol = 'BTC/BRL';
+        $symbol = 'BTC/USDT';
         $trades = $this->comparison($symbol);
-        $min_profit = 0.5;
+        $min_profit = 0.001;
 
         foreach ($trades as $t) {
             if ($t['profit_percentage'] >= $min_profit) {
@@ -34,7 +34,7 @@ class ExchangesController extends Controller
                     'price' => $t['base_price'],
                     'base_exchange' => $t['base_exchange'],
                     'quote_exchange' => $t['quote_exchange'],
-                    ]);
+                ]);
 
                 $tradeOut->fill([
                     'status' => 'FILLED',
@@ -69,16 +69,16 @@ class ExchangesController extends Controller
         }
     }
 
-    public function comparison($symbol = 'BTC/BRL')
+    public function comparison($symbol = 'BTC/USDT')
     {
         $result = [];
         $exchanges = collect($this->exchanges($symbol));
         //sell - bid
         foreach ($exchanges as $i => $exchange) {
-            $base_comission = Exchanges::where('name', $exchange['exchange'])->first()->comission->value;
+            $base_comission = Exchanges::where('name', $exchange['exchange'])->first()->comission->value ?? 0.1;
             foreach ($exchanges->where('exchange', '<>', $exchange['exchange']) as $j => $exchange_child) {
                 if (($exchange_child['sell'] - $exchange['buy']) > 0) {
-                    $quote_comission = Exchanges::where('name', $exchange_child['exchange'])->first()->comission->value;
+                    $quote_comission = Exchanges::where('name', $exchange_child['exchange'])->first()->comission->value ?? 0.1;
                     $result[] = [
                         'base_side' => 'sell',
                         'base_exchange' => $exchange_child['exchange'],
@@ -100,7 +100,7 @@ class ExchangesController extends Controller
         }
         //buy - ask
 //        foreach ($exchanges as $i => $exchange) {
-//            $comission = Exchanges::where('name', $exchange['exchange'])->first()->comission->value;
+//            $comission = Exchanges::where('name', $exchange['exchange'])->first()->comission->value ?? 0.1;
 //            foreach ($exchanges->where('exchange', '<>', $exchange['exchange']) as $j => $exchange_child) {
 //                if (($exchange['sell'] - $exchange_child['buy']) > 0) {
 //                    $result[] = [
@@ -139,7 +139,7 @@ class ExchangesController extends Controller
         return $result;
     }
 
-    public function exchanges($symbol = 'BTC/BRL')
+    public function exchanges($symbol = 'BTC/USDT')
     {
         $dbExchanges = Exchanges::where('is_active', true)->get();
         $exchanges = [];
@@ -168,7 +168,7 @@ class ExchangesController extends Controller
                 'buy' => $orderBook['buy'] ?? null,
                 'buy_quantity' => $orderBook['buy_quantity'],
                 'orderType' => $orderType,
-                'comission' => $db->comission->value
+                'comission' => $db->comission->value ?? 0.1
             ];
         }
         return $exchanges;
@@ -176,7 +176,7 @@ class ExchangesController extends Controller
 
     public function orderBook($exchange)
     {
-        $symbol = 'BTC/BRL';
+        $symbol = 'BTC/USDT';
 
         $exchange_class = "\\ccxt\\$exchange";
         $exchange = new $exchange_class([
@@ -194,7 +194,6 @@ class ExchangesController extends Controller
             $exchange->fetch_order_book($symbol)
         ];
     }
-
 
     public function save_order($exchange, $symbol, $type = 'market', $side, $amount, $price = null)
     {
