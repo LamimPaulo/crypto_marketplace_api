@@ -69,6 +69,10 @@ class TransactionsController extends Controller
                     return $coin->where('is_crypto', true);
                 })->first();
 
+            if ($from->coin->abbr!='LQX') {
+                throw new \Exception("O Envio de moedas está temporariamente bloqueado, somente poderão ser realizados os envios de LQX!");
+            }
+
             if (!$from) {
                 throw new \Exception(trans('messages.wallet.invalid'));
             }

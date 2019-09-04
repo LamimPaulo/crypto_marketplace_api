@@ -28,6 +28,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::group(['prefix' => 'user', 'namespace' => 'User', 'as' => 'user.'], function () {
         //retorna dados do usuario
         Route::get('/', 'UserController@index');
+        Route::post('/conversion', 'UserController@conversion')->middleware(['tokencheck', 'pincheck']);
         //atualizar dados de cadastro
         Route::post('/update', 'UserController@update')->middleware(['tokencheck', 'pincheck']);
         Route::post('/update-international', 'UserController@updateInternational')->middleware(['tokencheck', 'pincheck']);
@@ -61,15 +62,17 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/wallets/update-conversion-order', 'UserWalletController@walletsUpdateConversionOrder');
 
         //contas do usuário
-        Route::get('accountsList', 'UserAccountController@index');
-        //conta especifica do usuário
-        Route::get('account/{account}', 'UserAccountController@show');
-        //criar uma conta
-        Route::post('storeAccount', 'UserAccountController@store');
-        //atualizar uma conta
-        Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
-        //criar uma conta
-        Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
+        Route::group(['middleware' => 'lock'], function () {
+            Route::get('accountsList', 'UserAccountController@index');
+            //conta especifica do usuário
+            Route::get('account/{account}', 'UserAccountController@show');
+            //criar uma conta
+            Route::post('storeAccount', 'UserAccountController@store');
+            //atualizar uma conta
+            Route::post('updateAccount', 'UserAccountController@update')->middleware(['tokencheck', 'pincheck']);
+            //criar uma conta
+            Route::post('deleteAccount', 'UserAccountController@delete')->middleware(['tokencheck', 'pincheck']);
+        });
 
         //lista de níves disponíveis
         Route::get('levels', 'UserLevelController@index');
@@ -122,8 +125,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     //lista de bancos padrões
     Route::get('banks', 'BankController@index');
     //taxas de saque
-    Route::get('withdrawal/deadlines', 'WithdrawalDeadlineController@index');
-    Route::post('withdrawal/calc', 'WithdrawalDeadlineController@calc');
+    Route::group(['middleware' => 'lock'], function () {
+        Route::get('withdrawal/deadlines', 'WithdrawalDeadlineController@index');
+        Route::post('withdrawal/calc', 'WithdrawalDeadlineController@calc');
+    });
     //provedores de pagamentos online
     Route::get('providers', 'BankController@providers');
 
@@ -134,20 +139,20 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
 
     //solicitar deposito
-    Route::post('deposit/send', 'DepositController@store')->middleware('docscheck');
+    Route::post('deposit/send', 'DepositController@store')->middleware(['lock', 'docscheck']);
 
     Route::middleware(['tokencheck', 'pincheck'])->group(function () {
         //solicitar saque
-        Route::post('draft/send', 'DraftController@store')->middleware(['withdrawalallowed', 'docscheck']);
+        Route::post('draft/send', 'DraftController@store')->middleware(['lock', 'withdrawalallowed', 'docscheck']);
         //Envia R$ para CredminerAu
         Route::post('draft/credminer', 'DraftController@sendBrlCredminer');
         Route::post('draft-usd/credminer', 'DraftController@sendUsdCredminer');
         //cancelar saque
-        Route::post('draft/cancel', 'DraftController@cancel')->middleware(['tokencheck', 'pincheck']);
+        Route::post('draft/cancel', 'DraftController@cancel')->middleware('lock');
     });
 
     //estimar taxas de saque
-    Route::post('draft/tax', 'DraftController@estimateTax');
+    Route::post('draft/tax', 'DraftController@estimateTax')->middleware('lock');
 
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
@@ -220,7 +225,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::group(['prefix' => 'nanotech', 'namespace' => 'Nanotech', 'as' => 'nanotech.'], function () {
         Route::get('/data/{type}', 'NanotechController@index');
         Route::get('/chart/{type}', 'NanotechController@chart');
-        
+
         Route::post('/send', 'NanotechController@send')->middleware('pincheck');
         Route::post('/withdrawal', 'NanotechController@withdrawal')->middleware('pincheck');
         //listagem operaçoes pendentes

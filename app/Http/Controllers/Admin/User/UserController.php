@@ -22,7 +22,6 @@ use App\Models\User\UserEmailChange;
 use App\Models\User\UserWallet;
 use App\Services\PermissionService;
 use App\User;
-use App\UserRole;
 use App\VerifyUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -108,7 +107,7 @@ class UserController extends Controller
                 ->orderBy('name', 'ASC')
                 ->where('is_canceled', 0)
                 ->where('email_verified_at', '<>', '')
-                ->Where(function($q) use ($request){
+                ->Where(function ($q) use ($request) {
                     $q->where('name', 'like', "%{$request->name}%");
                     $q->orWhere('email', 'like', "%{$request->name}%");
                     $q->orWhere('document', 'like', "%{$request->name}%");
@@ -130,20 +129,20 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|min:3'
         ]);
-        
+
 
         try {
             $users = User::with(['level'])
                 ->orderBy('name', 'ASC')
                 ->where('is_canceled', 1)
                 ->where('email_verified_at', '<>', '')
-                ->Where(function($q) use ($request){
+                ->Where(function ($q) use ($request) {
                     $q->where('name', 'like', "%{$request->name}%");
                     $q->orWhere('email', 'like', "%{$request->name}%");
                     $q->orWhere('document', 'like', "%{$request->name}%");
                 })
                 ->get();
-                
+
             return response(['data' => $users]
                 , Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -451,12 +450,12 @@ class UserController extends Controller
 
                 ActivityLogger::log(trans('messages.account.reactivated'), $user->id);
                 Mail::to($user->email)->send(new UserReactivatedMail($user));
-                
+
                 return response([
                     'message' => trans('messages.account.reactivated'),
                 ], Response::HTTP_OK);
-                
-                
+
+
             }
 
             throw new \Exception(trans(''));

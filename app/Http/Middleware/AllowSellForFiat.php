@@ -24,13 +24,14 @@ class AllowSellForFiat
             $quote = Coin::getByAbbr($request->quote)->is_crypto;
             $base = Coin::getByAbbr($request->base)->is_crypto;
 
-            if(!$quote) {
-                if (!$level->is_allowed_sell_for_fiat) {
-                    throw new \Exception(trans('messages.products.not_allowed_sell_by_fiat'));
-                }
+            if (!$quote) {
+//                if (!$level->is_allowed_sell_for_fiat) {
+//                throw new \Exception(trans('messages.products.not_allowed_sell_by_fiat'));
+//                }
+                throw new \Exception("Esta funcionalidade não está disponível no momento.");
             }
 
-            if(!$base) {
+            if (!$base) {
                 if (!$level->is_allowed_buy_with_fiat) {
                     throw new \Exception(trans('messages.products.not_allowed_buy_with_fiat'));
                 }

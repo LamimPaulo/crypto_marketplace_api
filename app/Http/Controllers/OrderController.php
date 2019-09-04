@@ -539,8 +539,7 @@ class OrderController extends Controller
         }
     }
 
-    public
-    function convert(ConvertRequest $request)
+    public function convert(ConvertRequest $request)
     {
         if ($request->base === $request->quote) {
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);

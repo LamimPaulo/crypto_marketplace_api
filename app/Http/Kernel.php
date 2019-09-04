@@ -84,6 +84,7 @@ class Kernel extends HttpKernel
         'nationalUserNotAllowed' => Middleware\NationalUserNotAllowed::class,
         'can_access' => Middleware\CanAccess::class,
         'can_execute' => Middleware\CanExecute::class,
+        'lock' => Middleware\LockTransactions::class,
     ];
 
     /**
