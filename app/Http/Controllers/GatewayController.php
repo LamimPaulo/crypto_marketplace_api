@@ -411,7 +411,7 @@ class GatewayController extends Controller
             $gateway = Gateway::create([
                 'gateway_api_key_id' => 0,
                 'coin_id' => Coin::getByAbbr($request->crypto_abbr)->id,
-                'address' => $this->newAddress($request->fiat_abbr),
+                'address' => $this->newAddress($request->crypto_abbr),
                 'amount' => $quote['amount'],
                 'value' => $quote['quote'],
 
@@ -447,7 +447,7 @@ class GatewayController extends Controller
             DB::rollBack();
             return response([
                 'status' => 'error',
-                'message' => $ex->getMessage() . ' - ' . $ex->getLine(). ' - ' . $ex->getTraceAsString()
+                'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
