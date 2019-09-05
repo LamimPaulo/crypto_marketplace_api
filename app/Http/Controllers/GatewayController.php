@@ -447,7 +447,7 @@ class GatewayController extends Controller
             DB::rollBack();
             return response([
                 'status' => 'error',
-                'message' => $ex->getMessage()
+                'message' => $ex->getMessage() . ' - ' . $ex->getLine(). ' - ' . $ex->getTraceAsString()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
