@@ -9,6 +9,7 @@ use App\Enum\EnumGatewayType;
 use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
+use App\Http\Requests\CredminerGatewayRequest;
 use App\Models\Coin;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
@@ -395,24 +396,8 @@ class GatewayController extends Controller
         }
     }
 
-    public function new(Request $request)
+    public function new(CredminerGatewayRequest $request)
     {
-        $request->validate([
-            'fiat_amount' => 'required|numeric',
-            'fiat_abbr' => [
-                'required',
-                Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr])
-            ],
-            'crypto_abbr' => [
-                'required',
-                Rule::in(Coin::where([
-                    'is_crypto' => true,
-                    'is_wallet' => true,
-                    'is_active' => true,
-                ])->pluck('abbr'))
-            ]
-        ]);
-
         try {
 
             DB::beginTransaction();
