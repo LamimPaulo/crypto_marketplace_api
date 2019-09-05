@@ -123,13 +123,13 @@ class GatewayController extends Controller
 
             return response([
                 'status' => 'success',
-                'payment' => $gateway->address,
+                'address' => $gateway->address,
                 'amount' => $gateway->amount,
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
                 'fiat_amount' => $gateway->fiat_amount,
                 'fiat' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => $request->abbr=='BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => $request->abbr == 'BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -167,7 +167,7 @@ class GatewayController extends Controller
             return response([
                 "status_name" => EnumGatewayStatus::SITUATION[$gateway->status],
                 "status" => $gateway->status,
-                "payment" => $gateway->address,
+                "address" => $gateway->address,
                 "tx" => $gateway->tx,
                 "created" => $gateway->created_at,
                 "confirmations" => $gateway->confirmations,
@@ -191,7 +191,7 @@ class GatewayController extends Controller
         try {
             $gateway = self::show($transaction['toAddress']);
 
-            if(!$gateway){
+            if (!$gateway) {
                 return false;
             }
 
@@ -441,7 +441,7 @@ class GatewayController extends Controller
                 'amount' => $gateway->amount,
                 'fiat' => $request->fiat_abbr,
                 'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => $request->crypto_abbr=='BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => $request->crypto_abbr == 'BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
