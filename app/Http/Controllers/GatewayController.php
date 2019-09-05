@@ -435,7 +435,7 @@ class GatewayController extends Controller
 
             return response([
                 'status' => $gateway->statusName,
-                'payment' => $gateway->address,
+                'address' => $gateway->address,
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
                 'amount' => $gateway->amount,
