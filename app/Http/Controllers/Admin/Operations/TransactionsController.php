@@ -146,7 +146,7 @@ class TransactionsController extends Controller
 
             $transaction = Transaction::where('category', EnumTransactionCategory::TRANSACTION)
                 ->where('id', $request->crypto)
-                ->whereIn('status', [EnumTransactionsStatus::PENDING, EnumTransactionsStatus::ABOVELIMIT])
+                ->whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT])
                 ->firstOrFail();
 
             $transaction->status = EnumTransactionsStatus::REVERSED;
