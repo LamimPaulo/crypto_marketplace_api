@@ -86,6 +86,10 @@ class ApiController extends Controller
                     "btc_usd" => sprintf("%.8f", $btc_usd),
                     "btc_dash" => sprintf("%.8f", $btc_lqx),
                 ],
+                "ticker" => [
+                    "lqx_usd" => sprintf("%.2f", $lqx_usd),
+                    "lqx_brl" => sprintf("%.2f", $lqx_brl),
+                ],
             ];
     }
 }
