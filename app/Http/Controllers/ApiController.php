@@ -25,19 +25,19 @@ class ApiController extends Controller
         $lqx_usd = CoinQuote::where([
             'coin_id' => $lqx,
             'quote_coin_id' => $usd
-        ])->first()->average_quote;
+        ])->first();
 
         $lqx_brl = CoinQuote::where([
             'coin_id' => $lqx,
             'quote_coin_id' => $brl
-        ])->first()->average_quote;
+        ])->first();
 
         $btc_usd = CoinQuote::where([
             'coin_id' => $btc,
             'quote_coin_id' => $usd
-        ])->first()->average_quote;
+        ])->first();
 
-        $btc_lqx = ConversorService::FIAT2CRYPTO_MAX($lqx_usd, "BTC", "USD")['amount'];
+        $btc_lqx = ConversorService::FIAT2CRYPTO_MAX($lqx_usd->average_quote, "BTC", "USD")['amount'];
 
         $api = new \GuzzleHttp\Client(['http_errors' => false]);
 
@@ -57,13 +57,19 @@ class ApiController extends Controller
                         "registered_masternodes_verified" => 0
                     ],
                     "exchange_rates" => [
-                        "dash_usd" => sprintf("%.8f", $lqx_usd),
-                        "btc_usd" => sprintf("%.8f", $btc_usd),
+                        "dash_usd" => sprintf("%.8f", $lqx_usd)->average_quote,
+                        "btc_usd" => sprintf("%.8f", $btc_usd->average_quote),
                         "btc_dash" => sprintf("%.8f", $btc_lqx),
                     ],
                     "ticker" => [
-                        "lqx_usd" => sprintf("%.2f", $lqx_usd),
-                        "lqx_brl" => sprintf("%.2f", $lqx_brl),
+                        "lqx_usd" => sprintf("%.2f", $lqx_usd->average_quote),
+                        "lqx_brl" => sprintf("%.2f", $lqx_brl->average_quote),
+                        
+                        "lqx_usd_min" => sprintf("%.2f", $lqx_usd->sell_quote),
+                        "lqx_brl_min" => sprintf("%.2f", $lqx_brl->sell_quote),
+
+                        "lqx_usd_max" => sprintf("%.2f", $lqx_usd->buy_quote),
+                        "lqx_brl_max" => sprintf("%.2f", $lqx_brl->buy_quote),
                     ],
                 ];
         }
@@ -82,13 +88,19 @@ class ApiController extends Controller
                     "registered_masternodes_verified" => $result['general']['registered_masternodes_verified'],
                 ],
                 "exchange_rates" => [
-                    "dash_usd" => sprintf("%.8f", $lqx_usd),
-                    "btc_usd" => sprintf("%.8f", $btc_usd),
+                    "dash_usd" => sprintf("%.8f", $lqx_usd->average_quote),
+                    "btc_usd" => sprintf("%.8f", $btc_usd->average_quote),
                     "btc_dash" => sprintf("%.8f", $btc_lqx),
                 ],
                 "ticker" => [
-                    "lqx_usd" => sprintf("%.2f", $lqx_usd),
-                    "lqx_brl" => sprintf("%.2f", $lqx_brl),
+                    "lqx_usd" => sprintf("%.2f", $lqx_usd->average_quote),
+                    "lqx_brl" => sprintf("%.2f", $lqx_brl->average_quote),
+
+                    "lqx_usd_min" => sprintf("%.2f", $lqx_usd->sell_quote),
+                    "lqx_brl_min" => sprintf("%.2f", $lqx_brl->sell_quote),
+
+                    "lqx_usd_max" => sprintf("%.2f", $lqx_usd->buy_quote),
+                    "lqx_brl_max" => sprintf("%.2f", $lqx_brl->buy_quote),
                 ],
             ];
     }
