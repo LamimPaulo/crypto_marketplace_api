@@ -111,6 +111,98 @@ class AuthController extends Controller
         }
     }
 
+    public function mobile_login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required',
+            'code_2fa' => 'nullable|numeric',
+        ]);
+
+        try {
+
+            $user = User::where('email', $request->username)
+                ->orWhere('phone', $request->username)
+                ->orWhere('username', $request->username)->first();
+
+            if (!$user) {
+                throw new \Exception('Ops, usuário não encontrado!');
+            }
+
+            if ($request->key!=env('M_KEY')) {
+                throw new \Exception('App Não autorizado.');
+            }
+
+            if ($user->is_under_analysis) {
+                Mail::to($user->email)->send(new UnderAnalysisMail($user));
+                throw new \Exception('Uma tentativa de acesso em sua conta não foi autorizada, por Medida de segurança ela foi bloqueada, por favor acesse o <a href="https://www.facebook.com/liquidex/" target="_blank"> suporte aqui</a>, identifique-se e peça que seja desbloqueada.');
+            }
+
+            if ($user->is_canceled) {
+                throw new \Exception('Conta cancelada. Não é possível acessar a plataforma.');
+            }
+
+            if (!isset($user->email_verified_at)) {
+                Localization::setLocale($user);
+                Mail::to($user->email)->send(new VerifyMail($user));
+                throw new \Exception('Você deve confirmar sua conta. Enviamos um email de verificação, favor verificar sua caixa de entrada.');
+            }
+
+            if ($user->is_google2fa_active) {
+
+                if (is_null($request->code_2fa)) {
+                    throw new \Exception('Você deve informar o código 2FA para obter acesso à plataforma. Tente novamente.');
+                }
+
+                $g = new \Sonata\GoogleAuthenticator\GoogleAuthenticator();
+
+                if (!$g->checkCode($user->google2fa_secret, $request->code_2fa)) {
+                    throw new \Exception('O código 2FA informado é inválido ou expirou. Tente novamente.');
+                }
+            }
+
+            if (env('APP_ENV') != 'local') {
+                $user->tokens->each(function ($token) {
+                    $token->delete();
+                });
+            }
+
+            $req = Request::create('/oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => config('services.passport.client_id'),
+                'client_secret' => config('services.passport.client_secret'),
+                'username' => $user->email,
+                'password' => $request->password,
+            ]);
+            $res = app()->handle($req);
+            $responseBody = $res->getContent();
+            $response = json_decode($responseBody, true);
+
+            if (isset($response['error'])) {
+                if ($response['error'] === 'invalid_credentials') {
+                    throw new \Exception('Dados Inválidos. Tente Novamente.');
+                }
+
+                if ($response['error'] === 'invalid_request') {
+                    throw new \Exception('Dados Inválidos. Tente Novamente.');
+                }
+                throw new \Exception($response['error']);
+            }
+
+            $this->checkWallets($user);
+
+            $user['ip'] = $request->ip();
+            $user['created'] = Carbon::now('America/Sao_Paulo')->format('d/m/Y \à\s H:i:s');
+            $user['agent'] = $request->header('User-Agent');
+            Localization::setLocale($user);
+            Mail::to($user->email)->send(new NotifyLoginMail($user));
+
+            return $response;
+        } catch (\Exception $e) {
+            return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function register(Request $request)
     {
         $request->validate([

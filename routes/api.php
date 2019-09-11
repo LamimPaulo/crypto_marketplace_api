@@ -12,6 +12,7 @@
 */
 
 Route::post('/login', 'AuthController@login')->middleware('throttle');
+Route::post('/m_login', 'AuthController@mobile_login')->middleware('throttle');
 Route::get('/logout', 'AuthController@logout')->middleware('auth:api');
 
 Route::post('admin/login', 'Admin\AuthController@login')->middleware('throttle');
