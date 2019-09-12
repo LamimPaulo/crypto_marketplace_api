@@ -221,23 +221,23 @@ class GatewayController extends Controller
 
     /**
      *
-     * @param mixed $transaction
      * @param mixed $expected
+     * @param mixed $received
      * @return int
      */
-    private static function setStatus($transaction, $expected)
+    private static function setStatus($expected, $received)
     {
-        $transaction->amount = floatval($transaction->amount);
-        $expected = floatval($expected);
+        $expected->amount = sprintf("%.8f", $expected->amount);
+        $received = sprintf("%.8f", $received);
 
-        if ($transaction->amount == $expected) {
+        if ($received == $expected->amount) {
             return EnumGatewayStatus::DONE;
-        } else if ($transaction->amount < $expected) {
+        } else if ($received < $expected->amount) {
             return EnumGatewayStatus::UNDERPAID;
-        } else if ($transaction->amount > $expected) {
+        } else if ($received > $expected->amount) {
             return EnumGatewayStatus::OVERPAID;
         }
-        return $transaction->status;
+        return $expected->status;
     }
 
     /**
