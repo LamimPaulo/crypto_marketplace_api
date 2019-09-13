@@ -412,7 +412,7 @@ class GatewayController extends Controller
                 'gateway_api_key_id' => 0,
                 'coin_id' => Coin::getByAbbr($request->crypto_abbr)->id,
                 'address' => $this->newAddress($request->crypto_abbr),
-                'amount' => $quote['amount'],
+                'amount' => sprintf("%5.f", $quote['amount']),
                 'value' => $quote['quote'],
 
                 'user_id' => '',
