@@ -412,7 +412,7 @@ class GatewayController extends Controller
                 'gateway_api_key_id' => 0,
                 'coin_id' => Coin::getByAbbr($request->crypto_abbr)->id,
                 'address' => $this->newAddress($request->crypto_abbr),
-                'amount' => sprintf("%5.f", $quote['amount']),
+                'amount' => number_format($quote['amount'], 5),
                 'value' => $quote['quote'],
 
                 'user_id' => '',
@@ -438,10 +438,10 @@ class GatewayController extends Controller
                 'address' => $gateway->address,
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
-                'amount' => $gateway->amount,
+                'amount' => number_format($gateway->amount, 5),
                 'fiat' => $request->fiat_abbr,
                 'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => $request->crypto_abbr == 'BCH' ? $gateway->address . '?amount=' . $gateway->amount : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . $gateway->amount
+                'qr_code' => $request->crypto_abbr == 'BCH' ? $gateway->address . '?amount=' . number_format($gateway->amount, 5) : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . number_format($gateway->amount, 5)
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();
