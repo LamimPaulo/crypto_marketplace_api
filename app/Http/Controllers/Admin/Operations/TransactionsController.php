@@ -68,7 +68,7 @@ class TransactionsController extends Controller
                 $transactions->whereHas('coin', function ($coin) use ($request) {
                     return $coin->where('abbr', "{$request->coin}");
                 });
-            }    
+            }
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -107,7 +107,7 @@ class TransactionsController extends Controller
                 $transactions->whereHas('coin', function ($coin) use ($request) {
                     return $coin->where('abbr', "{$request->coin}");
                 });
-            } 
+            }
 
             if (!empty($request->term)) {
                 $transactions->whereHas('user', function ($user) use ($request) {
@@ -144,10 +144,17 @@ class TransactionsController extends Controller
         try {
             DB::beginTransaction();
 
-            $transaction = Transaction::where('category', EnumTransactionCategory::TRANSACTION)
-                ->where('id', $request->crypto)
-                ->whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT])
-                ->firstOrFail();
+            if (auth()->user()->is_dev) {
+                $transaction = Transaction::where('category', EnumTransactionCategory::TRANSACTION)
+                    ->where('id', $request->crypto)
+                    ->whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT, EnumTransactionsStatus::AUTHORIZED])
+                    ->firstOrFail();
+            } else {
+                $transaction = Transaction::where('category', EnumTransactionCategory::TRANSACTION)
+                    ->where('id', $request->crypto)
+                    ->whereIn('status', [EnumTransactionsStatus::ERROR, EnumTransactionsStatus::ABOVELIMIT])
+                    ->firstOrFail();
+            }
 
             $transaction->status = EnumTransactionsStatus::REVERSED;
             $transaction->info = $request->reason;
@@ -200,7 +207,7 @@ class TransactionsController extends Controller
 
             User::findOrFail($transaction->user_id);
 
-            if ($transaction->is_internal&&$transaction->coin->abbr!="LQX") {
+            if ($transaction->is_internal && $transaction->coin->abbr != "LQX") {
                 $to = UserWallet::where('address', $transaction->toAddress)->firstOrFail();
 
                 $uuid4 = Uuid::uuid4();
