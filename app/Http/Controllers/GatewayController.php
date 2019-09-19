@@ -412,7 +412,7 @@ class GatewayController extends Controller
                 'gateway_api_key_id' => 0,
                 'coin_id' => Coin::getByAbbr($request->crypto_abbr)->id,
                 'address' => $this->newAddress($request->crypto_abbr),
-                'amount' => number_format($quote['amount'], 5),
+                'amount' => sprintf("%.5f", $quote['amount']),
                 'value' => $quote['quote'],
 
                 'user_id' => '',
@@ -422,7 +422,7 @@ class GatewayController extends Controller
                 'status' => EnumGatewayStatus::NEWW,
                 'type' => EnumGatewayType::PAYMENT,
                 'tax' => 0,
-                'category' => EnumGatewayCategory::CREDMINER,
+                'category' => $request->type ?? EnumGatewayCategory::CREDMINER,
                 'time_limit' => Carbon::now()->addMinutes($time)
             ]);
 
@@ -435,13 +435,15 @@ class GatewayController extends Controller
 
             return response([
                 'status' => $gateway->statusName,
+                'status_id' => $gateway->status,
                 'address' => $gateway->address,
                 'coin' => $gateway->coin->abbr,
                 'coin_name' => $gateway->coin->name,
-                'amount' => number_format($gateway->amount, 5),
+                'amount' => sprintf("%.5f", $gateway->amount),
                 'fiat' => $request->fiat_abbr,
                 'fiat_amount' => number_format($gateway->fiat_amount, 2, ',', '.'),
-                'qr_code' => $request->crypto_abbr == 'BCH' ? $gateway->address . '?amount=' . number_format($gateway->amount, 5) : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . number_format($gateway->amount, 5)
+                'qr_code' => $request->crypto_abbr == 'BCH' ? $gateway->address . '?amount=' . sprintf("%.5f", $gateway->amount) : strtolower(Coin::getByAbbr($request->crypto_abbr)->name) . ':' . $gateway->address . '?amount=' . sprintf("%.5f", $gateway->amount),
+                'time_limit' => $gateway->time_limit
             ], Response::HTTP_OK);
         } catch (\Exception $ex) {
             DB::rollBack();

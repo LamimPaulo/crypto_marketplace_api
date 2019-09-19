@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enum\EnumGatewayCategory;
 use App\Models\Coin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -30,6 +31,10 @@ class CredminerGatewayRequest extends FormRequest
             'fiat_abbr' => [
                 'required',
                 Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr])
+            ],
+            'type' => [
+                'nullable',
+                Rule::in(array_keys(EnumGatewayCategory::CATEGORY))
             ],
             'crypto_abbr' => [
                 'required',
