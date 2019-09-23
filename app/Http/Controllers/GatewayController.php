@@ -176,7 +176,8 @@ class GatewayController extends Controller
                 "coin_name" => $gateway->coin->name,
                 "fiat_amount" => $gateway->fiat_amount,
                 "fiat" => number_format($gateway->fiat_amount, 2, ',', '.'),
-                "fiat_abbr" => $gateway->fiat_coin->abbr
+                "fiat_abbr" => $gateway->fiat_coin->abbr,
+                'qr_code' => strtoupper($gateway->coin->abbr) == 'BCH' ? $gateway->address . '?amount=' . sprintf("%.5f", $gateway->amount) : strtolower(Coin::getByAbbr($gateway->coin->abbr)->name) . ':' . $gateway->address . '?amount=' . sprintf("%.5f", $gateway->amount),
             ]);
         } catch (\Exception $ex) {
             return response([
@@ -481,6 +482,10 @@ class GatewayController extends Controller
                 throw new \Exception("Pagamento não encontrado!");
             }
 
+            $payment->qr_code = strtoupper($payment->coin->abbr) == 'BCH' ? $payment->address . '?amount=' . sprintf("%.5f", $payment->amount) : strtolower(Coin::getByAbbr($payment->coin->abbr)->name) . ':' . $payment->address . '?amount=' . sprintf("%.5f", $payment->amount);
+
+            unset($payment->coin);
+
             return response([
                 'message' => 'success',
                 'payment' => $payment
@@ -497,5 +502,42 @@ class GatewayController extends Controller
     public static function gatewayService()
     {
         return new GatewayService(new BalanceService(), new ConversorService(), new TaxCoinService());
+    }
+
+    public function gatewayDataList(Request $request)
+    {
+        try {
+            $result = [];
+
+            foreach (array_unique($request->addresses) as $address) {
+                $payment = Gateway::where('address', $address)->first();
+                if ($payment) {
+                    $result[] = [
+                        'address' => $address,
+                        'received' => $payment->received,
+                        'status' => $payment->status,
+                        'statusName' => $payment->statusName,
+                    ];
+                } else {
+                    $result[] = [
+                        'address' => $address,
+                        'received' => 0,
+                        'status' => 0,
+                        'statusName' => EnumGatewayStatus::SITUATION[EnumGatewayStatus::NOTFOUND],
+                    ];
+                }
+            }
+
+            return response([
+                'message' => 'success',
+                'payments' => $result
+            ], Response::HTTP_OK);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response([
+                'status' => 'error',
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }

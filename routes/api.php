@@ -311,6 +311,7 @@ Route::group([
     function () {
         Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
         Route::post('/check-key', 'Credminer\PaymentController@checkKey');
+        Route::post('/check-cpf', 'Credminer\PaymentController@checkCpf');
     });
 
 Route::group([
@@ -319,4 +320,5 @@ Route::group([
     function () {
         Route::post('/new', 'GatewayController@new')->middleware('credminer');
         Route::get('/status/{tx}', 'GatewayController@showGatewayData');
+        Route::post('/status-list', 'GatewayController@gatewayDataList');
     });

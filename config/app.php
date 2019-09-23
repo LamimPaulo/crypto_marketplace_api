@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\RecaptchaValidatorServiceProvider::class,
         Shivella\Bitly\BitlyServiceProvider::class,
+        App\Providers\CpfValidatorServiceProvider::class,
     ],
 
     /*

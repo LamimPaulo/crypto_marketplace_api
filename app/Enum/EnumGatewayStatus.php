@@ -2,7 +2,9 @@
 
 namespace App\Enum;
 
-abstract class EnumGatewayStatus {
+abstract class EnumGatewayStatus
+{
+    const NOTFOUND = 0;
     const PAID = 1;
     const SEEN = 2;
     const OVERPAIDEXPIRED = 3;
@@ -18,6 +20,7 @@ abstract class EnumGatewayStatus {
 
 
     const SITUATION = [
+        self::NOTFOUND => "NAO ENCONTRADO",
         self::PAID => "PAGO",
         self::SEEN => "VISTO",
         self::OVERPAIDEXPIRED => "PAGO ACIMA EXPIRADO",

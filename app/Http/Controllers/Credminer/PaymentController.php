@@ -12,6 +12,7 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CheckCpfRequest;
 use App\Http\Requests\CheckKeyRequest;
 use App\Http\Requests\WithdrawalCredminerRequest;
 use App\Models\Coin;
@@ -43,16 +44,16 @@ class PaymentController extends Controller
             return response([
                 'message' => 'Api Key is valid',
                 'user' => $user->name,
-                'user_type' => $user->country_id==31 ? 1 : 2,
-                'user_type_name' => $user->country_id==31 ? 'brasileiro' : 'internacional',
+                'user_type' => $user->country_id == 31 ? 1 : 2,
+                'user_type_name' => $user->country_id == 31 ? 'brasileiro' : 'internacional',
                 'document' => $user->document,
                 'level' => [
                     'name' => $user->level->name,
                     'nanotech_lqx_fee' => $user->level->nanotech_lqx_fee,
                     'nanotech_btc_fee' => $user->level->nanotech_btc_fee,
                     'masternode_fee' => $user->level->masternode_fee,
-                    'tax_crypto' => $user->level->tax_crypto->makeHidden(['id','coin_id','user_level_id','created_at','updated_at','description']),
-                    'tax_brl' => $user->level->tax_brl->makeHidden(['id','coin_id','user_level_id','created_at','updated_at','description']),
+                    'tax_crypto' => $user->level->tax_crypto->makeHidden(['id', 'coin_id', 'user_level_id', 'created_at', 'updated_at', 'description']),
+                    'tax_brl' => $user->level->tax_brl->makeHidden(['id', 'coin_id', 'user_level_id', 'created_at', 'updated_at', 'description']),
                 ],
                 'dictionary' => [
                     'tax_types' => EnumTaxType::OPERATIONS,
@@ -64,6 +65,34 @@ class PaymentController extends Controller
             return response([
                 'error' => $ex->getMessage()
             ], Response::HTTP_OK);
+        }
+    }
+
+    public function checkCpf(CheckCpfRequest $request)
+    {
+        try {
+            $user = User::whereHas('level', function ($level){
+                    return $level->whereNotIn('id',[1,7]);
+                })
+                ->where('document', $request->cpf)
+                ->whereNotNull('api_key')
+                ->first();
+
+            if (is_null($user)) {
+                throw new \Exception("Operação não permitida, Cliente sem keycode " . env("APP_NAME") . ".");
+            }
+
+            return response([
+                'message' => 'Cliente válido',
+                'user' => $user->name,
+                'user_type' => $user->country_id == 31 ? 'brasileiro' : 'internacional',
+                'document' => $user->document,
+                'level' => $user->level->name
+            ], Response::HTTP_OK);
+        } catch (\Exception $ex) {
+            return response([
+                'message' => $ex->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -121,7 +150,7 @@ class PaymentController extends Controller
 
             $user = User::where('api_key', '=', $request->get('api_key'))->first();
 
-            if(!$user){
+            if (!$user) {
                 throw new \Exception("Api Key Inválida.");
             }
 
