@@ -32,7 +32,8 @@ class Coin extends Model
         'core_limit_percent',
         'withdrawal_address',
         'core_balance',
-        'core_status'
+        'core_status',
+        'address_explorer',
     ];
 
     protected $hidden = ['id', 'created_at', 'updated_at'];
