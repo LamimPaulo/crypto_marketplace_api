@@ -134,6 +134,8 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::get('/remove2fa/{email}', 'UserController@remove2fa')->middleware('can_execute:user_2fa_disable');
         //reativa o usuario
         Route::get('/reactivateuser/{email}', 'UserController@reactivateUser')->middleware('can_execute:user_reactivate');
+        Route::get('/makeAdmin/{email}', 'UserController@makeAdmin')->middleware('is_dev');
+        Route::get('/revogueAdmin/{email}', 'UserController@revogueAdmin')->middleware('is_dev');
         //levels
         Route::group([
             'prefix' => 'levels',

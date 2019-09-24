@@ -24,6 +24,7 @@ use App\Services\PermissionService;
 use App\User;
 use App\VerifyUser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Ramsey\Uuid\Uuid;
@@ -532,6 +533,52 @@ class UserController extends Controller
 
             return response($users
                 , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function makeAdmin($email)
+    {
+
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+
+            $user->is_admin = true;
+            $user->save();
+
+            Artisan::call('db:seed --class=AclSeeder --force');
+
+            ActivityLogger::log("Tornou-se Admin.", $user->id);
+
+            return response([
+                'message' => trans('messages.general.success'),
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function revogueAdmin($email)
+    {
+
+        try {
+            $user = User::where('email', $email)->firstOrFail();
+
+            $user->is_admin = false;
+            $user->save();
+
+            ActivityLogger::log("Seu acesso Admin foi revogado.", $user->id);
+
+            return response([
+                'message' => trans('messages.general.success'),
+            ], Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
