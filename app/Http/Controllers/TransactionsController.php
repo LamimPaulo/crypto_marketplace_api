@@ -145,8 +145,8 @@ class TransactionsController extends Controller
 
             if ($transaction->coin->abbr != "LQX") {
                 $this->internalTransaction($transaction);
-                $this->internalPayment($transaction);
             }
+            $this->internalPayment($transaction);
 
             $transactionStatus = TransactionStatus::create([
                 'status' => $transaction->status,
@@ -167,7 +167,7 @@ class TransactionsController extends Controller
         } catch (\Exception $ex) {
             DB::rollBack();
             return response([
-                'message' => $ex->getMessage()
+                'message' => $ex->getMessage(). ' => '.$ex->getLine(). ' => '.$ex->getFile()
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -260,9 +260,11 @@ class TransactionsController extends Controller
             //atualizar o pagamento de acordo com o status
             $status = $this->gatewayService->setStatus($transaction, $gateway->amount);
 
+            $ntx = Uuid::uuid4()->toString();
+
             $transaction->update([
                 'status' => EnumTransactionsStatus::SUCCESS,
-                'txid' => Uuid::uuid4()->toString()
+                'tx' => $ntx
             ]);
 
             TransactionStatus::create([
@@ -271,10 +273,6 @@ class TransactionsController extends Controller
             ]);
 
             $this->gatewayService->updateInternal($gateway, $transaction);
-
-            if ($status == EnumGatewayStatus::PAID) {
-                $this->gatewayService->{EnumGatewayPaymentCoin::TYPE[$gateway->user->api_key->payment_coin]}($gateway);
-            }
 
         } catch
         (\Exception $ex) {

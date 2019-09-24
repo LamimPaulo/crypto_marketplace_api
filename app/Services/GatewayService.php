@@ -32,8 +32,8 @@ class GatewayService
     public function setStatus($transaction, $expected)
     {
         try {
-            $transaction->amount = sprintf("%.8f", $transaction->amount);
-            $expected = sprintf("%.8f", $expected);
+            $transaction->amount = sprintf("%.5f", $transaction->amount);
+            $expected = sprintf("%.5f", $expected);
 
             if ($transaction->amount == $expected) {
                 return EnumGatewayStatus::PAID;
@@ -42,7 +42,6 @@ class GatewayService
             } else if ($transaction->amount > $expected) {
                 return EnumGatewayStatus::OVERPAID;
             }
-
             return $transaction->status;
 
         } catch (\Exception $ex) {
@@ -57,7 +56,7 @@ class GatewayService
 
             $gateway->update([
                 'status' => $status,
-                'txid' => Uuid::uuid4()->toString(),
+                'txid' => $transaction->tx,
                 'received' => $transaction->amount,
                 'is_internal_payment' => true,
                 'payer_user_id' => $transaction->user_id
