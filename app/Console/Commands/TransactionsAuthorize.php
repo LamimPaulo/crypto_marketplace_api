@@ -65,6 +65,13 @@ class TransactionsAuthorize extends Command
      */
     private function BTC($pending)
     {
+        if ($pending->user_id == env("NAVI_USER")) {
+            $pending->update([
+                'status' => EnumTransactionsStatus::AUTHORIZED
+            ]);
+            return true;
+        }
+
         if (!$this->_checkLimits($pending)) {
             $pending->update([
                 'status' => EnumTransactionsStatus::ABOVELIMIT

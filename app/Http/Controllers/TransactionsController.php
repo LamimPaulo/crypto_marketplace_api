@@ -244,7 +244,6 @@ class TransactionsController extends Controller
                 'coin'
             ])->where('address', $transaction->toAddress)->first();
 
-
             if (!$gateway) {
                 return;
             }
