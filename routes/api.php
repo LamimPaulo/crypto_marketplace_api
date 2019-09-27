@@ -201,6 +201,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
 
     //enviar token de confirmação por email
     Route::post('/send-mail-token', 'Token\TokenMailController@generate');
+    Route::post('/send-sms-token', 'Token\TokenSmsController@generate');
+
     //estimar conversao de moeda fiat/crypto - venda
     Route::post('/convert', 'OrderController@convert')->middleware(['allowsellforfiat', 'docscheck']);
     //estimar conversao de moeda fiat/crypto - compra

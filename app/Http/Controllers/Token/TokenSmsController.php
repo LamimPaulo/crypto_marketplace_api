@@ -29,8 +29,50 @@ class TokenSmsController extends Controller
                     'service' => 'TKSMS',
                 ],
                 'form_params' => [
-                    'nome' => auth()->user()->name,
+                    'nome' => auth()->user()->name ?? env('APP_NAME'),
                     'numero' => '55' . $request->phone,
+                    'sistema' => env('APP_NAME') . ' - ' . EnumTokenAction::ACTION[$request->action],
+                ]
+            ]);
+
+            $result = json_decode($response->getBody()->getContents());
+
+            return response([
+                'message' => $result->message,
+                'status' => 'success'
+            ], Response::HTTP_CREATED);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = $e->getResponse();
+            $result = json_decode($response->getBody()->getContents());
+            return response([
+                'message' => $result->message,
+                'status' => 'error'
+            ], Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $ex) {
+            return response([
+                'message' => $ex->getMessage(),
+                'status' => 'error'], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public static function generateInternational(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|numeric'
+        ]);
+
+        try {
+            $api = new \GuzzleHttp\Client();
+
+            $response = $api->post(env("NAVI_API_URL") . "/token/sms/internacional/gerar", [
+                'headers' => [
+                    'cl' => env('NAVI_API_CL'),
+                    'token' => env('NAVI_API_TOKEN'),
+                    'service' => 'TKSMSINT',
+                ],
+                'form_params' => [
+                    'nome' => auth()->user()->name ?? env('APP_NAME'),
+                    'numero' => $request->code . $request->phone,
                     'sistema' => env('APP_NAME') . ' - ' . EnumTokenAction::ACTION[$request->action],
                 ]
             ]);
@@ -72,7 +114,7 @@ class TokenSmsController extends Controller
                     'service' => 'TKVERIFY',
                 ],
                 'form_params' => [
-                    'numero' => '55' . auth()->user()->phone,
+                    'numero' => $request->dial_code . $request->phone,
                     'codigo' => $request->code,
                     'sistema' => env('APP_NAME') . ' - ' . EnumTokenAction::ACTION[$request->action],
                 ]
