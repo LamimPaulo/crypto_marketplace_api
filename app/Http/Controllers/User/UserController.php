@@ -20,6 +20,7 @@ use App\Mail\UserCancelAccount;
 use App\Models\Coin;
 use App\Models\Country;
 use App\Models\Funds\FundBalances;
+use App\Models\LqxWithdrawal;
 use App\Models\Nanotech\Nanotech;
 use App\Models\System\ActivityLogger as Logger;
 use App\Models\Transaction;
@@ -30,6 +31,7 @@ use App\Services\ConversorService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -634,5 +636,6 @@ class UserController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
 
 }
