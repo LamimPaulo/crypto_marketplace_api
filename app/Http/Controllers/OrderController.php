@@ -82,7 +82,7 @@ class OrderController extends Controller
             $quoteQuantity = $amount * $quotePrice;
 
             if ($quoteQuantity <= $pair->min_trade_amount) {
-                throw new \Exception(trans('messages.products.minimum_purchase_value_not_reached', ['amount' => $pair->min_trade_amount,'abbr' => 'BTC']));
+                throw new \Exception(trans('messages.products.minimum_purchase_value_not_reached', ['amount' => $pair->min_trade_amount, 'abbr' => 'BTC']));
             }
 
             $baseWallet = $this->checkWallets($baseCoin, EnumUserWalletType::PRODUCT);
@@ -235,7 +235,7 @@ class OrderController extends Controller
             $quoteQuantity = $amount * $quotePrice;
 
             if ($quoteQuantity <= $pair->min_trade_amount) {
-                throw new \Exception(trans('messages.minimum_sell_value_not_reached', ['amount' => $pair->min_trade_amount,'abbr' => 'BTC']));
+                throw new \Exception(trans('messages.minimum_sell_value_not_reached', ['amount' => $pair->min_trade_amount, 'abbr' => 'BTC']));
             }
 
             $baseWallet = $this->checkWallets($baseCoin, EnumUserWalletType::PRODUCT);
@@ -396,14 +396,17 @@ class OrderController extends Controller
 
     public function convertBuy(Request $request)
     {
-        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
+        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
+            || ($request->quote === 'BRL' || $request->base === 'BRL')
+            || ($request->quote === 'USD' || $request->base === 'USD')
+        ) {
             return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
         }
 
         $request->validate([
             'amount' => 'required|numeric',
             'base' => 'required',
-        ],[
+        ], [
             'amount.required' => 'A quantidade é obrigatória',
             'amount.numeric' => 'A quantidade deve ser um número válido (utilize apenas números e ponto)',
             'base.required' => 'A moeda base é obrigatória',
@@ -437,14 +440,17 @@ class OrderController extends Controller
 
     public function convertBuyAmount(ConvertRequest $request)
     {
-        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
+        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
+            || ($request->quote === 'BRL' || $request->base === 'BRL')
+            || ($request->quote === 'USD' || $request->base === 'USD')
+        ) {
             return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
         }
 
         $request->validate([
             'amount' => 'required|numeric',
             'base' => 'required',
-        ],[
+        ], [
             'amount.required' => 'A quantidade é obrigatória',
             'amount.numeric' => 'A quantidade deve ser um número válido (utilize apenas números e ponto)',
             'base.required' => 'A moeda base é obrigatória',
@@ -545,7 +551,10 @@ class OrderController extends Controller
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
+        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
+            || ($request->quote === 'BRL' || $request->base === 'BRL')
+            || ($request->quote === 'USD' || $request->base === 'USD')
+        ) {
             return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -565,39 +574,41 @@ class OrderController extends Controller
             }
         ])->where('abbr', $request->quote)->first();
 
-        if ($base_coin->is_crypto AND $quote_coin->is_crypto) {
-            $result_sell = $base_coin->quote[0]->sell_quote * $amount;
-            $result_amount = $result_sell / $quote_coin->quote[0]->buy_quote;
-            return [
-                'amount' => number_format($result_amount, $quote_coin->decimal, '.', ''),
-                'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
-            ];
-        }
 
-        if ($base_coin->is_crypto AND !$quote_coin->is_crypto) {
-            $result_sell = $base_coin->quote[0]->sell_quote * $amount;
-            $dec_point = $fiat_coin->abbr === 'BRL' ? ',' : '.';
-            $thousando_sep = $fiat_coin->abbr === 'BRL' ? '.' : ',';
-            return [
-                'amount' => number_format($result_sell, $quote_coin->decimal, $dec_point, $thousando_sep),
-                'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
-            ];
-        }
+        $result_sell = $base_coin->quote[0]->sell_quote * $amount;
+        $result_amount = $result_sell / $quote_coin->quote[0]->buy_quote;
+        return [
+            'amount' => number_format($result_amount, $quote_coin->decimal, '.', ''),
+            'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
+        ];
 
-        if (!$base_coin->is_crypto AND $quote_coin->is_crypto) {
-            $result_buy = $amount / $quote_coin->quote[0]->buy_quote;
-
-            return [
-                'amount' => number_format($result_buy, $quote_coin->decimal, '.', ''),
-                'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
-            ];
-        }
+//        if ($base_coin->is_crypto AND !$quote_coin->is_crypto) {
+//            $result_sell = $base_coin->quote[0]->sell_quote * $amount;
+//            $dec_point = $fiat_coin->abbr === 'BRL' ? ',' : '.';
+//            $thousando_sep = $fiat_coin->abbr === 'BRL' ? '.' : ',';
+//            return [
+//                'amount' => number_format($result_sell, $quote_coin->decimal, $dec_point, $thousando_sep),
+//                'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
+//            ];
+//        }
+//
+//        if (!$base_coin->is_crypto AND $quote_coin->is_crypto) {
+//            $result_buy = $amount / $quote_coin->quote[0]->buy_quote;
+//
+//            return [
+//                'amount' => number_format($result_buy, $quote_coin->decimal, '.', ''),
+//                'message' => $this->balanceService->verifyBalance($amount, $base_coin->abbr)
+//            ];
+//        }
     }
 
     public function convertAmount(ConvertRequest $request)
     {
 
-        if ($request->quote === 'LQXD' || $request->base === 'LQXD') {
+        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
+            || ($request->quote === 'BRL' || $request->base === 'BRL')
+            || ($request->quote === 'USD' || $request->base === 'USD')
+        ) {
             return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -628,7 +639,7 @@ class OrderController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($base_coin->is_crypto AND $quote_coin->is_crypto) {
+//        if ($base_coin->is_crypto AND $quote_coin->is_crypto) {
             $result_sell = $base_coin->quote[0]->sell_quote * $amount;
             $result_buy = $result_sell / $quote_coin->quote[0]->buy_quote;
 
@@ -639,30 +650,30 @@ class OrderController extends Controller
                 'buy_current' => $quote_coin->quote[0]->average_quote,
                 'buy_quote' => $quote_coin->quote[0]->sell_quote,
             ];
-        }
-
-        if ($base_coin->is_crypto AND !$quote_coin->is_crypto) {
-            $result_buy = $base_coin->quote[0]->sell_quote * $amount;
-
-            $result = [
-                'amount_buy' => $result_buy,
-                'sell_current' => $base_coin->quote[0]->average_quote,
-                'sell_quote' => $base_coin->quote[0]->sell_quote,
-                'buy_current' => 1,
-                'buy_quote' => 1,
-            ];
-        }
-
-        if (!$base_coin->is_crypto AND $quote_coin->is_crypto) {
-            $result_buy = $amount / $quote_coin->quote[0]->buy_quote;
-            $result = [
-                'amount_buy' => $result_buy,
-                'buy_current' => $quote_coin->quote[0]->average_quote,
-                'buy_quote' => $quote_coin->quote[0]->sell_quote,
-                'sell_current' => 1,
-                'sell_quote' => 1,
-            ];
-        }
+//        }
+//
+//        if ($base_coin->is_crypto AND !$quote_coin->is_crypto) {
+//            $result_buy = $base_coin->quote[0]->sell_quote * $amount;
+//
+//            $result = [
+//                'amount_buy' => $result_buy,
+//                'sell_current' => $base_coin->quote[0]->average_quote,
+//                'sell_quote' => $base_coin->quote[0]->sell_quote,
+//                'buy_current' => 1,
+//                'buy_quote' => 1,
+//            ];
+//        }
+//
+//        if (!$base_coin->is_crypto AND $quote_coin->is_crypto) {
+//            $result_buy = $amount / $quote_coin->quote[0]->buy_quote;
+//            $result = [
+//                'amount_buy' => $result_buy,
+//                'buy_current' => $quote_coin->quote[0]->average_quote,
+//                'buy_quote' => $quote_coin->quote[0]->sell_quote,
+//                'sell_current' => 1,
+//                'sell_quote' => 1,
+//            ];
+//        }
 
 
         if (!$this->balanceService->verifyBalance($amount, $base_coin->abbr)) {
@@ -782,8 +793,8 @@ class OrderController extends Controller
     public function myCoinsList()
     {
         $coins = Coin::whereHas('wallets', function ($wallets) {
-            return $wallets->where('user_id', auth()->user()->id)->where('type', EnumUserWalletType::WALLET);
-        })->get();
+            return $wallets->where('user_id', auth()->user()->id);
+        })->where('is_wallet', true)->get();
         return $coins;
     }
 

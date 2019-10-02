@@ -50,12 +50,12 @@ class CoinQuoteController extends Controller
                     'quote_coin_id' => Coin::getByAbbr("USD")->id,
                     'average_quote' => $result->data->rates->BRL
                 ]);
-            }else{
+            } else {
                 throw new \Exception($statuscode);
             }
 
 
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return $e->getMessage();
         }
     }
@@ -195,9 +195,8 @@ class CoinQuoteController extends Controller
 
     public function quotes()
     {
-        $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
-
-        $fiat_coin = Coin::with('quote')->where('abbr', $user_fiat_abbr)->first();
+        $lqx_quote = 'LQX';
+        $fiat_coin = Coin::with('quote')->where('abbr', $lqx_quote)->first();
 
         return Coin::with([
             'quote' => function ($quotes) use ($fiat_coin) {
@@ -218,5 +217,43 @@ class CoinQuoteController extends Controller
             ->where('is_wallet', true)
             ->where('is_crypto', true)
             ->get();
+    }
+
+    public function CRYPTO_TO_LQX()
+    {
+        $brl = Coin::getByAbbr("BRL")->id;
+        $lqx = Coin::getByAbbr("LQX")->id;
+
+        $coins = CoinQuote::with('coin')
+            ->whereHas('coin', function ($coin) use ($lqx) {
+                return $coin->where('is_active', true)
+                    ->where('is_crypto', true)
+                    ->where('is_wallet', true)
+                    ->whereNotIn('id', [$lqx]);
+            })
+            ->where('quote_coin_id', $brl)
+            ->get();
+
+//        buy_quote
+//        sell_quote
+
+        $lqx_quote = CoinQuote::where([
+            'coin_id' => $lqx,
+            'quote_coin_id' => $brl,
+        ])->first();
+
+        $quotes = [];
+        foreach ($coins as $coin) {
+
+            $quotes[] = [
+                'abbr' => $coin->coin->abbr,
+                'quote' => [
+                    'sell_quote' => sprintf("%.5f", $lqx_quote->sell_quote / $coin->buy_quote),
+                    'buy_quote' => sprintf("%.5f", $coin->sell_quote / $lqx_quote->buy_quote),
+                ],
+            ];
+        }
+
+        return $quotes;
     }
 }

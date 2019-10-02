@@ -324,3 +324,5 @@ Route::group([
         Route::get('/status/{tx}', 'GatewayController@showGatewayData');
         Route::post('/status-list', 'GatewayController@gatewayDataList');
     });
+
+Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
