@@ -50,34 +50,11 @@ class UserController extends Controller
     public function index()
     {
         try {
-            $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
-            $fiat_coin = Coin::getByAbbr($user_fiat_abbr);
-            $wallet = UserWallet::where([
-                'coin_id' => $fiat_coin->id,
-                'user_id' => auth()->user()->id,
-            ])->first();
-
-            $request = new ConvertRequest();
-            $request->amount = $wallet->balance;
-            $request->base = $fiat_coin->abbr;
-            $request->quote = 'BTC';
-
-            $fiat_to_btc = (new OrderController(new BalanceService(), new ConversorService()))->convert($request);
-
-            $request->quote = 'LQX';
-            $fiat_to_lqx = (new OrderController(new BalanceService(), new ConversorService()))->convert($request);
-
-
             $user = User::with([
                 'level' => function ($level) {
                     return $level->with('product');
                 }
             ])->findOrFail(auth()->user()->id);
-
-            $user['fiat_balance'] = $wallet->balance_rounded . ' ' . $user_fiat_abbr;
-            $user['fiat_balance_'] = (float)$wallet->balance;
-            $user['fiat_to_lqx'] = $fiat_to_lqx['amount'] . 'LQX';
-            $user['fiat_to_btc'] = $fiat_to_btc['amount'] . 'BTC';
 
             return response([
                 'message' => trans('messages.general.success'),
@@ -564,78 +541,5 @@ class UserController extends Controller
             return true;
         }
     }
-
-    public function conversion(Request $request)
-    {
-        $request->validate([
-            'abbr' => [
-                'required',
-                Rule::in(['BTC', 'LQX'])
-            ]
-        ]);
-
-        try {
-            $quote = $request->abbr;
-
-            $user_fiat_abbr = auth()->user()->country_id === 31 ? 'BRL' : 'USD';
-            $fiat_coin = Coin::getByAbbr($user_fiat_abbr);
-            $wallet = UserWallet::where([
-                'coin_id' => $fiat_coin->id,
-                'user_id' => auth()->user()->id,
-            ])->first();
-
-            $request = new ConvertRequest();
-            $request->amount = $wallet->balance;
-            $request->base = $fiat_coin->abbr;
-            $request->quote = $quote;
-
-//            if ($quote == 'LQX') {
-//                $request->quote = 'LQX';
-//                $fiat_to_lqx = (new OrderController(new BalanceService(), new ConversorService()))->convert($request);
-//                $extra_amount = $fiat_to_lqx['amount'] * 0.1;
-//
-//                (new OrderController(new BalanceService(), new ConversorService()))->convertAmount($request);
-//
-//                $transaction_in = Transaction::create([
-//                    'user_id' => auth()->user()->id,
-//                    'coin_id' => Coin::getByAbbr("LQX")->id,
-//                    'wallet_id' => UserWallet::where(['coin_id' => Coin::getByAbbr("LQX")->id, 'user_id' => auth()->user()->id])->first()->id,
-//                    'amount' => $extra_amount,
-//                    'status' => EnumTransactionsStatus::SUCCESS,
-//                    'type' => EnumTransactionType::IN,
-//                    'category' => EnumTransactionCategory::CONVERSION,
-//                    'fee' => 0,
-//                    'tax' => 0,
-//                    'tx' => Uuid::uuid4()->toString(),
-//                    'info' => '10% de Bônus na conversão',
-//                    'error' => '',
-//                    'price' => 0,
-//                    'market' => 0
-//                ]);
-//
-//                TransactionStatus::create([
-//                    'status' => $transaction_in->status,
-//                    'transaction_id' => $transaction_in->id,
-//                ]);
-//
-//                BalanceService::increments($transaction_in);
-//
-//                return response([
-//                    'message' => trans('messages.general.success'),
-//                ], Response::HTTP_OK);
-//            }
-
-            (new OrderController(new BalanceService(), new ConversorService()))->convertAmount($request);
-
-            return response([
-                'message' => trans('messages.general.success'),
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            return response([
-                'message' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
 
 }

@@ -24,7 +24,7 @@ class LqxTempWithdrawals extends Command
      *
      * @var string
      */
-    protected $signature = 'lqx:tempwithdrawals';
+    //protected $signature = 'lqx:tempwithdrawals';
 
     /**
      * The console command description.

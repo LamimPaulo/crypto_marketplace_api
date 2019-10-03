@@ -29,7 +29,7 @@ class BrlUsdConversion extends Command
      *
      * @var string
      */
-    protected $signature = 'brlusd:conversion';
+    //protected $signature = 'brlusd:conversion';
 
     /**
      * The console command description.
