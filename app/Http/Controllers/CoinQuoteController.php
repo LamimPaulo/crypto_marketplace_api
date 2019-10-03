@@ -195,8 +195,8 @@ class CoinQuoteController extends Controller
 
     public function quotes()
     {
-        $lqx_quote = 'LQX';
-        $fiat_coin = Coin::with('quote')->where('abbr', $lqx_quote)->first();
+        $fiat = auth()->user()->country_id == 31 ? 'BRL' : 'USD';
+        $fiat_coin = Coin::with('quote')->where('abbr', $fiat)->first();
 
         return Coin::with([
             'quote' => function ($quotes) use ($fiat_coin) {
