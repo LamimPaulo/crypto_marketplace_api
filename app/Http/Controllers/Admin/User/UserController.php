@@ -68,6 +68,60 @@ class UserController extends Controller
         }
     }
 
+    public function balance()
+    {
+        try {
+            $users = User::with(['level', 'wallets' => function ($coin) {
+                return $coin->whereHas('coin', function($abbr){
+                    return $abbr->where('abbr', 'LQX');
+                });
+            }])
+                ->whereHas('wallets', function ($wallets) {
+                    return $wallets->whereHas('coin', function ($coin){
+                        return $coin->where('abbr', 'LQX');
+                    });
+                })
+                ->where('email_verified_at', '<>', '')
+                ->where('is_admin', 0)
+                ->where('is_canceled', 0)
+                ->orderBy('created_at', 'DESC')->paginate(10);
+
+            return response($users
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function searchBalance(Request $request)
+    {
+        try {
+            $users = User::with(['level', 'wallets' => function ($coin) use ($request) {
+                return $coin->whereHas('coin', function($abbr) use ($request) {
+                    return $abbr->where('abbr', $request->abbr);
+                });
+            }])
+                ->whereHas('wallets', function ($wallets) use ($request)  {
+                    return $wallets->whereHas('coin', function ($coin) use ($request) {
+                        return $coin->where('abbr', $request->abbr);
+                    });
+                })
+                ->where('email_verified_at', '<>', '')
+                // ->where('is_admin', 0)
+                ->where('is_canceled', 0)
+                ->orderBy('created_at', 'DESC')->paginate(10);
+
+            return response($users
+                , Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function listDeactivated()
     {
         try {
