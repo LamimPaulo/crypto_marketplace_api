@@ -55,8 +55,8 @@ class CoinQuoteController extends Controller
                 $lqx_brl = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("LQX")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id]);
                 $lqx_usd = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("LQX")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id]);
 
-                $lqx_usd->buy_quote = $lqx_brl->sell_quote / $result->data->rates->BRL;
-                $lqx_usd->sell_quote = $lqx_brl->buy_quote / $result->data->rates->BRL;
+                $lqx_usd->buy_quote = $lqx_brl->buy_quote / $result->data->rates->BRL;
+                $lqx_usd->sell_quote = $lqx_brl->sell_quote / $result->data->rates->BRL;
                 $lqx_usd->average_quote = ($lqx_usd->buy_quote + $lqx_usd->sell_quote) / 2;
                 $lqx_usd->save();
 
