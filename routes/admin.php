@@ -113,6 +113,8 @@ Route::group(['namespace' => 'Admin'], function () {
     ], function () {
         //user list
         Route::get('/list', 'UserController@list');
+        Route::get('/balance', 'UserController@balance');
+        Route::post('/searchBalance', 'UserController@searchBalance');
         Route::get('/list/deactivated', 'UserController@listDeactivated');
         Route::post('/update-email', 'UserController@updateEmail')->middleware('can_execute:user_mail_change');
         //user hist
@@ -334,5 +336,3 @@ Route::group(['namespace' => 'Admin'], function () {
     Route::post('/lqx/withdrawals/update', 'LqxWithdrawalController@update')->middleware('can_execute:lqx_withdrawals');
 
 });
-
-
