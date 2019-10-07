@@ -50,6 +50,23 @@ class CoinQuoteController extends Controller
                     'quote_coin_id' => Coin::getByAbbr("USD")->id,
                     'average_quote' => $result->data->rates->BRL
                 ]);
+
+                //LQXTOUSD
+                $lqx_brl = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("LQX")->id, 'quote_coin_id' => Coin::getByAbbr("BRL")->id]);
+                $lqx_usd = CoinQuote::firstOrNew(['coin_id' => Coin::getByAbbr("LQX")->id, 'quote_coin_id' => Coin::getByAbbr("USD")->id]);
+
+                $lqx_usd->buy_quote = $result->data->rates->BRL / $lqx_brl->buy_quote;
+                $lqx_usd->sell_quote = $result->data->rates->BRL / $lqx_brl->sell_quote;
+                $lqx_usd->average_quote = ($lqx_usd->buy_quote + $lqx_usd->sell_quote) / 2;
+                $lqx_usd->save();
+
+                CoinQuoteHist::create([
+                    'coin_id' => Coin::getByAbbr("LQX")->id,
+                    'quote_coin_id' => Coin::getByAbbr("USD")->id,
+                    'average_quote' => $lqx_usd->average_quote
+                ]);
+
+
             } else {
                 throw new \Exception($statuscode);
             }
