@@ -66,7 +66,6 @@ class CoinQuoteController extends Controller
                     'average_quote' => $lqx_usd->average_quote
                 ]);
 
-
             } else {
                 throw new \Exception($statuscode);
             }

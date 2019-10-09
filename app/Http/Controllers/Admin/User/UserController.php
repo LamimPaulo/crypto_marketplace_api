@@ -425,7 +425,6 @@ class UserController extends Controller
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
-
             return response($transactions, Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
