@@ -407,7 +407,7 @@ class GatewayController extends Controller
             $time = SysConfig::first()->time_gateway ?? 30;
             $tx = Uuid::uuid4()->toString();
 
-            $quote = $this->conversorService::FIAT2CRYPTO_MAX($amount, $request->crypto_abbr, $request->fiat_abbr);
+            $quote = $this->conversorService::FIAT2CRYPTO_MIN($amount, $request->crypto_abbr, $request->fiat_abbr);
 
             $gateway = Gateway::create([
                 'gateway_api_key_id' => 0,
