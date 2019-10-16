@@ -34,7 +34,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/update', 'UserController@update')->middleware(['tokencheck', 'pincheck']);
         Route::post('/update-international', 'UserController@updateInternational')->middleware(['tokencheck', 'pincheck']);
         //atualizar senha
-        Route::post('/update-password', 'UserController@updatePassword')->middleware(['tokencheck', 'pincheck']);//token check
+        Route::post('/update-password', 'UserController@updatePassword')->middleware(['tokencheck', 'pincheck']); //token check
         //atualizar pin
         Route::post('/update-pin', 'UserController@updatePin')->middleware('tokencheck');
         //preencher dados pelo cpf informado
@@ -158,6 +158,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::group(['prefix' => 'transactions'], function () {
         //enviar transações
         Route::post('/send', 'TransactionsController@store')->middleware(['tokencheck', 'pincheck', 'checkkeycodelevel']);
+        Route::post('/send-mobile', 'TransactionsController@store')->middleware(['tokenmobilecheck', 'pincheck', 'checkkeycodelevel']);
         //retorna o valor transacionado do usuario no dia
         Route::get('/sum-day/{user}', 'TransactionsController@getValueByDayUser');
         //verifica se o usuário pode efetuar a transação
@@ -184,7 +185,6 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/', 'Admin\CoinsController@index');
         //preco da moeda indicada pelo simbolo (abbr)
         Route::get('/quotes', 'CoinQuoteController@quotes');
-
     });
 
     //crypto ativos
@@ -259,7 +259,6 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/user-list', 'FundsController@userList');
 
         Route::get('/update/{fund}', 'FundsController@updateFund');
-
     });
     Route::prefix('admin')->middleware('admin')->group(base_path('routes/admin.php'));
 });
@@ -293,7 +292,8 @@ Route::post('operation', 'OperationController@index');
 Route::get('public/lqx', 'ApiController@lqx');
 
 //credminer products
-Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
+Route::group(
+    ['prefix' => 'credminer/product', 'middleware' => 'credminer'],
     function () {
         Route::get('/nanotech', 'Credminer\NanotechController@index');
         Route::post('/nanotech/info', 'Credminer\NanotechController@info');
@@ -303,26 +303,31 @@ Route::group(['prefix' => 'credminer/product', 'middleware' => 'credminer'],
         Route::post('/investment/invest', 'Credminer\InvestmentController@invest');
         Route::post('/investment/estimate', 'Credminer\InvestmentController@estimate');
         Route::post('/investment/acquired', 'Credminer\InvestmentController@acquired');
-    });
+    }
+);
 
 //gateway de saques credminer
-Route::group([
-    'prefix' => 'credminer/payments',
-    'middleware' => 'credminer'
-],
+Route::group(
+    [
+        'prefix' => 'credminer/payments',
+        'middleware' => 'credminer'
+    ],
     function () {
         Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
         Route::post('/check-key', 'Credminer\PaymentController@checkKey');
         Route::post('/check-cpf', 'Credminer\PaymentController@checkCpf');
-    });
+    }
+);
 
-Route::group([
-    'prefix' => 'credminer/gateway'
-],
+Route::group(
+    [
+        'prefix' => 'credminer/gateway'
+    ],
     function () {
         Route::post('/new', 'GatewayController@new')->middleware('credminer');
         Route::get('/status/{tx}', 'GatewayController@showGatewayData');
         Route::post('/status-list', 'GatewayController@gatewayDataList');
-    });
+    }
+);
 
 Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
