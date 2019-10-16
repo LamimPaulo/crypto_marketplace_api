@@ -239,8 +239,10 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/profitbtc', 'NanotechOperationController@btc_profitOperations');
     });
 
-    Route::group(['prefix' => 'masternode', 'as' => 'masternode.'], function () {
-        Route::get('/list', 'MasternodeController@listNodes');
+    Route::group(['prefix' => 'masternode'], function () {
+        Route::get('/list', 'MasternodeController@list');
+        Route::get('/processing', 'MasternodeController@processing');
+        Route::get('/total-reward', 'MasternodeController@totalReward');
     });
 
     //funds
@@ -276,7 +278,6 @@ Route::post('/payments/check-key', 'GatewayController@checkKey');
 Route::get('/comparison', 'Exchange\ExchangesController@comparison');
 
 Route::get('/uuid', function () {
-
     $id = \Ramsey\Uuid\Uuid::uuid4()->toString();
     return response([
         'uuid' => $id,
@@ -299,6 +300,9 @@ Route::group(
         Route::post('/nanotech/info', 'Credminer\NanotechController@info');
         Route::post('/nanotech/invest', 'Credminer\NanotechController@invest');
 
+        Route::get('/masternode', 'Credminer\MasternodesController@index');
+        Route::post('/masternode', 'Credminer\MasternodesController@create');
+
         Route::get('/investments', 'Credminer\InvestmentController@index');
         Route::post('/investment/invest', 'Credminer\InvestmentController@invest');
         Route::post('/investment/estimate', 'Credminer\InvestmentController@estimate');
@@ -319,15 +323,10 @@ Route::group(
     }
 );
 
-Route::group(
-    [
-        'prefix' => 'credminer/gateway'
-    ],
-    function () {
-        Route::post('/new', 'GatewayController@new')->middleware('credminer');
-        Route::get('/status/{tx}', 'GatewayController@showGatewayData');
-        Route::post('/status-list', 'GatewayController@gatewayDataList');
-    }
-);
+Route::group(['prefix' => 'credminer/gateway'], function () {
+    Route::post('/new', 'GatewayController@new')->middleware('credminer');
+    Route::get('/status/{tx}', 'GatewayController@showGatewayData');
+    Route::post('/status-list', 'GatewayController@gatewayDataList');
+});
 
 Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');

@@ -5,6 +5,7 @@ namespace App;
 use App\Models\Country;
 use App\Models\Gateway;
 use App\Models\GatewayApiKey;
+use App\Models\Masternode;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
 use App\Models\SysConfig;
@@ -194,5 +195,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function user_role()
     {
         return $this->hasOne(UserRole::class, 'user_id');
+    }
+
+    public function masternodes()
+    {
+        return $this->hasMany(Masternode::class, 'user_id');
     }
 }

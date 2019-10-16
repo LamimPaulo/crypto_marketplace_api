@@ -9,11 +9,24 @@ use App\User;
 
 class UserWallet extends Model
 {
-    protected $fillable = ['balance', 'address', 'user_id', 'coin_id', 'type', 'conversion_priority', 'sync'];
+    protected $fillable = [
+        'balance',
+        'address',
+        'user_id',
+        'coin_id',
+        'type',
+        'conversion_priority',
+        'sync'
+    ];
 
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
 
-    protected $appends = ['balance_rounded'];
+    protected $appends = [
+        'balance_rounded'
+    ];
 
     public static function showByAddress($address)
     {

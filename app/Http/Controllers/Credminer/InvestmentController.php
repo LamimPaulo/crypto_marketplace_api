@@ -18,7 +18,6 @@ use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
 use App\User;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;

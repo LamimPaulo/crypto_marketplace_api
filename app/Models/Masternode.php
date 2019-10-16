@@ -2,28 +2,76 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Enum\EnumMasternodeStatus;
+use App\Models\User\UserWallet;
+use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Masternode extends Model
 {
+    use SoftDeletes;
+
     //
     protected $fillable = [
         'coin_id',
-        'roi',
-        'daily_return',
-        'daily_return_btc'
+        'user_id',
+        'ip',
+        'reward_address',
+        'payment_address',
+        'fee_address',
+        'status',
     ];
 
-    protected $appends = ['createdLocal', 'roiLocal'];
+    protected $appends = [
+        'createdLocal',
+        'updatedLocal',
+        'deletedLocal',
+        'statusName',
+        'statusColor',
+        'balance',
+    ];
+
+    public static function hiddenAttr()
+    {
+        return [
+            'id',
+            'statusColor',
+            'createdLocal',
+            'updatedLocal',
+            'deletedLocal',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+            'user_id',
+            'coin_id',
+        ];
+    }
+
+    public function getStatusNameAttribute()
+    {
+        return EnumMasternodeStatus::STATUS[$this->status];
+    }
+
+    public function getStatusColorAttribute()
+    {
+        return EnumMasternodeStatus::COLOR[$this->status];
+    }
 
     public function getCreatedLocalAttribute()
     {
         return $this->created_at->format('d/m/Y H:i');
     }
 
-    public function getRoiLocalAttribute()
+    public function getUpdatedLocalAttribute()
     {
-        return sprintf("%.3f", $this->roi);
+        return $this->updated_at->format('d/m/Y H:i');
+    }
+
+    public function getDeletedLocalAttribute()
+    {
+        if ($this->deleted_at) {
+            return $this->deleted_at->format('d/m/Y H:i');
+        }
     }
 
     public function coin()
@@ -31,9 +79,19 @@ class Masternode extends Model
         return $this->belongsTo(Coin::class, 'coin_id');
     }
 
-    public function hists()
+    public function user()
     {
-        return $this->hasMany(MasternodeHist::class, 'coin_id', 'coin_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function wallet()
+    {
+        return $this->belongsTo(UserWallet::class, 'reward_address','address');
+    }
+
+    public function getBalanceAttribute()
+    {
+        return $this->wallet()->pluck('balance')[0];
     }
 
 }

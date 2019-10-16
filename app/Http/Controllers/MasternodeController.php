@@ -2,85 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Coin;
-use App\Models\CoinQuote;
+use App\Enum\EnumMasternodeStatus;
 use App\Models\Masternode;
-use App\Models\MasternodeHist;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class MasternodeController extends Controller
 {
-    public function listNodes()
+    public function list(Request $request)
     {
-        return Masternode::with(['coin'])->get();
-    }
-
-    public function updateCommand()
-    {
-        $coins = Coin::where([
-            'is_active' => true,
-            'is_masternode' => true
-        ])->get();
-
-        $api = new \GuzzleHttp\Client([
-            'http_errors' => false
-        ]);
-
         try {
-            Masternode::truncate();
+            $list = Masternode::where('user_id', auth()->user()->id)->paginate(10);
+            $data = $list->makeHidden(['user_id']);
+            $list->data = $data;
+            return response($list, Response::HTTP_OK);
 
-            foreach ($coins as $coin) {
-                $url = config('services.masternode.api')
-                    . "coin/{$coin->abbr}?apikey="
-                    . config("services.masternode.key");
-
-                $response = $api->get($url);
-                $statuscode = $response->getStatusCode();
-
-                if (200 === $statuscode) {
-                    $result = json_decode($response->getBody()->getContents());
-
-                    $masternode = [
-                        'coin_id' => $coin->id,
-                        'roi' => $result->roi,
-                        'daily_return' => $result->daily_returns->{strtolower($coin->abbr)},
-                        'daily_return_btc' => $result->daily_returns->btc
-                    ];
-
-                    Masternode::create($masternode);
-                    MasternodeHist::create($masternode);
-                }
-            }
-
-            //BR /LQX
-            $url = config('services.masternode.api')
-                . "coin/BR?apikey="
-                . config("services.masternode.key");
-
-            $response = $api->get($url);
-            $statuscode = $response->getStatusCode();
-
-            if (200 === $statuscode) {
-                $result = json_decode($response->getBody()->getContents());
-
-                $lqx = Coin::getByAbbr('LQX');
-                $brl = Coin::getByAbbr('BRL');
-
-                $quote = CoinQuote::where([
-                    'coin_id' => $lqx->id,
-                    'quote_coin_id' => $brl->id,
-                ])->first();
-
-                $masternode = [
-                    'coin_id' => $lqx->id,
-                    'roi' => $result->roi,
-                    'daily_return' => $result->daily_returns->br / $quote->average_quote,
-                    'daily_return_btc' => $result->daily_returns->btc
-                ];
-                Masternode::create($masternode);
-                MasternodeHist::create($masternode);
-            }
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
+
+    public function processing()
+    {
+        try {
+            $masternode = Masternode::where([
+                'user_id' => auth()->user()->id,
+                'status' => EnumMasternodeStatus::PROCESSING,
+            ])->first();
+            return response($masternode, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
 }
