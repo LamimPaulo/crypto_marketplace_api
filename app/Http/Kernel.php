@@ -39,7 +39,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-//            'throttle:60,1',
+            //            'throttle:60,1',
             \Barryvdh\Cors\HandleCors::class,
             'bindings',
         ],
@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'tokencheck' => Middleware\TokenCheck::class,
+        'tokenmobilecheck' => Middleware\TokenMobileCheck::class,
         'pincheck' => Middleware\PinCheck::class,
         'docscheck' => Middleware\DocsCheck::class,
         'gateway' => Middleware\Gateway::class,
