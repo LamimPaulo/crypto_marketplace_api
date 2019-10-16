@@ -196,9 +196,17 @@ class GatewayController extends Controller
                 return false;
             }
 
-            if ($gateway->status === EnumGatewayStatus::NEWW) {
-                $amount = abs($transaction['amount']);
-                $status = self::setStatus($gateway, $amount);
+            if (in_array($gateway->status, EnumGatewayStatus::NOTIFY)) {
+
+                if ($gateway->status == EnumGatewayStatus::EXPIRED) {
+                    $amount = abs($transaction['amount']);
+                    $status = self::setExpiredStatus($gateway, $amount);
+                }
+
+                if ($gateway->status == EnumGatewayStatus::NEWW) {
+                    $amount = abs($transaction['amount']);
+                    $status = self::setStatus($gateway, $amount);
+                }
 
                 $gateway->update([
                     'status' => $status,
@@ -237,6 +245,27 @@ class GatewayController extends Controller
             return EnumGatewayStatus::UNDERPAID;
         } else if ($received > $expected->amount) {
             return EnumGatewayStatus::OVERPAID;
+        }
+        return $expected->status;
+    }
+
+    /**
+     *
+     * @param mixed $expected
+     * @param mixed $received
+     * @return int
+     */
+    private static function setExpiredStatus($expected, $received)
+    {
+        $expected->amount = sprintf("%.8f", $expected->amount);
+        $received = sprintf("%.8f", $received);
+
+        if ($received == $expected->amount) {
+            return EnumGatewayStatus::DONEEXPIRED;
+        } else if ($received < $expected->amount) {
+            return EnumGatewayStatus::UNDERPAIDEXPIRED;
+        } else if ($received > $expected->amount) {
+            return EnumGatewayStatus::OVERPAIDEXPIRED;
         }
         return $expected->status;
     }
@@ -348,8 +377,9 @@ class GatewayController extends Controller
                 return $user->with(['gateway_key', 'level']);
             },])
             ->where('type', '=', EnumTransactionType::IN)
+            ->where('confirmations', '<', 6)
             ->whereRaw('LENGTH(txid) > 36')
-            ->whereIn('status', [EnumGatewayStatus::DONE, EnumGatewayStatus::OVERPAID, EnumGatewayStatus::UNDERPAID])
+            ->whereIn('status', EnumGatewayStatus::CONFIRMATION)
             ->get()->makeVisible(['coin_id', 'status', 'user_id']);
 
         foreach ($transactions as $transaction) {
@@ -377,7 +407,10 @@ class GatewayController extends Controller
 
             if ((int)$data['confirmations'] >= 6) {
 
-                $data['status'] = EnumGatewayStatus::PAID;
+                $data['status'] =
+                    EnumGatewayStatus::DONE == $data['status'] ? EnumGatewayStatus::PAID :
+                        EnumGatewayStatus::DONEEXPIRED == $data['status'] ? EnumGatewayStatus::PAIDEXPIRED :
+                            $data['status'];
 
                 GatewayStatus::create([
                     'status' => $data['status'],
