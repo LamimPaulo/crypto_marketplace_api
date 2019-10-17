@@ -51,7 +51,8 @@ class TokenSmsController extends Controller
         } catch (\Exception $ex) {
             return response([
                 'message' => $ex->getMessage(),
-                'status' => 'error'], Response::HTTP_BAD_REQUEST);
+                'status' => 'error'
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -93,14 +94,15 @@ class TokenSmsController extends Controller
         } catch (\Exception $ex) {
             return response([
                 'message' => $ex->getMessage(),
-                'status' => 'error'], Response::HTTP_BAD_REQUEST);
+                'status' => 'error'
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 
     public static function verify(Request $request)
     {
         $request->validate([
-            'action' => 'required|numeric',
+            'action' => 'required',
             'code' => 'required'
         ]);
 
