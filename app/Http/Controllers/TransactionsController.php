@@ -48,8 +48,8 @@ class TransactionsController extends Controller
         BalanceService $balance,
         ConversorService $conversor,
         TaxCoinService $taxCoin,
-        GatewayService $gateway)
-    {
+        GatewayService $gateway
+    ) {
         $this->conversorService = $conversor;
         $this->taxCoinService = $taxCoin;
         $this->balanceService = $balance;
@@ -64,12 +64,13 @@ class TransactionsController extends Controller
             $from = UserWallet::where([
                 'user_id' => auth()->user()->id,
                 'address' => $request->address,
-                'type' => EnumUserWalletType::WALLET])
+                'type' => EnumUserWalletType::WALLET
+            ])
                 ->whereHas('coin', function ($coin) {
                     return $coin->where('is_crypto', true);
                 })->first();
 
-            if ($from->coin->abbr!='LQX') {
+            if ($from->coin->abbr != 'LQX') {
                 throw new \Exception("O Envio de moedas está temporariamente bloqueado, somente poderão ser realizados os envios de LQX!");
             }
 
@@ -163,11 +164,10 @@ class TransactionsController extends Controller
                 'transaction' => $transaction,
                 'transactionStatus' => $transactionStatus
             ], Response::HTTP_CREATED);
-
         } catch (\Exception $ex) {
             DB::rollBack();
             return response([
-                'message' => $ex->getMessage(). ' => '.$ex->getLine(). ' => '.$ex->getFile()
+                'message' => $ex->getMessage() . ' => ' . $ex->getLine() . ' => ' . $ex->getFile(), 'status' => 'error'
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -216,7 +216,7 @@ class TransactionsController extends Controller
                 'fee' => 0,
                 'taxas' => 0,
                 'tx' => $internalTx,
-                'info' => trans('info.internal_receiving'),
+                'info' => trans('info. '),
                 'error' => '',
                 'is_internal' => true,
             ]);
@@ -272,12 +272,9 @@ class TransactionsController extends Controller
             ]);
 
             $this->gatewayService->updateInternal($gateway, $transaction);
-
-        } catch
-        (\Exception $ex) {
+        } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
         }
-
     }
 
     public function getValueMinTransaction()
@@ -336,7 +333,7 @@ class TransactionsController extends Controller
 
         $sumValueTransaction = floatval($sumTaxas + $request->amount + $fee);
 
-        if (!((float)$sumValueTransaction <= (float)$from->balance)) {
+        if (!((float) $sumValueTransaction <= (float) $from->balance)) {
             return response([
                 'message' => trans('messages.transaction.value_exceeds_balance')
             ], Response::HTTP_NOT_ACCEPTABLE);
@@ -423,12 +420,12 @@ class TransactionsController extends Controller
             $wallet_id = UserWallet::where('address', $address)->firstOrFail();
 
             $transactions = Transaction::with('coin', 'user_account')
-//                ->whereHas('wallet', function ($wallet) use ($address) {
-//                    return $wallet->where('address', $address);
-//                })
-//                ->whereHas('coin', function ($coin) use ($abbr) {
-//                    return $coin->where('abbr', $abbr);
-//                })
+                //                ->whereHas('wallet', function ($wallet) use ($address) {
+                //                    return $wallet->where('address', $address);
+                //                })
+                //                ->whereHas('coin', function ($coin) use ($abbr) {
+                //                    return $coin->where('abbr', $abbr);
+                //                })
                 ->where([
                     'user_id' => auth()->user()->id,
                     'coin_id' => Coin::getByAbbr($abbr)->id,
@@ -447,7 +444,7 @@ class TransactionsController extends Controller
 
     public function transfer(TransferRequest $request)
     {
-        $amount = (float)$request->amount;
+        $amount = (float) $request->amount;
 
         if (auth()->user()->country_id == 31) {
             if (!$this->balanceService->verifyBalance($amount, 'BRL')) {
@@ -528,7 +525,6 @@ class TransactionsController extends Controller
             return response([
                 'message' => trans('messages.transaction.sent_success'),
             ], Response::HTTP_CREATED);
-
         } catch (\Exception $ex) {
             DB::rollBack();
             return response([
@@ -627,5 +623,4 @@ class TransactionsController extends Controller
         $amount = floatval($transaction->amount);
         return ($auto >= $amount) ? true : false;
     }
-
 }
