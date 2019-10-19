@@ -106,4 +106,40 @@ class MasternodesController extends Controller
         }
     }
 
+    public function suspend(Request $request)
+    {
+        Validator::make($request->all(), [
+            'keycode' => 'required|exists:users,api_key',
+        ], [
+            'keycode.required' => "O keycode deve ser informado.",
+            'keycode.exists' => "O keycode informado é inválido.",
+        ])->validate();
+
+        try {
+
+            $user = User::where('api_key', '=', $request->keycode)->first();
+
+            Masternode::where([
+                'user_id' => $user->id,
+                'status' => EnumMasternodeStatus::SUCCESS,
+            ])->each(function ($masternode) {
+                $masternode->status = EnumMasternodeStatus::CANCELED;
+                $masternode->save();
+            });
+
+            return response([
+                'status' => 'success',
+                'message' => trans('messages.products.suspend_success'),
+                'masternodes' => Masternode::where('user_id', $user->id)->get()
+                    ->makeHidden(Masternode::hiddenAttr())
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
 }

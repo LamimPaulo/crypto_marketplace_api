@@ -17,7 +17,6 @@ use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\TaxCoinService;
 use Illuminate\Support\Facades\DB;
-use mysql_xdevapi\Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 //use App\Http\Controllers\WalletTempController;

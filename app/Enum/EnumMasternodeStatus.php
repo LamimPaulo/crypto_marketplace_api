@@ -9,6 +9,7 @@ abstract class EnumMasternodeStatus
     const SUCCESS = 3;
     const CANCELED = 4;
     const ERROR = 5;
+    const SUSPENDED = 6;
 
     const STATUS = [
         self::PENDING => 'Pendente',
@@ -16,6 +17,7 @@ abstract class EnumMasternodeStatus
         self::SUCCESS => 'Ativado',
         self::CANCELED => 'Cancelado',
         self::ERROR => 'Erro',
+        self::SUSPENDED => 'Suspenso',
     ];
 
     const COLOR = [
@@ -24,5 +26,6 @@ abstract class EnumMasternodeStatus
         self::SUCCESS => 'success',
         self::CANCELED => 'secondary',
         self::ERROR => 'danger',
+        self::SUSPENDED => 'danger',
     ];
 }

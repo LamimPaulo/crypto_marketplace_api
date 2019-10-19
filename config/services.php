@@ -71,8 +71,7 @@ return [
         ],
     ],
     'masternode' => [
-        'api' => 'https://masternodes.pro/api/v1/',
-        'key' => env("MASTERNODE_KEY")
+        'api' => env("MASTERNODES_LQX")
     ],
     'slushpool' => [
         'key' => env('SLUSH_KEY'),

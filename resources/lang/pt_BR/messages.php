@@ -90,6 +90,7 @@ return [
         'error_creating_investment' => 'Erro ao criar investimento.',
         'fund_not_acquired' => 'Você não possui cotas do Fundo de Investmento selecionado.',
         'hiring_success' => 'Contratação efetuada com sucesso.',
+        'suspend_success' => 'Suspenso com sucesso.',
         'index_fund' => 'Fundo de Investmentos',
         'index_fund_hiring_success' => 'Fundo de Investmento adquirido com Sucesso!',
         'index_fund_sold_success' => 'Fundo de Investmento vendido com Sucesso!',

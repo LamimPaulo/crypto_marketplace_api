@@ -5,21 +5,21 @@ namespace App\Console\Commands;
 use App\Http\Controllers\MasternodeController;
 use Illuminate\Console\Command;
 
-class MasternodeUpdate extends Command
+class MasternodeSuspend extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'masternode:update';
+    protected $signature = 'masternode:suspend';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Update Masternodes';
+    protected $description = 'Suspend Masternodes';
 
     /**
      * Create a new command instance.
@@ -39,6 +39,6 @@ class MasternodeUpdate extends Command
      */
     public function handle()
     {
-        MasternodeController::updateTxids();
+        MasternodeController::cancelMasternodes();
     }
 }

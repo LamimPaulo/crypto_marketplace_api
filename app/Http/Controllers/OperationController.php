@@ -6,7 +6,6 @@ use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Http\Controllers\Admin\CoinsController;
-use App\Http\Controllers\Admin\SystemConfigController;
 use App\Models\Coin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

@@ -242,7 +242,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     Route::group(['prefix' => 'masternode'], function () {
         Route::get('/list', 'MasternodeController@list');
         Route::get('/processing', 'MasternodeController@processing');
-        Route::get('/total-reward', 'MasternodeController@totalReward');
+        Route::get('/founders-reward', 'MasternodeController@foundersInfo');
     });
 
     //funds
@@ -285,6 +285,19 @@ Route::get('/uuid', function () {
     ], 200);
 });
 
+Route::get('/hex', function () {
+    $x = 1;
+    $hex = "2700";
+    $prefix = "2804:778:800:1::";
+    while ($x < 200000) {
+        //\App\Models\MasternodeIp::firstOrCreate(["ip" => "$prefix$hex"]);
+        echo "$prefix$hex <br />";
+        $hex = dechex(hexdec($hex) + 1);
+        //$hex = str_pad($hex, 2, "0", STR_PAD_LEFT);
+        $x++;
+    }
+});
+
 Route::get('/time', function () {
     return response(['time' => \Carbon\Carbon::now()->toIso8601ZuluString()], 200);
 });
@@ -302,6 +315,8 @@ Route::group(
 
         Route::get('/masternode', 'Credminer\MasternodesController@index');
         Route::post('/masternode', 'Credminer\MasternodesController@create');
+
+        Route::post('/masternode/suspend', 'Credminer\MasternodesController@suspend');
 
         Route::get('/investments', 'Credminer\InvestmentController@index');
         Route::post('/investment/invest', 'Credminer\InvestmentController@invest');

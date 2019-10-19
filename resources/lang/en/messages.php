@@ -90,6 +90,7 @@ return [
         'error_creating_investment' => 'Error creating investment.',
         'fund_not_acquired' => 'You do not have quotas in the Index Fund selected.',
         'hiring_success' => 'Hiring successful.',
+        'suspend_success' => 'Suspended successfully.',
         'index_fund' => 'Index Funds',
         'index_fund_hiring_success' => 'Index Fund purchased successfully!',
         'index_fund_sold_success' => 'Index Fund sold successfully!',
