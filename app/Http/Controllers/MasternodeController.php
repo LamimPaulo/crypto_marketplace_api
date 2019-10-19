@@ -50,9 +50,9 @@ class MasternodeController extends Controller
         try {
             $masternode = MasternodeInfo::first();
             $mynodes = Masternode::where([
-                    'user_id' => auth()->user()->id,
-                    'status' => EnumMasternodeStatus::SUCCESS
-                ])->count();
+                'user_id' => auth()->user()->id,
+                'status' => EnumMasternodeStatus::SUCCESS
+            ])->count();
 
             $percent = round(100 * $mynodes / 3, 2);
 
@@ -80,7 +80,7 @@ class MasternodeController extends Controller
             ])->get();
 
             foreach ($masternodes as $masternode) {
-                $data[] = [
+                $data = [
                     'address' => $masternode->reward_address,
                 ];
 
@@ -107,7 +107,7 @@ class MasternodeController extends Controller
             ])->get();
 
             foreach ($masternodes as $masternode) {
-                $data[] = [
+                $data = [
                     'ownerKeyAddr' => $masternode->payment_address,
                 ];
 
@@ -132,7 +132,7 @@ class MasternodeController extends Controller
             ])->get();
 
             foreach ($masternodes as $masternode) {
-                $data[] = [
+                $data = [
                     'ownerKeyAddr' => $masternode->payment_address,
                 ];
 

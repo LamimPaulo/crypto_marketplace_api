@@ -345,3 +345,4 @@ Route::group(['prefix' => 'credminer/gateway'], function () {
 });
 
 Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
+Route::get('command', 'MasternodeController@proccessPending');
