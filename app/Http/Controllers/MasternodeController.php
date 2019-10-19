@@ -86,7 +86,7 @@ class MasternodeController extends Controller
 
                 $return = self::post(EnumMasternodeOperation::ALLOC_NEW_ADDRESS, $data);
 
-                $masternode->ip = $return['server']['ipv4'];
+                $masternode->ip = $return['ipv6'];
                 $masternode->payment_address = $return['ownerKeyAddr'];
                 $masternode->fee_address = $return['feeSourceAddress'];
 
@@ -170,7 +170,7 @@ class MasternodeController extends Controller
                     'Content-Type' => 'application/x-www-form-urlencoded'
                 ],
                 'form_params' => [
-                    encrypt([
+                    'data' => encrypt([
                         'data' => $data,
                         'type' => $type
                     ])
