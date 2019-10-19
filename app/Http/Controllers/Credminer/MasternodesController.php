@@ -110,9 +110,12 @@ class MasternodesController extends Controller
     {
         Validator::make($request->all(), [
             'keycode' => 'required|exists:users,api_key',
+            'reward_address' => 'required|exists:masternodes,reward_address',
         ], [
             'keycode.required' => "O keycode deve ser informado.",
             'keycode.exists' => "O keycode informado é inválido.",
+            'reward_address.required' => "O endereço de recompensa do masternode deve ser informado.",
+            'reward_address.exists' => "O endereço de recompensa do masternode informado é inválido.",
         ])->validate();
 
         try {
@@ -122,6 +125,7 @@ class MasternodesController extends Controller
             Masternode::where([
                 'user_id' => $user->id,
                 'status' => EnumMasternodeStatus::SUCCESS,
+                'reward_address' => $request->reward_address
             ])->each(function ($masternode) {
                 $masternode->status = EnumMasternodeStatus::CANCELED;
                 $masternode->save();
