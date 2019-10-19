@@ -41,7 +41,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:send')->everyTenMinutes()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
-        $schedule->command('masternode:update')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('update:corebalances')->everyMinute()->withoutOverlapping();
         $schedule->command('trade:execute')->everyMinute();
 

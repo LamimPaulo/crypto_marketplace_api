@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enum\EnumMasternodeOperation;
 use App\Enum\EnumMasternodeStatus;
-use App\Helpers\ActivityLogger;
 use App\Models\Masternode;
 use App\Models\MasternodeInfo;
 use Illuminate\Http\Request;
@@ -96,7 +95,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            ActivityLogger::log($e->getMessage(), null, Masternode::class, null);
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -121,7 +120,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            ActivityLogger::log($e->getMessage(), null, Masternode::class, null);
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -144,7 +143,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            ActivityLogger::log($e->getMessage(), null, Masternode::class, null);
+            throw new \Exception($e->getMessage());
         }
     }
 
@@ -158,7 +157,7 @@ class MasternodeController extends Controller
             $info->save();
 
         } catch (\Exception $e) {
-            ActivityLogger::log($e->getMessage(), null, Masternode::class, null);
+            throw new \Exception($e->getMessage());
         }
     }
 
