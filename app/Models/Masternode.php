@@ -91,7 +91,7 @@ class Masternode extends Model
 
     public function getBalanceAttribute()
     {
-        return $this->wallet()->pluck('balance')[0];
+        return $this->wallet()->pluck('balance')[0] ?? 0;
     }
 
 }

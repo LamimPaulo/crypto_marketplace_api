@@ -35,6 +35,7 @@ class MasternodeController extends Controller
                 'user_id' => auth()->user()->id,
                 'status' => EnumMasternodeStatus::PROCESSING,
             ])->first();
+
             return response($masternode, Response::HTTP_OK);
 
         } catch (\Exception $e) {
