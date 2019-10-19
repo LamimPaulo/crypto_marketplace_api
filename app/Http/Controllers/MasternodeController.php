@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enum\EnumMasternodeOperation;
 use App\Enum\EnumMasternodeStatus;
+use App\Enum\EnumUserWalletType;
+use App\Models\Coin;
 use App\Models\Masternode;
 use App\Models\MasternodeInfo;
+use App\Models\User\UserWallet;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use GuzzleHttp\Client;
@@ -109,7 +112,7 @@ class MasternodeController extends Controller
 
             foreach ($masternodes as $masternode) {
                 $data = [
-                    'ownerKeyAddr' => $masternode->payment_address,
+                    'address' => $masternode->payment_address,
                 ];
 
                 $return = self::post(EnumMasternodeOperation::UPDATE_TXIDS, $data);
@@ -186,6 +189,25 @@ class MasternodeController extends Controller
             } else {
                 throw new \Exception($response['error']);
             }
+        } catch (\Exception $ex) {
+            throw new \Exception($ex->getMessage());
+        }
+    }
+
+    public static function import()
+    {
+        try {
+
+            Masternode::all()->each(function ($masternode) {
+                UserWallet::firstOrCreate([
+                    'user_id' => $masternode->user_id,
+                    'coin_id' => Coin::getByAbbr("LQX")->id,
+                    'balance' => 0,
+                    'address' => $masternode->reward_address,
+                    'type' => EnumUserWalletType::MASTERNODE,
+                    'is_active' => true
+                ]);
+            });
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
         }
