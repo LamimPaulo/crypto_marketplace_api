@@ -6,6 +6,7 @@ use App\Enum\EnumMasternodeStatus;
 use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 
 class Masternode extends Model
 {
