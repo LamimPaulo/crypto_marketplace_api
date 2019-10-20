@@ -28,9 +28,9 @@ class UserWalletController extends Controller
                         return $userWallet->where(['user_id' => auth()->user()->id, 'is_active' => 1, 'type' => EnumUserWalletType::WALLET]);
                     }
                 ])->whereHas(
-                    'wallets', function($userWallet){
-                        return $userWallet->where(['user_id' => auth()->user()->id, 'is_active' => 1, 'type' => EnumUserWalletType::WALLET]);
-                    }
+                    'wallets', function ($userWallet) {
+                    return $userWallet->where(['user_id' => auth()->user()->id, 'is_active' => 1, 'type' => EnumUserWalletType::WALLET]);
+                }
                 )->orderBy('wallet_order');
 
             return response([
@@ -75,7 +75,11 @@ class UserWalletController extends Controller
                 ->whereHas('coin', function ($coin) use ($abbr) {
                     return $coin->where('is_active', 1)->where('abbr', 'LIKE', $abbr);
                 })
-                ->where(['user_id' => auth()->user()->id, 'is_active' => 1])->first();
+                ->where([
+                    'user_id' => auth()->user()->id,
+                    'is_active' => 1,
+                    'type' => EnumUserWalletType::WALLET
+                ])->first();
 
             if (!$wallet) {
                 return response([
