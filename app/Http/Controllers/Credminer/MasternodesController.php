@@ -68,14 +68,13 @@ class MasternodesController extends Controller
             DB::beginTransaction();
 
             for ($i = 0; $i < $request->amount; $i++) {
-                $address = env('APP_ENV') == 'local' ? Uuid::uuid4()->toString() :
-                    OffScreenController::post(EnumOperationType::CREATE_ADDRESS, NULL, "LQX");
+                $address = OffScreenController::post(EnumOperationType::MN_ACCOUNT, NULL, "LQX");
 
                 $wallet = UserWallet::create([
                     'user_id' => $user->id,
                     'coin_id' => Coin::getByAbbr("LQX")->id,
                     'balance' => 0,
-                    'address' => $address,
+                    'address' => $address['address'],
                     'type' => EnumUserWalletType::MASTERNODE,
                     'is_active' => true
                 ]);
@@ -84,6 +83,7 @@ class MasternodesController extends Controller
                     'coin_id' => $wallet->coin_id,
                     'user_id' => $wallet->user_id,
                     'reward_address' => $wallet->address,
+                    'privkey' => $address['privkey'],
                     'status' => EnumMasternodeStatus::PENDING,
                 ]);
             }

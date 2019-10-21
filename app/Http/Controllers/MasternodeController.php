@@ -197,7 +197,6 @@ class MasternodeController extends Controller
     public static function import()
     {
         try {
-
             Masternode::all()->each(function ($masternode) {
                 UserWallet::firstOrCreate([
                     'user_id' => $masternode->user_id,

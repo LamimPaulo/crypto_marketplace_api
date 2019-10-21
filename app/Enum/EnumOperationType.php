@@ -28,4 +28,5 @@ abstract class EnumOperationType
     const CORE_WITHDRAWAL_LIMIT = 'CORE WITHDRAWAL LIMIT';
     const IMPORT_ADDRESS = 'IMPORT ADDRESS';
     const SYNC_ADDRESS = 'SYNC ADDRESS';
+    const MN_ACCOUNT = 'MN_ACCOUNT';
 }

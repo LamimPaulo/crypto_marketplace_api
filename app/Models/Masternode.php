@@ -20,6 +20,7 @@ class Masternode extends Model
         'reward_address',
         'payment_address',
         'fee_address',
+        'privkey',
         'status',
     ];
 
