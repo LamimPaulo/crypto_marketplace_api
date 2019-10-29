@@ -167,7 +167,8 @@ class TransactionsController extends Controller
         } catch (\Exception $ex) {
             DB::rollBack();
             return response([
-                'message' => $ex->getMessage() . ' => ' . $ex->getLine() . ' => ' . $ex->getFile(), 'status' => 'error'
+                'message' => $ex->getMessage(),
+                'status' => 'error'
             ], Response::HTTP_BAD_REQUEST);
         }
     }
