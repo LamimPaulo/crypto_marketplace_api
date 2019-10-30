@@ -18,6 +18,12 @@ class CheckKeycodeLevel
     public function handle($request, Closure $next)
     {
         try {
+            $gateway = \App\Models\Gateway::where('address', $request->get('toAddress'))->exists();
+
+            if ($gateway) {
+                return $next($request);
+            }
+
             $internal = UserWallet::with('user')->where('address', $request->get('toAddress'))->first();
             if ($internal) {
                 if ($internal->user->user_level_id == 1 OR $internal->user->user_level_id == 7 OR is_null($internal->user->api_key)) {
