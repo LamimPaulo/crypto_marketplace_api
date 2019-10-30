@@ -217,7 +217,7 @@ class TransactionsController extends Controller
                 'fee' => 0,
                 'taxas' => 0,
                 'tx' => $internalTx,
-                'info' => trans('info. '),
+                'info' => '',
                 'error' => '',
                 'is_internal' => true,
             ]);
@@ -240,7 +240,7 @@ class TransactionsController extends Controller
         try {
             $gateway = Gateway::with([
                 'user' => function ($user) {
-                    return $user->with(['api_key', 'level']);
+                    return $user->with(['gateway_key', 'level']);
                 },
                 'coin'
             ])->where('address', $transaction->toAddress)->first();
