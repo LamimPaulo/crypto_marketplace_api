@@ -296,6 +296,7 @@ Route::group(['namespace' => 'Admin'], function () {
         //listar pagamentos
         Route::post('/', 'Operations\GatewayController@index');
         Route::get('/status', 'Operations\GatewayController@status');
+        Route::get('/transaction/{address}', 'Operations\GatewayController@transaction');
 
         //listar chave(s)
         Route::get('/get-key/{email}', 'GatewayApiKeyController@index');

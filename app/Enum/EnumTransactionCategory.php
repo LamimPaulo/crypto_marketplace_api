@@ -24,6 +24,7 @@ abstract class EnumTransactionCategory
     const BRL_SUBMIT = 18;          //OUT
     const USD_SUBMIT = 19;          //OUT
     const LQX_WITHDRAWAL = 20;      //IN - OUT
+    const LQX_REVERSION = 20;      //IN - OUT
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
@@ -46,5 +47,6 @@ abstract class EnumTransactionCategory
         self::BRL_SUBMIT => 'Envio de R$ Credminer',
         self::USD_SUBMIT => 'Submited USD Credminer',
         self::LQX_WITHDRAWAL => 'Resgate Automático de Saldo',
+        self::LQX_REVERSION => 'Estorno Gateway',
     ];
 }

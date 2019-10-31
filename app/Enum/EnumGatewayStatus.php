@@ -17,22 +17,23 @@ abstract class EnumGatewayStatus
     const PAIDEXPIRED = 10;
     const RECENT = 11;
     const UNDERPAID = 12;
-
+    const REVERSED = 13;
 
     const SITUATION = [
-        self::NOTFOUND => "NAO ENCONTRADO",
-        self::PAID => "PAGO",
-        self::SEEN => "VISTO",
-        self::OVERPAIDEXPIRED => "PAGO ACIMA EXPIRADO",
-        self::OVERPAID => "PAGO ACIMA",
-        self::UNDERPAIDEXPIRED => "PAGO ABAIXO EXPIRADO",
+        self::REVERSED => "DEVOLVIDO",
         self::EXPIRED => "EXPIRADO",
         self::DONE => "FEITO",
         self::DONEEXPIRED => "FEITO EXPIRADO",
-        self::NEWW => "PENDENTE",
-        self::PAIDEXPIRED => "PAGO EXPIRADO",
-        self::RECENT => "RECENT",
+        self::NOTFOUND => "NAO ENCONTRADO",
+        self::PAID => "PAGO",
         self::UNDERPAID => "PAGO ABAIXO",
+        self::UNDERPAIDEXPIRED => "PAGO ABAIXO EXPIRADO",
+        self::OVERPAID => "PAGO ACIMA",
+        self::OVERPAIDEXPIRED => "PAGO ACIMA EXPIRADO",
+        self::PAIDEXPIRED => "PAGO EXPIRADO",
+        self::NEWW => "PENDENTE",
+        self::RECENT => "RECENTE",
+        self::SEEN => "VISTO",
     ];
 
     const CONFIRMATION = [

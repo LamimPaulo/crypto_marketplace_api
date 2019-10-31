@@ -53,9 +53,9 @@ class estimateFee extends Command
                 $fee_1 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 1, $coin->abbr);
                 $fee_3 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 3, $coin->abbr);
                 $fee_6 = OffScreenController::post(\App\Enum\EnumOperationType::ESTIMATE_SMART_FEE, 6, $coin->abbr);
-                $coin->fee_low = is_numeric($fee_6) ? sprintf("%.8f", $fee_6) : 0.00001;
-                $coin->fee_avg = is_numeric($fee_3) ? sprintf("%.8f", $fee_3) : 0.00001;
-                $coin->fee_high = is_numeric($fee_1) ? sprintf("%.8f", $fee_1) : 0.00001;
+                $coin->fee_low = is_numeric($fee_6) AND $fee_6 > 0 ? sprintf("%.8f", $fee_6) : 0.00001;
+                $coin->fee_avg = is_numeric($fee_3) AND $fee_3 > 0 ? sprintf("%.8f", $fee_3) : 0.00001;
+                $coin->fee_high = is_numeric($fee_1) AND $fee_1 > 0  ? sprintf("%.8f", $fee_1) : 0.00001;
                 $coin->save();
             }
 

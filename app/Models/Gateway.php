@@ -50,7 +50,9 @@ class Gateway extends Model
         'is_internal_payment',
         'payer_user_id',
         'category',
-        'time_limit'
+        'time_limit',
+        'info',
+        'txid_reverse',
     ];
 
     protected $appends = [
@@ -133,7 +135,7 @@ class Gateway extends Model
 
     public function getCreatedLocalAttribute()
     {
-        return $this->created_at->format('d/m/Y H:i:s');
+        return $this->created_at->format('d/m/Y H:i');
     }
 
     public static function listByTypeAndStatus(int $type, int $status)
@@ -141,9 +143,9 @@ class Gateway extends Model
         return self::where('type', '=', $type)->where('status', '=', $status)->get();
     }
 
-    public function internalPayment()
+    public function transaction()
     {
-        return $this->hasOne(Transaction::class, 'toAddress', 'address');
+        return $this->belongsTo(Transaction::class, 'address', 'toAddress');
     }
 
     public function user()
