@@ -48,6 +48,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('masternode:update')->everyFiveMinutes();
         $schedule->command('masternode:suspend')->everyMinute();
         $schedule->command('masternode:info')->everyMinute();
+
+        $schedule->command('gateway:reverseunderpaid')->everyFiveMinutes();
+        $schedule->command('gateway:reverseoverpaid')->everyFiveMinutes();
     }
 
     /**
