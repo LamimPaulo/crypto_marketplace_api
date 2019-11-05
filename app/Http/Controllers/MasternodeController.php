@@ -90,7 +90,7 @@ class MasternodeController extends Controller
 
                 $return = self::post(EnumMasternodeOperation::ALLOC_NEW_ADDRESS, $data);
 
-                $masternode->ip = preg_replace( "/\r|\n/", "", $return['ipv6']);
+                $masternode->ip = preg_replace("/\r|\n/", "", $return['ipv6']);
                 $masternode->payment_address = $return['ownerKeyAddr'];
                 $masternode->fee_address = $return['feeSourceAddress'];
 
@@ -99,7 +99,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
@@ -124,7 +124,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
@@ -147,7 +147,7 @@ class MasternodeController extends Controller
             }
 
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
@@ -161,7 +161,7 @@ class MasternodeController extends Controller
             $info->save();
 
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
@@ -189,8 +189,8 @@ class MasternodeController extends Controller
             } else {
                 throw new \Exception($response['error']);
             }
-        } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
@@ -207,8 +207,8 @@ class MasternodeController extends Controller
                     'is_active' => true
                 ]);
             });
-        } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
         }
     }
 
