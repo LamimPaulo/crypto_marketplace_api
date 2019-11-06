@@ -86,10 +86,10 @@ class MasternodeController extends Controller
             foreach ($masternodes as $masternode) {
                 $data = [
                     'address' => $masternode->reward_address,
+                    'privkey' => $masternode->privkey,
                 ];
 
                 $return = self::post(EnumMasternodeOperation::ALLOC_NEW_ADDRESS, $data);
-
                 $masternode->ip = preg_replace("/\r|\n/", "", $return['ipv6']);
                 $masternode->payment_address = $return['ownerKeyAddr'];
                 $masternode->fee_address = $return['feeSourceAddress'];

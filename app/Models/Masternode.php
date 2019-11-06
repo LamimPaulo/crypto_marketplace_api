@@ -22,6 +22,7 @@ class Masternode extends Model
         'fee_address',
         'privkey',
         'status',
+        'label',
     ];
 
     protected $appends = [
@@ -46,6 +47,7 @@ class Masternode extends Model
             'deleted_at',
             'user_id',
             'coin_id',
+            'privkey',
         ];
     }
 
