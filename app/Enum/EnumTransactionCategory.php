@@ -24,7 +24,7 @@ abstract class EnumTransactionCategory
     const BRL_SUBMIT = 18;          //OUT
     const USD_SUBMIT = 19;          //OUT
     const LQX_WITHDRAWAL = 20;      //IN - OUT
-    const LQX_REVERSION = 20;      //IN - OUT
+    const LQX_REVERSION = 21;       //IN - OUT
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
