@@ -7,6 +7,7 @@ use App\Enum\EnumNanotechOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
@@ -118,6 +119,7 @@ class NanotechController extends Controller
             $wallet = UserWallet::where([
                 'coin_id' => $operation->investment->coin_id,
                 'user_id' => $operation->user_id,
+                'type' => EnumUserWalletType::WALLET,
             ])->first();
 
             $transaction = Transaction::create([

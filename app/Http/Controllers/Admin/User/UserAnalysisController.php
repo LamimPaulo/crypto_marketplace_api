@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\User;
 
+use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
 use App\Models\Coin;
 use App\Models\Transaction;
@@ -217,6 +218,7 @@ class UserAnalysisController extends Controller
             $wallet = UserWallet::where([
                 'user_id' => $user->id,
                 'coin_id' => Coin::getByAbbr($request->abbr)->id,
+                'type' => EnumUserWalletType::WALLET,
             ])->firstOrFail();
 
             $wallet->balance = $request->balance;

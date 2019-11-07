@@ -6,6 +6,7 @@ use App\Enum\EnumFundTransactionCategory;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckKeyRequest;
 use App\Http\Requests\FundRequest;
@@ -89,7 +90,7 @@ class InvestmentController extends Controller
             $acquired = $values['total'] - $values['tax'];
             $fund = Funds::where('is_active', true)->findOrFail($request->fund_id);
 
-            $wallet = UserWallet::where(['user_id' => $user->id, 'coin_id' => $fund->coin_id])->first();
+            $wallet = UserWallet::where(['user_id' => $user->id, 'coin_id' => $fund->coin_id,'type' => EnumUserWalletType::WALLET,])->first();
 
             DB::beginTransaction();
 
