@@ -4,14 +4,21 @@ namespace App\Console\Commands;
 
 use App\Enum\EnumGatewayCategory;
 use App\Enum\EnumGatewayStatus;
+use App\Enum\EnumTransactionCategory;
+use App\Enum\EnumTransactionsStatus;
+use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Admin\Operations\GatewayController;
 use App\Models\Coin;
 use App\Models\Gateway;
 use App\Models\Transaction;
+use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
+use App\Services\BalanceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
 class GatewayReverseUnderpaid extends Command
 {
@@ -43,13 +50,12 @@ class GatewayReverseUnderpaid extends Command
     {
         try {
             $lqx = Coin::getByAbbr("LQX");
-            $gateway = Gateway::where([
-                'coin_id' => $lqx->id,
-                'category' => EnumGatewayCategory::PAY2P,
-            ])
+            $gateway = Gateway::where('coin_id', $lqx->id)
+                ->whereDate('created_at', '>', '2019-11-02')
                 ->where('amount', '>', 'received')
                 ->whereNull('txid_reverse')
                 ->whereIn('status', [EnumGatewayStatus::UNDERPAID, EnumGatewayStatus::UNDERPAIDEXPIRED])
+                ->whereIn('category', [EnumGatewayCategory::PAY2P, EnumGatewayCategory::CREDMINER])
                 ->get();
 
             foreach ($gateway as $g) {

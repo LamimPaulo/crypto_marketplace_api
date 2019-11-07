@@ -7,7 +7,6 @@ abstract class EnumGatewayType {
     const WITHDRAW = 2;
     const MINING_PAYMENT = 3;
 
-
     const TYPE = [
       self::PAYMENT => 'PAYMENT',
       self::WITHDRAW => 'WITHDRAW',

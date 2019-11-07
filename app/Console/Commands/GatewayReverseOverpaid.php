@@ -14,6 +14,7 @@ use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -48,13 +49,12 @@ class GatewayReverseOverpaid extends Command
     {
         try {
             $lqx = Coin::getByAbbr("LQX");
-            $gateway = Gateway::where([
-                'coin_id' => $lqx->id,
-                'category' => EnumGatewayCategory::PAY2P,
-            ])
+            $gateway = Gateway::where('coin_id', $lqx->id)
                 ->where('received', '>', 'amount')
+                ->whereDate('created_at', '>', '2019-11-02')
                 ->whereNull('txid_reverse')
                 ->whereIn('status', [EnumGatewayStatus::OVERPAID, EnumGatewayStatus::OVERPAIDEXPIRED])
+                ->whereIn('category', [EnumGatewayCategory::PAY2P, EnumGatewayCategory::CREDMINER])
                 ->get();
 
             foreach ($gateway as $g) {
