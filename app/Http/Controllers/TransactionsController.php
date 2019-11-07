@@ -548,7 +548,11 @@ class TransactionsController extends Controller
                     'price' => 1,
                     'market' => 1,
                     'coin_in' => $coin_out,
-                    'wallet_in' => UserWallet::where(['coin_id' => $coin_out, 'user_id' => $user_in->id, 'type' => EnumUserWalletType::WALLET])->first()->id,
+                    'wallet_in' => UserWallet::where([
+                        'coin_id' => $coin_out,
+                        'user_id' => $user_in->id,
+                        'type' => EnumUserWalletType::WALLET
+                    ])->first()->id,
                     'amount_in' => $amount,
                 ];
                 return $conversion;

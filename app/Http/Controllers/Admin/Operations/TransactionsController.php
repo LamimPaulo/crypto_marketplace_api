@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Operations;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
@@ -300,6 +301,7 @@ class TransactionsController extends Controller
                     "balance_computed" => UserWallet::where([
                         'user_id' => $user->id,
                         'coin_id' => $c->id,
+                        'type' => EnumUserWalletType::WALLET,
                     ])->first()
                 ];
             }

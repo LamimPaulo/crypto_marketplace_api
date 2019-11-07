@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Enum\EnumGatewayCategory;
 use App\Enum\EnumGatewayStatus;
+use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Admin\Operations\GatewayController;
 use App\Models\Coin;
 use App\Models\Gateway;
 use App\Models\Transaction;
+use App\Models\User\UserWallet;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

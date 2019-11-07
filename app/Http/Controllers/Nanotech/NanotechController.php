@@ -233,7 +233,7 @@ class NanotechController extends Controller
                 $wallet = UserWallet::where([
                     'user_id' => auth()->user()->id,
                     'coin_id' => $type->coin_id,
-                    'type' => EnumUserWalletType::WALLET
+                    'type' => EnumUserWalletType::WALLET,
                 ])->first();
 
                 if ($wallet->balance < $request->amount) {

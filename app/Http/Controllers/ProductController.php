@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Http\Requests\BuyLevelRequest;
 use App\Models\Coin;
 use App\Models\Product;
@@ -24,7 +25,8 @@ class ProductController extends Controller
         try {
             $level = UserLevel::with('product')->find($request->level_id);
             $coin = Coin::getByAbbr($request->abbr);
-            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();
+            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id,
+                    'type' => EnumUserWalletType::WALLET])->first();
 
             $actualLevelValue = Product::find(auth()->user()->user_level_id);
 
@@ -91,7 +93,8 @@ class ProductController extends Controller
         try {
             $level = UserLevel::with('product')->find($request->level_id);
             $coin = Coin::getByAbbr("LQX");
-            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();
+            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id,
+                    'type' => EnumUserWalletType::WALLET])->first();
 
             $actualLevelValue = Product::find(auth()->user()->user_level_id);
 
@@ -154,7 +157,8 @@ class ProductController extends Controller
         try {
             $level = UserLevel::with('product')->find($request->level_id);
             $coin = Coin::getByAbbr("USD");
-            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id])->first();
+            $wallet = UserWallet::where(['coin_id' => $coin->id, 'user_id' => auth()->user()->id,
+                    'type' => EnumUserWalletType::WALLET,])->first();
 
             $actualLevelValue = Product::find(auth()->user()->user_level_id);
 
