@@ -54,7 +54,7 @@ class GatewayReverseUnderpaid extends Command
                 ->whereDate('created_at', '>', '2019-11-02')
                 ->where('amount', '>', 'received')
                 ->whereNull('txid_reverse')
-                ->whereIn('status', [EnumGatewayStatus::UNDERPAID, EnumGatewayStatus::UNDERPAIDEXPIRED])
+                ->whereIn('status', [EnumGatewayStatus::UNDERPAID, EnumGatewayStatus::UNDERPAIDEXPIRED, EnumGatewayStatus::PAIDEXPIRED])
                 ->whereIn('category', [EnumGatewayCategory::PAY2P, EnumGatewayCategory::CREDMINER])
                 ->get();
 
@@ -89,7 +89,7 @@ class GatewayReverseUnderpaid extends Command
                                 'fee' => $lqx->fee_avg,
                                 'taxas' => 0,
                                 'tx' => $internalTx,
-                                'info' => "Estorno de Pagamento Abaixo do esperado no Gateway. (txid: $g->txid)",
+                                'info' => "Estorno de Pagamento Abaixo do esperado ou Pago após expirado no Gateway. (txid: $g->txid)",
                                 'error' => '',
                                 'is_internal' => true,
                             ]);
@@ -101,7 +101,7 @@ class GatewayReverseUnderpaid extends Command
 
                             (new BalanceService)->increments($newTransaction);
 
-                            $g->info = "Pagamento abaixo devolvido para o Usuário. Verificar transação pela txid de estorno. ($internalTx)";
+                            $g->info = "Pagamento abaixo ou expirado devolvido para o Usuário. Verificar transação pela txid de estorno. ($internalTx)";
                             $g->txid_reverse = $internalTx;
                             $g->save();
 
