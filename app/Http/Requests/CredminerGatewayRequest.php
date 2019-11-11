@@ -30,7 +30,7 @@ class CredminerGatewayRequest extends FormRequest
             'fiat_amount' => 'required|numeric',
             'fiat_abbr' => [
                 'required',
-                Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr])
+                Rule::in([Coin::getByAbbr("BRL")->abbr, Coin::getByAbbr("USD")->abbr, Coin::getByAbbr("LQX")->abbr])
             ],
             'type' => [
                 'nullable',
