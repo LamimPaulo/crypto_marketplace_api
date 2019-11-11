@@ -97,7 +97,7 @@ class TransactionsSend extends Command
             }
 
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+            throw new \Exception($ex->getMessage() . ' => ' . $ex->getLine() . ' => '. $ex->getFile());
         }
     }
 
