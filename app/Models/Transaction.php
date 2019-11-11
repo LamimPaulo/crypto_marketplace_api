@@ -245,7 +245,7 @@ class Transaction extends Model
         ])->with(['wallet', 'user'])
             ->groupBy('toAddress')
             ->orderBy('amount')
-            ->get();
+            ->take(50);
     }
 
     public static function listUnique($id)
