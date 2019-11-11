@@ -346,5 +346,5 @@ Route::group(['prefix' => 'credminer/gateway'], function () {
 
 Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
 Route::get('command', function () {
-    \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::CREATE_ADDRESS, NULL, "LQX");
+    return \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::CREATE_ADDRESS, NULL, "LQX");
 });
