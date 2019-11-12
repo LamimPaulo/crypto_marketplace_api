@@ -33,7 +33,7 @@ class OffScreenController extends Controller
                 throw new \Exception($response['error']);
             }
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+            throw new \Exception($ex->getMessage() . ' => ' . $ex->getLine() . ' => ' . $ex->getFile());
         }
     }
 
