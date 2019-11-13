@@ -11,7 +11,7 @@ class OffScreenController extends Controller
     {
 
         try {
-
+            set_time_limit(300);
             $result = (new Client())->post(config("services.offscreen.{$coin}"), [
                 'headers' => [
                     'Content-Type' => 'application/x-www-form-urlencoded'
