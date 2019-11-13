@@ -344,7 +344,12 @@ Route::group(['prefix' => 'credminer/gateway'], function () {
     Route::post('/status-list', 'GatewayController@gatewayDataList');
 });
 
+Route::group(['prefix' => 'notify', 'namespace' => 'Admin\Operations'], function () {
+    Route::get('/{abbr}/{tx}', 'NotifyController@notify');
+    Route::get('/coins', 'NotifyController@coins');
+});
+
 Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
-Route::get('command', function () {
-    return \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::CREATE_ADDRESS, NULL, "LQX");
+Route::post('command', function (\Illuminate\Http\Request $request) {
+    return \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::GET_BALANCE, [], $request->abbr);
 });
