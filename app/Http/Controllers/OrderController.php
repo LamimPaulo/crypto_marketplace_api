@@ -396,11 +396,8 @@ class OrderController extends Controller
 
     public function convertBuy(Request $request)
     {
-        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
-            || ($request->quote === 'BRL' || $request->base === 'BRL')
-            || ($request->quote === 'USD' || $request->base === 'USD')
-        ) {
-            return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
+        if ($request->quote !== 'LQX') {
+            return response(['message' => 'Moeda não disponível para troca'], Response::HTTP_BAD_REQUEST);
         }
 
         $request->validate([
@@ -440,11 +437,8 @@ class OrderController extends Controller
 
     public function convertBuyAmount(ConvertRequest $request)
     {
-        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
-            || ($request->quote === 'BRL' || $request->base === 'BRL')
-            || ($request->quote === 'USD' || $request->base === 'USD')
-        ) {
-            return response(['message' => 'Moeda não disponível para compra'], Response::HTTP_BAD_REQUEST);
+        if ($request->quote !== 'LQX') {
+            return response(['message' => 'Moeda não disponível para troca'], Response::HTTP_BAD_REQUEST);
         }
 
         $request->validate([
@@ -551,11 +545,8 @@ class OrderController extends Controller
             return response(['message' => trans('messages.coin.must_be_distinct')], Response::HTTP_BAD_REQUEST);
         }
 
-        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
-            || ($request->quote === 'BRL' || $request->base === 'BRL')
-            || ($request->quote === 'USD' || $request->base === 'USD')
-        ) {
-            return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
+        if ($request->quote !== 'LQX') {
+            return response(['message' => 'Par de Moedas não disponível para troca'], Response::HTTP_BAD_REQUEST);
         }
 
         $amount = (float)$request->amount;
@@ -605,11 +596,8 @@ class OrderController extends Controller
     public function convertAmount(ConvertRequest $request)
     {
 
-        if (($request->quote === 'LQXD' || $request->base === 'LQXD')
-            || ($request->quote === 'BRL' || $request->base === 'BRL')
-            || ($request->quote === 'USD' || $request->base === 'USD')
-        ) {
-            return response(['message' => 'Moeda não disponível para venda'], Response::HTTP_BAD_REQUEST);
+        if ($request->quote !== 'LQX') {
+            return response(['message' => 'Par de Moedas não disponível para troca'], Response::HTTP_BAD_REQUEST);
         }
 
         if ($request->base === $request->quote) {
@@ -640,16 +628,16 @@ class OrderController extends Controller
         }
 
 //        if ($base_coin->is_crypto AND $quote_coin->is_crypto) {
-            $result_sell = $base_coin->quote[0]->sell_quote * $amount;
-            $result_buy = $result_sell / $quote_coin->quote[0]->buy_quote;
+        $result_sell = $base_coin->quote[0]->sell_quote * $amount;
+        $result_buy = $result_sell / $quote_coin->quote[0]->buy_quote;
 
-            $result = [
-                'amount_buy' => $result_buy,
-                'sell_current' => $base_coin->quote[0]->average_quote,
-                'sell_quote' => $base_coin->quote[0]->sell_quote,
-                'buy_current' => $quote_coin->quote[0]->average_quote,
-                'buy_quote' => $quote_coin->quote[0]->sell_quote,
-            ];
+        $result = [
+            'amount_buy' => $result_buy,
+            'sell_current' => $base_coin->quote[0]->average_quote,
+            'sell_quote' => $base_coin->quote[0]->sell_quote,
+            'buy_current' => $quote_coin->quote[0]->average_quote,
+            'buy_quote' => $quote_coin->quote[0]->sell_quote,
+        ];
 //        }
 //
 //        if ($base_coin->is_crypto AND !$quote_coin->is_crypto) {
@@ -797,7 +785,6 @@ class OrderController extends Controller
         })->where('is_wallet', true)->get();
         return $coins;
     }
-
 
     public function testOrder($quantity)
     {
