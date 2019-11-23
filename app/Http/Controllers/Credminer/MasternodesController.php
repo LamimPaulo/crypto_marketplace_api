@@ -66,7 +66,7 @@ class MasternodesController extends Controller
             $user = User::where('api_key', '=', $request->keycode)->first();
 
             DB::beginTransaction();
-
+            $masternode_ = [];
             for ($i = 0; $i < $request->amount; $i++) {
                 $address = OffScreenController::post(EnumOperationType::MN_ACCOUNT, NULL, "LQX");
 
@@ -79,21 +79,20 @@ class MasternodesController extends Controller
                     'is_active' => true
                 ]);
 
-                Masternode::create([
+                $masternode_[] = Masternode::create([
                     'coin_id' => $wallet->coin_id,
                     'user_id' => $wallet->user_id,
                     'reward_address' => $wallet->address,
                     'privkey' => $address['privkey'],
                     'status' => EnumMasternodeStatus::PENDING,
-                ]);
+                ])->makeHidden(Masternode::hiddenAttr());
             }
 
             DB::commit();
             return response([
                 'status' => 'success',
                 'message' => trans('messages.products.hiring_success'),
-                'masternodes' => Masternode::where('user_id', $user->id)->get()
-                    ->makeHidden(Masternode::hiddenAttr())
+                'masternodes' => $masternode_
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
