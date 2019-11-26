@@ -23,7 +23,6 @@ use App\Services\TaxCoinService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -143,8 +142,10 @@ class GatewayController extends Controller
     protected function newAddress($abbr)
     {
         try {
-            $address = env('APP_ENV') == 'local' ? Uuid::uuid4()->toString() : OffScreenController::post(EnumOperationType::CREATE_ADDRESS, null, $abbr);
-            return $address;
+            $api = new \GuzzleHttp\Client();
+            $url = str_replace("operation", "newaddress", config("services.offscreen.{$abbr}"));
+            $response = $api->post($url);
+            return $response->getBody()->getContents();
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
@@ -409,8 +410,8 @@ class GatewayController extends Controller
 
                 $data['status'] =
                     EnumGatewayStatus::DONE == $data['status'] ? EnumGatewayStatus::PAID :
-                        EnumGatewayStatus::DONEEXPIRED == $data['status'] ? EnumGatewayStatus::PAIDEXPIRED :
-                            $data['status'];
+                        (EnumGatewayStatus::DONEEXPIRED == $data['status'] ? EnumGatewayStatus::PAIDEXPIRED :
+                            $data['status']);
 
                 GatewayStatus::create([
                     'status' => $data['status'],
