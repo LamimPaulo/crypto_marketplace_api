@@ -108,7 +108,7 @@ class MasternodeController extends Controller
         try {
             $masternodes = Masternode::where([
                 'status' => EnumMasternodeStatus::PROCESSING,
-            ])->get();
+            ])->take(10)->get();
 
             foreach ($masternodes as $masternode) {
                 $data = [
@@ -117,10 +117,8 @@ class MasternodeController extends Controller
 
                 $return = self::post(EnumMasternodeOperation::UPDATE_TXIDS, $data);
 
-                if (isset($return['txid']) AND !empty($return['txid'])) {
-                    $masternode->status = EnumMasternodeStatus::SUCCESS;
-                    $masternode->save();
-                }
+                $masternode->status = $return == 1 ? EnumMasternodeStatus::SUCCESS : $masternode->status;
+                $masternode->save();
             }
 
         } catch (\Exception $e) {
@@ -151,20 +149,6 @@ class MasternodeController extends Controller
         }
     }
 
-    public static function info()
-    {
-        try {
-            $return = self::post(EnumMasternodeOperation::SUSPEND_NODE, null);
-            $info = MasternodeInfo::firstOrNew();
-            $info->rewards = $return['rewards'];
-            $info->nodes = $return['nodes'];
-            $info->save();
-
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
-        }
-    }
-
     public static function post($type, $data = "")
     {
         try {
@@ -183,7 +167,7 @@ class MasternodeController extends Controller
 
             $response = $result->getBody()->getContents();
             $response = decrypt($response);
-
+            return $response;
             if (!isset($response['error'])) {
                 return $response;
             } else {
