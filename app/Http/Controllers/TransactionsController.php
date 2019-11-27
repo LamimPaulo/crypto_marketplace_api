@@ -398,6 +398,12 @@ class TransactionsController extends Controller
         return $fee;
     }
 
+    public function verifyAddress($address)
+    {
+        $exists = Transaction::where(['user_id' => auth()->user()->id, 'toAddress' => $address, 'type' => EnumTransactionType::OUT])->count();
+        return $exists;
+    }
+
     public function list()
     {
         try {

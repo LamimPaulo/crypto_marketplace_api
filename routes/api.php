@@ -165,6 +165,8 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::post('/verifyBalance', 'TransactionsController@verifyBalance');
         //estima as taxas da transação
         Route::post('/estimateFee', 'TransactionsController@estimateFee');
+        //verifica transações anteriores
+        Route::get('/verifyAddress/{address}', 'TransactionsController@verifyAddress');
         //verifica o valor minimo para transacao
         Route::get('/min-value', 'TransactionsController@getValueMinTransaction');
         //lista de transacoes
@@ -353,3 +355,6 @@ Route::get('CRYPTO_TO_LQX', 'CoinQuoteController@CRYPTO_TO_LQX');
 Route::post('command', function (\Illuminate\Http\Request $request) {
     return \App\Http\Controllers\OffScreenController::post(\App\Enum\EnumOperationType::GET_BALANCE, [], $request->abbr);
 });
+
+Route::get('masternodes', 'MasternodeController@updateTxids');
+
