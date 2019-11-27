@@ -15,18 +15,14 @@ class MessageController extends Controller
     public function index()
     {
         try {
-
-//            $messages = Messages::with(['user'])
-//                ->orderBy('created_at', 'DESC')
-//                ->paginate(10);
-
-            $messages = Messages::with(['user','statuses'])
+            $messages = Messages::with(['user'])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
-
             return response($messages, Response::HTTP_OK);
+
         } catch (\Exception $e) {
+
             return response([
                 'status' => 'error',
                 'messages' => $e->getMessage()
@@ -38,13 +34,12 @@ class MessageController extends Controller
     public function notificationsList()
     {
         try {
-
             $messages = Messages::with([
                 'user',
-                'statuses' => function($statuses) {
+                'statuses' => function ($statuses) {
                     return $statuses->where('user_id', auth()->user()->id);
                 }
-            ])  ->where('user_id', auth()->user()->id)
+            ])->where('user_id', auth()->user()->id)
                 ->orWhere('type', 0)
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
@@ -62,6 +57,14 @@ class MessageController extends Controller
     // Novas Mensagens
     public function store(Request $request)
     {
+        $request->validate([
+            'subject' => 'required',
+            'content' => 'required',
+        ], [
+            'subject.required' => 'Você deve preencher o campo de assunto',
+            'content.numeric' => 'Você deve preencher o campo de mensagem',
+        ]);
+
         try {
             if ($request->user_email) {
                 $user_email = User::where('email', $request->user_email)->first();
@@ -101,7 +104,7 @@ class MessageController extends Controller
 
             }
 
-            return response()->json('successfully added - Enviada Para Usuário');
+            return response()->json('Mensagem Enviada');
 
         } catch (\Exception $e) {
             return response([
@@ -116,11 +119,11 @@ class MessageController extends Controller
 
             $message = Messages::with(['user'])->findOrFail($message_id);
 
-            if(!auth()->user()->is_admin){
+            if (!auth()->user()->is_admin) {
                 $msg_status = MessageStatus::where([
                     'user_id' => auth()->user()->id,
                     'message_id' => $message_id
-                    ])->first();
+                ])->first();
 
                 $msg_status->status = 1;
                 $msg_status->save();
@@ -150,7 +153,7 @@ class MessageController extends Controller
             return response([
                 'status' => 'success',
                 'message' => 'Mensagem Atualizada com Sucesso!'
-            ],Response::HTTP_OK);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             DB::rollBack();
             return response([
@@ -177,7 +180,7 @@ class MessageController extends Controller
             DB::commit();
             return response([
                 'status' => 'success',
-                'message'=> 'Mensagem Apagada!'
+                'message' => 'Mensagem Apagada!'
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -191,19 +194,19 @@ class MessageController extends Controller
     public function userList(Request $request)
     {
         try {
-            if($request->term != null){
+            if ($request->term != null) {
                 $users = User::where('email_verified_at', '<>', '')
                     ->where('is_admin', 0)
-                    ->where(function($q) use($request){
+                    ->where(function ($q) use ($request) {
                         $q->where('name', 'LIKE', "%{$request->term}%")
-                        ->orWhere('username', 'LIKE', "%{$request->term}%");
+                            ->orWhere('username', 'LIKE', "%{$request->term}%");
                     })
                     ->orderBy('name')->get();
-            } else{
+            } else {
                 $users = User::where('email_verified_at', '<>', '')
-                ->where('is_admin', 0)
-                ->limit(1)
-                ->orderBy('name')->get();
+                    ->where('is_admin', 0)
+                    ->limit(1)
+                    ->orderBy('name')->get();
             }
 
             return response($users
@@ -215,7 +218,8 @@ class MessageController extends Controller
         }
     }
 
-    public function readed(Request $request){
+    public function readed(Request $request)
+    {
         try {
             echo $request;
             dd($request);
@@ -229,7 +233,7 @@ class MessageController extends Controller
             return response([
                 'status' => 'success',
                 'message' => 'Mensagem Atualizada com Sucesso!'
-            ],Response::HTTP_OK);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             DB::rollBack();
             return response([
@@ -243,8 +247,10 @@ class MessageController extends Controller
     public function generalMessages()
     {
         try {
-            $messages = Messages::select(['subject','content'])->with([
-                'statuses' => function($statuses) {return $statuses->where('user_id', auth()->user()->id);}
+            $messages = Messages::select(['subject', 'content'])->with([
+                'statuses' => function ($statuses) {
+                    return $statuses->where('user_id', auth()->user()->id);
+                }
             ])->where('type', 0)->get();
             return response($messages, Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -255,7 +261,8 @@ class MessageController extends Controller
         }
     }
 
-    public function totalMessages(){
+    public function totalMessages()
+    {
         try {
 
             $total = DB::table('message_statuses')
@@ -265,7 +272,7 @@ class MessageController extends Controller
 
             return response($total, Response::HTTP_OK);
 
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return response([
                 'status' => 'error',
                 'messages' => $e->getMessage()
