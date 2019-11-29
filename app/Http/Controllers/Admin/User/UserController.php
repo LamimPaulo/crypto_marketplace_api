@@ -8,6 +8,7 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumUserWalletType;
 use App\Helpers\Localization;
 use App\Helpers\ActivityLogger;
+use App\Models\Masternode;
 use App\Models\System\ActivityLogger as UserLogger;
 use App\Http\Controllers\Controller;
 use App\Mail\VerifyMail;
@@ -174,7 +175,7 @@ class UserController extends Controller
             }
 
             if (!is_null($request->wallet) && !empty($request->wallet)) {
-                $users->whereHas('wallets', function($wallet) use ($request){
+                $users->whereHas('wallets', function ($wallet) use ($request) {
                     $wallet->where('address', 'like', "%{$request->wallet}%");
                 });
             }
@@ -237,7 +238,6 @@ class UserController extends Controller
                 'wallets' => $wallets,
                 'accounts' => $accounts,
                 'nanotech' => $this->nanotech($user->id),
-                'masternodes' => $this->masternode($user->id),
                 'funds' => $funds,
                 'documents' => $this->documents($user->id)
             ], Response::HTTP_OK);
@@ -299,42 +299,6 @@ class UserController extends Controller
                         ->sum('amount'),
                     'investment_from_balance' => $from_balance + $from_brokerage,
                     'investment_withdrawal' => NanotechOperation::whereIn('type', [EnumNanotechOperationType::WITHDRAWAL])
-                        ->where('user_id', $user_id)
-                        ->where('investment_id', $n->id)
-                        ->sum('amount')
-                ];
-            }
-
-            return $array;
-
-        } catch (\Exception $e) {
-            return response([
-                'message' => "Erro: {$e->getMessage()}"
-            ], Response::HTTP_BAD_REQUEST);
-        }
-    }
-
-    public function masternode($user_id)
-    {
-        try {
-            $nanotech = Nanotech::with(['coin', 'type'])
-                ->where('user_id', $user_id)
-                ->where('type_id', 3)
-                ->get();
-
-            $array = [];
-
-            foreach ($nanotech as $n) {
-                $array[] = [
-                    'coin' => $n->coin->abbr,
-                    'name' => $n->type->type,
-                    'balance' => $n->amount,
-                    'profit' => NanotechOperation::whereIn('type',
-                        [
-                            EnumNanotechOperationType::PROFIT,
-                            EnumNanotechOperationType::PROFIT_WITHDRAWAL,
-                            EnumNanotechOperationType::PROFIT_IN
-                        ])
                         ->where('user_id', $user_id)
                         ->where('investment_id', $n->id)
                         ->sum('amount')
@@ -645,6 +609,24 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function masternodes(Request $request)
+    {
+        try {
+            $user = User::where('email', $request->email)->first();
+
+            $list = Masternode::where('user_id', $user->id)->paginate(10);
+            $data = $list->makeHidden(['user_id']);
+            $list->data = $data;
+            return response($list, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response([
+                'status' => 'error',
+                'message' => $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         }
     }

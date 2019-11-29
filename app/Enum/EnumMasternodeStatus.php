@@ -20,6 +20,15 @@ abstract class EnumMasternodeStatus
         self::SUSPENDED => 'Suspenso',
     ];
 
+    const TYPE = [
+        self::PENDING => 'pending',
+        self::PROCESSING => 'processing',
+        self::SUCCESS => 'success',
+        self::CANCELED => 'canceled',
+        self::ERROR => 'error',
+        self::SUSPENDED => 'suspended',
+    ];
+
     const COLOR = [
         self::PENDING => 'warning',
         self::PROCESSING => 'primary',

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enum\EnumMasternodeStatus;
 use App\Models\User\UserWallet;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
@@ -63,12 +64,12 @@ class Masternode extends Model
 
     public function getCreatedLocalAttribute()
     {
-        return $this->created_at->format('d/m/Y H:i');
+        return $this->created_at ? $this->created_at->format('d/m/Y H:i') : Carbon::now()->format('d/m/Y H:i');
     }
 
     public function getUpdatedLocalAttribute()
     {
-        return $this->updated_at->format('d/m/Y H:i');
+        return $this->updated_at ? $this->updated_at->format('d/m/Y H:i') : Carbon::now()->format('d/m/Y H:i');
     }
 
     public function getDeletedLocalAttribute()
@@ -90,7 +91,7 @@ class Masternode extends Model
 
     public function wallet()
     {
-        return $this->belongsTo(UserWallet::class, 'reward_address','address');
+        return $this->belongsTo(UserWallet::class, 'reward_address', 'address');
     }
 
     public function getBalanceAttribute()
