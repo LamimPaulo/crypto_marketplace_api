@@ -72,12 +72,12 @@ class UserController extends Controller
     {
         try {
             $users = User::with(['level', 'wallets' => function ($coin) {
-                return $coin->whereHas('coin', function($abbr){
+                return $coin->whereHas('coin', function ($abbr) {
                     return $abbr->where('abbr', 'LQX');
                 });
             }])
                 ->whereHas('wallets', function ($wallets) {
-                    return $wallets->whereHas('coin', function ($coin){
+                    return $wallets->whereHas('coin', function ($coin) {
                         return $coin->where('abbr', 'LQX');
                     });
                 })
@@ -99,11 +99,11 @@ class UserController extends Controller
     {
         try {
             $users = User::with(['level', 'wallets' => function ($coin) use ($request) {
-                return $coin->whereHas('coin', function($abbr) use ($request) {
+                return $coin->whereHas('coin', function ($abbr) use ($request) {
                     return $abbr->where('abbr', $request->abbr);
                 });
             }])
-                ->whereHas('wallets', function ($wallets) use ($request)  {
+                ->whereHas('wallets', function ($wallets) use ($request) {
                     return $wallets->whereHas('coin', function ($coin) use ($request) {
                         return $coin->where('abbr', $request->abbr);
                     });
@@ -154,23 +154,33 @@ class UserController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'name' => 'required|min:3'
+            'name' => 'required_without:wallet',
+            'wallet' => 'required_without:name',
         ]);
 
         try {
             $users = User::with(['level'])
                 ->orderBy('name', 'ASC')
                 ->where('is_canceled', 0)
-                ->where('email_verified_at', '<>', '')
-                ->Where(function ($q) use ($request) {
+                ->where('email_verified_at', '<>', '');
+
+            if (!is_null($request->name) && !empty($request->name)) {
+                $users->where(function ($q) use ($request) {
                     $q->where('name', 'like', "%{$request->name}%");
                     $q->orWhere('email', 'like', "%{$request->name}%");
                     $q->orWhere('document', 'like', "%{$request->name}%");
                     $q->orWhere('api_key', 'like', "%{$request->name}%");
-                })
-                ->get();
+                });
+            }
 
-            return response(['data' => $users]
+            if (!is_null($request->wallet) && !empty($request->wallet)) {
+                $users->whereHas('wallets', function($wallet) use ($request){
+                    $wallet->where('address', 'like', "%{$request->wallet}%");
+                });
+            }
+
+
+            return response(['data' => $users->get()]
                 , Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([

@@ -103,6 +103,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'support_config',
                     'desc' => 'Configurações gerais no suporte'
+                ], [
+                    'name' => 'masternodes',
+                    'desc' => 'Relatório Masternodes'
                 ],
             ];
 
