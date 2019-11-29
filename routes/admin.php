@@ -123,6 +123,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/transactions/nanotech', 'UserController@transactionsNanotech');
         Route::post('/drafts', 'UserController@drafts');
         Route::post('/deposits', 'UserController@deposits');
+        Route::post('/masternodes', 'UserController@masternodes');
         //busca de usuarios
         Route::post('/search', 'UserController@search');
         Route::post('/search/deactivated', 'UserController@searchDeactivated')->middleware('can_execute:user_reactivate');
@@ -209,6 +210,15 @@ Route::group(['namespace' => 'Admin'], function () {
 
         Route::get('/transactions/{fund}', 'FundTransactionsController@transactions');
         Route::get('/profits/{fund}', 'FundTransactionsController@profits');
+    });
+
+    //funds
+    Route::group([
+        'prefix' => 'masternodes', 'middleware' => 'can_access:funds'
+    ], function () {
+        //resumo
+        Route::get('/resume', 'MasternodesController@index');
+        Route::post('/', 'MasternodesController@list');
     });
 
     //exchanges - coin providers
