@@ -21,6 +21,10 @@ class DocsCheck
     {
         try {
 
+            if (auth()->user()->user_level_id == 1 OR auth()->user()->user_level_id == 7) {
+                return $next($request);
+            }
+
             $cpf = Document::where([
                 'document_type_id' => 1,
                 'status' => EnumStatusDocument::VALID,

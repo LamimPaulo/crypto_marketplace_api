@@ -24,12 +24,12 @@ class CheckKeycodeLevel
                 return $next($request);
             }
 
-            $internal = UserWallet::with('user')->where('address', $request->get('toAddress'))->first();
-            if ($internal) {
-                if ($internal->user->user_level_id == 1 OR $internal->user->user_level_id == 7 OR is_null($internal->user->api_key)) {
-                    throw new \Exception('A carteira de destino não possui keycode válido para recebimento.');
-                }
-            }
+//            $internal = UserWallet::with('user')->where('address', $request->get('toAddress'))->first();
+//            if ($internal) {
+//                if ($internal->user->user_level_id == 1 OR $internal->user->user_level_id == 7 OR is_null($internal->user->api_key)) {
+//                    throw new \Exception('A carteira de destino não possui keycode válido para recebimento.');
+//                }
+//            }
             return $next($request);
 
         } catch (\Exception $ex) {
