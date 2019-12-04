@@ -247,7 +247,7 @@ Route::group(['namespace' => 'Admin'], function () {
         Route::post('/readed', 'MessageController@readed');
         Route::get('/edit/{id}', 'MessageController@edit');
         Route::post('/user/list', 'MessageController@userList');
-        Route::post('/new', 'MessageController@store');
+        Route::post('/store', 'MessageController@store');
         Route::post('/update/{id}', 'MessageController@update');
         Route::delete('/delete/{id}', 'MessageController@delete');
     });

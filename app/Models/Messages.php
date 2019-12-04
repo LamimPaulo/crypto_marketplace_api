@@ -14,7 +14,8 @@ class Messages extends Model
         'subject',
         'content',
         'status',
-        'created_at'
+        'created_at',
+        'command'
     ];
 
     protected $hidden = ['updated_at'];

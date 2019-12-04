@@ -84,27 +84,19 @@ class MessageController extends Controller
                 ]);
             } else {
 
-                $users = User::whereNotNull('email_verified_at')->get();
-
-                $message = Messages::create([
+                Messages::create([
                     'user_id' => 0,
                     'type' => $request->get('type'),
                     'subject' => $request->get('subject'),
                     'content' => $request->get('content'),
-                    'status' => $request->get('status')
+                    'status' => $request->get('status'),
+                    'command' => false
                 ]);
-
-                foreach ($users as $user) {
-                    MessageStatus::create([
-                        'user_id' => $user->id,
-                        'message_id' => $message->id,
-                        'status' => 0
-                    ]);
-                }
-
             }
 
-            return response()->json('Mensagem Enviada');
+            return response([
+                'message' => 'Mensagem Enviada'
+            ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             return response([
@@ -116,7 +108,6 @@ class MessageController extends Controller
     public function edit($message_id)
     {
         try {
-
             $message = Messages::with(['user'])->findOrFail($message_id);
 
             if (!auth()->user()->is_admin) {
@@ -146,7 +137,6 @@ class MessageController extends Controller
             DB::beginTransaction();
 
             $message = Messages::where('id', $request->id)->first();
-
             $message->update($request->all());
 
             DB::commit();
@@ -221,12 +211,9 @@ class MessageController extends Controller
     public function readed(Request $request)
     {
         try {
-            echo $request;
-            dd($request);
             DB::beginTransaction();
 
             $message = Messages::where('id', $request->id)->first();
-
             $message->update($request->all());
 
             DB::commit();
@@ -277,6 +264,33 @@ class MessageController extends Controller
                 'status' => 'error',
                 'messages' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public static function createMessageStatus()
+    {
+        try {
+            DB::beginTransaction();
+
+            $users = User::whereNotNull('email_verified_at')->get();
+            $messages = Messages::where('command', false)->get();
+
+            foreach ($messages as $message) {
+                foreach ($users as $user) {
+                    MessageStatus::create([
+                        'user_id' => $user->id,
+                        'message_id' => $message->id,
+                        'status' => 0
+                    ]);
+                }
+
+                $message->command = true;
+                $message->save();
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
         }
     }
 }
