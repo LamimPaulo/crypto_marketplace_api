@@ -226,7 +226,7 @@ class UserAnalysisController extends Controller
 
             //Offscreen
             //if ($wallet->coin->is_crypto AND $wallet->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
-            if ($wallet->coin->is_crypto AND $wallet->coin->abbr != "LQX") {
+            if ($wallet->coin->is_crypto AND $wallet->coin->abbr != "LQXD") {
                 $api = new \GuzzleHttp\Client(['http_errors' => false]);
 
                 $url = str_replace("operation", "syncwallet", config("services.offscreen.{$request->abbr}"));
