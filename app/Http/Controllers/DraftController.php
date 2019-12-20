@@ -382,11 +382,13 @@ class DraftController extends Controller
             ], Response::HTTP_OK);
 
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response([
                 'status' => 'error',
                 'message' => trans('messages.transaction.not_found'),
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'status' => 'error',
                 'message' => $e->getMessage(),

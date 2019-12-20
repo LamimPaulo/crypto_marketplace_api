@@ -210,7 +210,6 @@ class OrderController extends Controller
             ], Response::HTTP_CREATED);
         } catch (\Exception $ex) {
             DB::rollBack();
-
             return response([
                 'message' => $ex->getMessage()
             ], Response::HTTP_BAD_REQUEST);

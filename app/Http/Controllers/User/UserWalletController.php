@@ -144,6 +144,7 @@ class UserWalletController extends Controller
             return $this->walletsConversionOrder();
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);

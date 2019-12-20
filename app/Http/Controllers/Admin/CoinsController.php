@@ -162,6 +162,7 @@ class CoinsController extends Controller
             return $this->walletsOrder();
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);

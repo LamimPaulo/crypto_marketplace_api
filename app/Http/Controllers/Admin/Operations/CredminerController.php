@@ -163,6 +163,7 @@ class CredminerController extends Controller
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'status' => 'error',
                 'message' => $e->getMessage(),
@@ -215,6 +216,7 @@ class CredminerController extends Controller
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response([
                 'status' => 'error',
                 'message' => $e->getMessage(),

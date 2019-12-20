@@ -213,7 +213,7 @@ class NanotechController extends Controller
         }
 
         try {
-
+            DB::beginTransaction();
             $brokerageFeePercentage = $this->brokerageFee($type->id);
             $brokerageFee = $request->amount * $brokerageFeePercentage / 100;
             $amount = $request->amount - $brokerageFee;
@@ -282,10 +282,11 @@ class NanotechController extends Controller
             $operation->coin_id = $type->coin_id;
 
             Nanotech::increments($operation);
-
+            DB::commit();
             return response(['message' => trans('messages.products.investment_success')], Response::HTTP_OK);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
