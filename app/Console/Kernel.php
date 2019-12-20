@@ -34,14 +34,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('gateway:expirepayments')->everyMinute();
         $schedule->command('pool:refresh')->everyMinute();
-        $schedule->command('estimate:fee')->everyMinute();
+        $schedule->command('estimate:fee')->everyTenMinutes();
         $schedule->command('get:btcquote')->everyFiveMinutes();
         $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('transactions:authorize')->everyMinute()->withoutOverlapping();
         $schedule->command('transactions:send')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
-        $schedule->command('update:corebalances')->everyMinute()->withoutOverlapping();
+//        $schedule->command('update:corebalances')->everyMinute()->withoutOverlapping();
         $schedule->command('trade:execute')->everyMinute();
 
         $schedule->command('masternode:create')->everyMinute();
