@@ -143,7 +143,7 @@ class GatewayController extends Controller
     {
         try {
             $api = new \GuzzleHttp\Client();
-            $url = str_replace("operation", "newaddress", config("services.offscreen.{$abbr}"));
+            $url = config("services.gateway.{$abbr}");
             $response = $api->post($url);
             return $response->getBody()->getContents();
         } catch (\Exception $e) {
