@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('funds:expiration')->dailyAt('01:00');
         $schedule->command('lqx:withdrawals')->dailyAt('01:00');
 
-        $schedule->command('gateway:expirepayments')->everyMinute();
+        $schedule->command('gateway:expirepayments')->everyTenMinutes();
         $schedule->command('pool:refresh')->everyMinute();
         $schedule->command('estimate:fee')->everyTenMinutes();
         $schedule->command('get:btcquote')->everyFiveMinutes();
@@ -41,8 +41,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:send')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
-//        $schedule->command('update:corebalances')->everyMinute()->withoutOverlapping();
-        $schedule->command('trade:execute')->everyMinute();
+        $schedule->command('update:corebalances')->everyTenMinutes()->withoutOverlapping();
+        $schedule->command('trade:execute')->everyFiveMinutes();
 
         $schedule->command('masternode:create')->everyMinute();
         $schedule->command('masternode:update')->everyFiveMinutes();

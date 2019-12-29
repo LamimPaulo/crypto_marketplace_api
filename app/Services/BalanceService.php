@@ -117,7 +117,7 @@ class BalanceService
             $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
+                //OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
 
@@ -147,7 +147,7 @@ class BalanceService
             $wallet->decrement('balance', sprintf("%.8f", (string)$total));
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-                OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
+                //OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
             DB::commit();
@@ -176,7 +176,7 @@ class BalanceService
             $wallet->increment('balance', (string)$total);
 
             if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
+//                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
             }
 
             DB::commit();
