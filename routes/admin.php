@@ -77,6 +77,8 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'TransactionsController@accept')->middleware('can_execute:crypto_above_limit');
         });
 
+        Route::post('/transactions/tx', 'TransactionsController@listTxGroup');
+
         Route::group([
             'prefix' => 'transactions/credminer',
             'middleware' => 'can_access:credminer_transactions'

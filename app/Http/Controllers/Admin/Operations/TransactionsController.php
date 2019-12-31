@@ -289,7 +289,7 @@ class TransactionsController extends Controller
                 "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ") 
                 AND category NOT IN (" . EnumTransactionCategory::FUND_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ") ) 
                 OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
-                ->whereHas('coin', function ($coin){
+                ->whereHas('coin', function ($coin) {
                     return $coin->whereNotIn('abbr', ['ION']);
                 })
                 ->orderBy('updated_at', 'ASC')->orderBy('type', 'DESC')->get()->makeVisible('coin_id');
@@ -324,6 +324,24 @@ class TransactionsController extends Controller
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function listTxGroup()
+    {
+        try {
+            $transactions = Transaction::with('coin')
+                ->orderByDesc('updated_at')
+                ->whereRaw('LENGTH(tx) > 36')
+                ->groupBy('tx')
+                ->paginate(10);
+
+            return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
             ], Response::HTTP_BAD_REQUEST);
         }
     }
