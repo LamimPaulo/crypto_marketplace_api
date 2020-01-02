@@ -78,6 +78,9 @@ Route::group(['namespace' => 'Admin'], function () {
         });
 
         Route::post('/transactions/tx', 'TransactionsController@listTxGroup');
+        Route::get('/transactions/tx/{tx}', 'TransactionsController@listTxTransactions');
+        Route::post('/transactions/address', 'TransactionsController@listAddressGroup');
+        Route::get('/transactions/address/{address}', 'TransactionsController@listAddressTransactions');
 
         Route::group([
             'prefix' => 'transactions/credminer',

@@ -328,16 +328,94 @@ class TransactionsController extends Controller
         }
     }
 
-    public function listTxGroup()
+    public function listTxGroup(Request $request)
     {
         try {
             $transactions = Transaction::with('coin')
+                ->whereRaw('LENGTH(tx) > 36')
+                ->orderByDesc('updated_at')
+                ->groupBy('tx');
+
+            if (!is_null($request->coin) && !empty($request->coin)) {
+                $transactions->whereHas('coin', function ($coin) use ($request) {
+                    return $coin->where('abbr', $request->coin);
+                });
+            }
+
+            if (!is_null($request->type) && !empty($request->type)) {
+                $transactions->where('type', $request->type);
+            }
+
+            if (!is_null($request->tx) && !empty($request->tx)) {
+                $transactions->where('tx', "LIKE", "%{$request->tx}%");
+            }
+
+            return response($transactions->paginate(25), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function listAddressGroup(Request $request)
+    {
+        try {
+            $transactions = Transaction::with(['coin', 'user', 'internalWallet' => function ($internal) {
+                return $internal->with('user');
+            }])
                 ->orderByDesc('updated_at')
                 ->whereRaw('LENGTH(tx) > 36')
-                ->groupBy('tx')
-                ->paginate(10);
+                ->groupBy('toAddress');
+
+            if (!is_null($request->coin) && !empty($request->coin)) {
+                $transactions->whereHas('coin', function ($coin) use ($request) {
+                    return $coin->where('abbr', $request->coin);
+                });
+            }
+
+            if (!is_null($request->address) && !empty($request->address)) {
+                $transactions->where('toAddress', 'LIKE', "%{$request->address}%");
+            }
+
+            return response($transactions->paginate(25), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function listTxTransactions($tx)
+    {
+        try {
+            $transactions = Transaction::with(['coin', 'user'])
+                ->where('tx', $tx)
+                ->orderBy('vout')
+                ->get();
 
             return response($transactions, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response([
+                'message' => $e->getMessage(),
+                'transactions' => null
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function listAddressTransactions($address)
+    {
+        try {
+            $transactions = Transaction::with(['coin', 'user', 'internalWallet' => function ($internal) {
+                return $internal->with('user');
+            }])
+                ->orderByDesc('updated_at')
+                ->whereRaw('LENGTH(tx) > 36')
+                ->where('toAddress', $address);
+
+            return response($transactions->get(), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage(),
