@@ -393,7 +393,8 @@ class TransactionsController extends Controller
         try {
             $transactions = Transaction::with(['coin', 'user'])
                 ->where('tx', $tx)
-                ->orderBy('vout')
+                ->orderBy('type')
+                ->orderByDesc('amount')
                 ->get();
 
             return response($transactions, Response::HTTP_OK);
