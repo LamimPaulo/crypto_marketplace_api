@@ -71,8 +71,13 @@ class LqxWithdrawals extends Command
                 $balancePercent = 0;
 
                 if ($wallet->balance > 0) {
-                    $old_balance = ($wallet->balance * 100) / $withdrawal_pending;
-                    $balancePercent = $old_balance * ($withdrawal->percent / 100);
+                    $pending = LqxWithdrawal::where('is_executed', false)->count();
+                    if ($pending == 1) {
+                        $balancePercent = $wallet->balance;
+                    } else {
+                        $old_balance = ($wallet->balance * 100) / $withdrawal_pending;
+                        $balancePercent = $old_balance * ($withdrawal->percent / 100);
+                    }
                 }
 
                 $lqx_wallet = UserWallet::with('coin')
