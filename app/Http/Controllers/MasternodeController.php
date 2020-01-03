@@ -108,7 +108,7 @@ class MasternodeController extends Controller
         try {
             $masternodes = Masternode::where([
                 'status' => EnumMasternodeStatus::PROCESSING,
-            ])->inRandomOrder()->limit(100)->get();
+            ])->inRandomOrder()->limit(env('MASTERNODE_CREATE', 1))->get();
 
             foreach ($masternodes as $masternode) {
                 $data = [
