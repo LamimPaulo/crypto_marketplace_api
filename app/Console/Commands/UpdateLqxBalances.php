@@ -53,7 +53,6 @@ class UpdateLqxBalances extends Command
                     'coin_id' => Coin::getByAbbr("LQX")->id,
                     'type' => EnumUserWalletType::WALLET
                 ])
-                ->where('balance', '>=', 0.00001)
                 ->get();
 
             foreach ($wallets as $wallet) {

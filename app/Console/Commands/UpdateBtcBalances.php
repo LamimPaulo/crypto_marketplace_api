@@ -53,7 +53,6 @@ class UpdateBtcBalances extends Command
                     'coin_id' => Coin::getByAbbr("BTC")->id,
                     'type' => EnumUserWalletType::WALLET
                 ])
-                ->where('balance', '>=', 0.00001)
                 ->get();
 
             foreach ($wallets as $wallet) {
