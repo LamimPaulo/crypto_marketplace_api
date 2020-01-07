@@ -59,8 +59,7 @@ class BalancesToLqx extends Command
                     'sync' => false,
                     'type' => EnumUserWalletType::WALLET
                 ])
-                ->whereIn('coin_id', Coin::whereIn('abbr', ['BTC'])->pluck('id'))
-//                ->whereIn('coin_id', Coin::whereIn('abbr', ['BTC', 'LTC', 'BCH', 'DASH'])->pluck('id'))
+                ->whereIn('coin_id', Coin::whereIn('abbr', ['BTC', 'LTC', 'BCH', 'DASH'])->pluck('id'))
                 ->orderBy('balance')
                 ->get();
 
