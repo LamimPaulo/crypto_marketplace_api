@@ -53,6 +53,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('gateway:reverseoverpaid')->everyFiveMinutes();
 
         $schedule->command('messages:create')->everyMinute();
+
+        $schedule->command('update:lqxbalance')->dailyAt('05:00');
     }
 
     /**

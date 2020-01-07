@@ -51,86 +51,78 @@ class LqxWithdrawals extends Command
      */
     public function handle()
     {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+
         try {
 
-            $withdrawal_pending = LqxWithdrawal::where('is_executed', false)->sum('percent');
-
-            $withdrawal = LqxWithdrawal::where('is_executed', false)
-                ->whereDate('date', Carbon::now()->format('Y-m-d'))
-                ->first();
-
-            if (!$withdrawal) {
-                return;
-            }
-
-            $wallets = UserWallet::where('coin_id', Coin::getByAbbr("LQXD")->id)->get();
+            $wallets = UserWallet::with('user', 'coin')
+                ->where('coin_id', Coin::getByAbbr("LQXD")->id)
+                ->orderBy('balance')
+                ->get();
 
             foreach ($wallets as $wallet) {
-                DB::beginTransaction();
 
-                $balancePercent = 0;
+                if ($wallet->balance >= 0.00001) {
 
-                if ($wallet->balance > 0) {
-                    $pending = LqxWithdrawal::where('is_executed', false)->count();
-                    if ($pending == 1) {
-                        $balancePercent = $wallet->balance;
-                    } else {
-                        $old_balance = ($wallet->balance * 100) / $withdrawal_pending;
-                        $balancePercent = $old_balance * ($withdrawal->percent / 100);
-                    }
+                    $output->writeln("<info>-----------------------------</info>");
+                    $output->writeln("<info>{$wallet->user->email}</info>");
+                    $output->writeln("<info>{$wallet->coin->abbr}: {$wallet->balance}</info>");
+
+                    DB::beginTransaction();
+                    $balancePercent = $wallet->balance;
+
+                    $lqx_wallet = UserWallet::with('coin')
+                        ->whereHas('coin', function ($coin) {
+                            return $coin->where('abbr', 'LIKE', 'LQX');
+                        })
+                        ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
+
+                    $tx = Uuid::uuid4()->toString();
+
+                    $transaction_in = Transaction::create([
+                        'user_id' => $lqx_wallet->user_id,
+                        'coin_id' => $lqx_wallet->coin_id,
+                        'wallet_id' => $lqx_wallet->id,
+                        'toAddress' => $lqx_wallet->address,
+                        'amount' => $balancePercent,
+                        'status' => EnumTransactionsStatus::SUCCESS,
+                        'type' => EnumTransactionType::IN,
+                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
+                        'fee' => 0,
+                        'tax' => 0,
+                        'tx' => $tx,
+                        'info' => '',
+                        'error' => '',
+                        'is_internal' => true,
+                    ]);
+
+                    BalanceService::increments($transaction_in);
+
+                    $transaction_out = Transaction::create([
+                        'user_id' => $wallet->user_id,
+                        'coin_id' => $wallet->coin_id,
+                        'wallet_id' => $wallet->id,
+                        'toAddress' => $lqx_wallet->address,
+                        'amount' => $balancePercent,
+                        'status' => EnumTransactionsStatus::SUCCESS,
+                        'type' => EnumTransactionType::OUT,
+                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
+                        'fee' => 0,
+                        'tax' => 0,
+                        'tx' => $tx,
+                        'info' => '',
+                        'error' => '',
+                        'is_internal' => true,
+                    ]);
+
+                    BalanceService::decrements($transaction_out);
+
+                    DB::commit();
+                } else {
+                    $wallet->balance = 0;
+                    $wallet->save();
                 }
-
-                $lqx_wallet = UserWallet::with('coin')
-                    ->whereHas('coin', function ($coin) {
-                        return $coin->where('abbr', 'LIKE', 'LQX');
-                    })
-                    ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
-
-                $tx = Uuid::uuid4()->toString();
-
-                $transaction_in = Transaction::create([
-                    'user_id' => $lqx_wallet->user_id,
-                    'coin_id' => $lqx_wallet->coin_id,
-                    'wallet_id' => $lqx_wallet->id,
-                    'toAddress' => $lqx_wallet->address,
-                    'amount' => $balancePercent,
-                    'status' => EnumTransactionsStatus::SUCCESS,
-                    'type' => EnumTransactionType::IN,
-                    'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                    'fee' => 0,
-                    'tax' => 0,
-                    'tx' => $tx,
-                    'info' => '',
-                    'error' => '',
-                    'is_internal' => true,
-                ]);
-
-                BalanceService::increments($transaction_in);
-
-                $transaction_out = Transaction::create([
-                    'user_id' => $wallet->user_id,
-                    'coin_id' => $wallet->coin_id,
-                    'wallet_id' => $wallet->id,
-                    'toAddress' => $lqx_wallet->address,
-                    'amount' => $balancePercent,
-                    'status' => EnumTransactionsStatus::SUCCESS,
-                    'type' => EnumTransactionType::OUT,
-                    'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                    'fee' => 0,
-                    'tax' => 0,
-                    'tx' => $tx,
-                    'info' => '',
-                    'error' => '',
-                    'is_internal' => true,
-                ]);
-
-                BalanceService::decrements($transaction_out);
-
-                DB::commit();
             }
-
-            $withdrawal->is_executed = true;
-            $withdrawal->save();
 
         } catch
         (\Exception $e) {

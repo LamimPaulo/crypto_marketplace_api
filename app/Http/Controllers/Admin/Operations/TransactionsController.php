@@ -317,10 +317,10 @@ class TransactionsController extends Controller
                 $transaction['balances'] = $balances;
             }
 
-            return response([
-                'transactions' => $transactions,
+            return [
                 'balances' => $balances,
-            ], Response::HTTP_OK);
+                'transactions' => $transactions,
+            ];
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage()
