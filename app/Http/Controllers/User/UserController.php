@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Enum\EnumMasternodeStatus;
 use App\Enum\EnumTokenAction;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
@@ -21,6 +22,7 @@ use App\Models\Coin;
 use App\Models\Country;
 use App\Models\Funds\FundBalances;
 use App\Models\LqxWithdrawal;
+use App\Models\Masternode;
 use App\Models\Nanotech\Nanotech;
 use App\Models\System\ActivityLogger as Logger;
 use App\Models\Transaction;
@@ -352,17 +354,10 @@ class UserController extends Controller
     public function dashboard()
     {
         try {
-            $nanotech_btc = $this->nanotechBTC();
             $nanotech_lqx = $this->nanotechLQX();
             $masternode = $this->nanotechMasternode();
 
             $products = [
-                [
-                    'name' => "Nanotech BTC",
-                    'value_lqx' => $nanotech_btc['value_lqx'],
-                    'value_brl' => $nanotech_btc['value_brl'],
-                    'value_usd' => $nanotech_btc['value_usd'],
-                ],
                 [
                     'name' => "Nanotech LQX",
                     'value_lqx' => $nanotech_lqx['value_lqx'],
@@ -389,13 +384,12 @@ class UserController extends Controller
             }
 
             //chart
-            $total = $nanotech_btc['value_lqx'] + $nanotech_lqx['value_lqx'] + $masternode['value_brl'];
+            $total = $nanotech_lqx['value_lqx'] + $masternode['value_brl'];
 
             $chart = [0, 0, 0];
 
             if ($total > 0) {
                 $chart = [
-                    (float)round($nanotech_btc['value_lqx'] * 100 / $total, 3),
                     (float)round($nanotech_lqx['value_lqx'] * 100 / $total, 3),
                     (float)round($masternode['value_brl'] * 100 / $total, 3)
                 ];
@@ -412,34 +406,6 @@ class UserController extends Controller
                 'message' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
-    }
-
-    private function nanotechBTC()
-    {
-        $conversor = new ConversorService();
-        $nanotech_btc = Nanotech::where([
-            'user_id' => auth()->user()->id,
-            'type_id' => 2
-        ]);
-
-        $total = $nanotech_btc->sum('amount');
-
-        if ($total == 0) {
-            return [
-                'value_brl' => 0,
-                'value_lqx' => 0,
-                'value_usd' => 0,
-            ];
-        }
-
-        $nanotech_btc_to_brl = $conversor::CRYPTO2FIAT_MIN($total, "BTC");
-        $nanotech_btc_to_usd = $conversor::CRYPTO2FIAT_MIN($total, "BTC", "USD");
-
-        return [
-            'value_brl' => $nanotech_btc_to_brl['amount'],
-            'value_lqx' => $conversor::FIAT2CRYPTO_MIN($nanotech_btc_to_brl['amount'], "LQX")['amount'],
-            'value_usd' => $nanotech_btc_to_usd['amount']
-        ];
     }
 
     private function nanotechLQX()
@@ -469,27 +435,16 @@ class UserController extends Controller
 
     private function nanotechMasternode()
     {
-        $conversor = new ConversorService();
-
-        $masternode = Nanotech::where([
+        $masternode = Masternode::where([
             'user_id' => auth()->user()->id,
-            'type_id' => 3
-        ]);
+            'status' => EnumMasternodeStatus::SUCCESS
+        ])->count();
 
-        $total = $masternode->sum('amount');
-
-        if ($total == 0) {
-            return [
-                'value_brl' => 0,
-                'value_lqx' => 0,
-                'value_usd' => 0,
-            ];
-        }
-
+        $total = $masternode * 1000;
         return [
-            'value_brl' => $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX")['amount'],
+            'value_brl' => $total,
             'value_lqx' => $total,
-            'value_usd' => $conversor::CRYPTO2FIAT_MIN($masternode->sum('amount'), "LQX", "USD")['amount'],
+            'value_usd' => $total,
         ];
     }
 
