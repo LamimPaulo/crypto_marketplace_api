@@ -202,6 +202,35 @@ class UserAnalysisController extends Controller
         }
     }
 
+    public function transactionDuplicate(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:transactions,id',
+            'new_tx' => 'required',
+            'new_updated' => 'required',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $transaction = Transaction::findOrFail($request->id);
+            $newTransaction = $transaction->replicate();
+            $newTransaction->tx = $request->new_tx;
+            $newTransaction->updated_at = $request->new_updated;
+            $newTransaction->save();
+
+            DB::commit();
+            return response([
+                'message' => "Transação duplicada com sucesso!"
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => "Erro: {$e->getMessage()}"
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
     public function balanceUpdate(Request $request)
     {
         $request->validate([

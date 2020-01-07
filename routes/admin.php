@@ -175,6 +175,7 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::get('/analysis/block/{email}', 'UserAnalysisController@block');
             Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
             Route::post('/analysis/transaction/delete', 'UserAnalysisController@transactionDelete');
+            Route::post('/analysis/transaction/duplicate', 'UserAnalysisController@transactionDuplicate');
             Route::post('/analysis/balance/update', 'UserAnalysisController@balanceUpdate');
         });
 
