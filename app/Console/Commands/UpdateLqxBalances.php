@@ -69,15 +69,19 @@ class UpdateLqxBalances extends Command
                 if ($computed['balances']['LQX']['balance'] < 0) {
 
                     if (!$wallet->user->is_under_analysis) {
-                        $message = env("APP_NAME") . " - Usuário bloqueado: " . $wallet->user->email;
+                        $message = env("APP_NAME") . " - Usuário bloqueado: ". env("ADMIN_URL") ."/user/analysis/" . $wallet->user->email;
                         Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
                         sleep(5);
                     }
 
-                    $wallet->user->is_under_analysis = true;
-                    $wallet->user->tokens()->each(function ($token) {
+                    $user = User::find($wallet->user_id);
+                    $user->is_under_analysis = true;
+                    $user->save();
+
+                    $user->tokens()->each(function ($token) {
                         $token->delete();
                     });
+
                     $output->writeln("<info>BLOQUEADO ANALISE</info>");
                 }
 

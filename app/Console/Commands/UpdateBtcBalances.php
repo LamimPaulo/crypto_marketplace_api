@@ -8,6 +8,7 @@ use App\Mail\AlertsMail;
 use App\Models\Coin;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
+use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -68,22 +69,27 @@ class UpdateBtcBalances extends Command
 
                 if ($computed['balances']['BTC']['balance'] < 0) {
                     if (!$wallet->user->is_under_analysis) {
-                        $message = env("APP_NAME") . " - Usuário bloqueado: " . $wallet->user->email;
+                        $message = env("APP_NAME") . " - Usuário bloqueado: ". env("ADMIN_URL") ."/user/analysis/" . $wallet->user->email;
                         Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
                         sleep(5);
                     }
 
-                    $wallet->user->is_under_analysis = true;
-                    $wallet->user->tokens()->each(function ($token) {
+                    $user = User::find($wallet->user_id);
+                    $user->is_under_analysis = true;
+                    $user->save();
+
+                    $user->tokens()->each(function ($token) {
                         $token->delete();
                     });
                     $output->writeln("<info>BLOQUEADO ANALISE</info>");
+                    }
                 }
-            }
 
-        } catch (\Exception $e) {
-            $output->writeln("<info>{$e->getMessage()}</info>");
-            $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
-        }
+            }
+        catch
+            (\Exception $e) {
+                $output->writeln("<info>{$e->getMessage()}</info>");
+                $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
+            }
     }
 }
