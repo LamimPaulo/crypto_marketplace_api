@@ -68,19 +68,18 @@ class UpdateBtcBalances extends Command
                 $output->writeln("<info>verify sum transactions: {$computed['balances']['BTC']['balance']}</info>");
 
                 if ($computed['balances']['BTC']['balance'] < 0) {
+                    if (!$wallet->user->is_under_analysis) {
+                        $message = env("APP_NAME") . " - Usuário bloqueado: " . $wallet->user->email;
+                        Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
+                        sleep(5);
+                    }
+
                     $wallet->user->is_under_analysis = true;
                     $wallet->user->tokens()->each(function ($token) {
                         $token->delete();
                     });
-
-                    $message = env("APP_NAME"). " - Usuário bloqueado: " . $wallet->user->email;
-                    Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-
                     $output->writeln("<info>BLOQUEADO ANALISE</info>");
                 }
-
-                $wallet->balance = $computed['balances']['BTC']['balance'];
-                $wallet->save();
             }
 
         } catch (\Exception $e) {
