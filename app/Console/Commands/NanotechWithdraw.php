@@ -8,15 +8,12 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
-use App\Helpers\ActivityLogger;
 use App\Models\Nanotech\Nanotech;
 use App\Models\Nanotech\NanotechOperation;
-use App\Models\Nanotech\NanotechProfitPercent;
 use App\Models\Transaction;
 use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -60,45 +57,51 @@ class NanotechWithdraw extends Command
     {
         $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
-        $investments = Nanotech::with('user')->where(['type_id' => 2, 'coin_id' => 1])->get();
+        $investments = Nanotech::with('user')->where(['type_id' => 2, 'coin_id' => 1])
+            ->orderByDesc('amount')
+            ->get();
 
         foreach ($investments as $investment) {
 
             try {
-                DB::beginTransaction();
-
-                $total = sprintf("%.5f", ($this->start($investment->type_id, $investment->user_id) + $this->profit($investment->type_id, $investment->user_id)));
+                $total = sprintf("%.8f", ($this->start($investment->type_id, $investment->user_id) + $this->profit($investment->type_id, $investment->user_id)));
 
                 if ($total > 0) {
-
+                    $output->writeln("<info>-----------------------------</info>");
                     $output->writeln("<info>{$investment->user->email}</info>");
                     $output->writeln("<info>$total</info>");
 
-                    //saque do investimento total
-                    $op1 = NanotechOperation::create([
-                        'user_id' => $investment->user_id,
-                        'coin_id' => $investment->coin_id,
-                        'investment_id' => $investment->id,
-                        'amount' => 0 - sprintf("%.5f", ($this->start($investment->type_id, $investment->user_id))),
-                        'status' => EnumNanotechOperationStatus::SUCCESS,
-                        'type' => EnumNanotechOperationType::WITHDRAWAL,
-                    ]);
+                    $balance = sprintf("%.8f", ($this->start($investment->type_id, $investment->user_id)));
+                    if ($balance > 0) {
+                        //saque do investimento total
+                        $op1 = NanotechOperation::create([
+                            'user_id' => $investment->user_id,
+                            'coin_id' => $investment->coin_id,
+                            'investment_id' => $investment->id,
+                            'amount' => 0 - floatval($balance),
+                            'status' => EnumNanotechOperationStatus::SUCCESS,
+                            'type' => EnumNanotechOperationType::WITHDRAWAL,
+                        ]);
 
-                    $output->writeln("<info>{$op1->amount}</info>");
+                        $output->writeln("<info>Saldo: {$op1->amount}</info>");
+                        $investment->amount = 0;
+                        $investment->save();
+                    }
 
-                    $op2 = NanotechOperation::create([
-                        'user_id' => $investment->user_id,
-                        'coin_id' => $investment->coin_id,
-                        'investment_id' => $investment->id,
-                        'amount' => 0 - sprintf("%.5f", ($this->profit($investment->type_id, $investment->user_id))),
-                        'status' => EnumNanotechOperationStatus::SUCCESS,
-                        'type' => EnumNanotechOperationType::PROFIT_WITHDRAWAL,
-                    ]);
+                    $profit = sprintf("%.8f", ($this->profit($investment->type_id, $investment->user_id)));
+                    if ($profit > 0) {
+                        $op2 = NanotechOperation::create([
+                            'user_id' => $investment->user_id,
+                            'coin_id' => $investment->coin_id,
+                            'investment_id' => $investment->id,
+                            'amount' => 0 - floatval($profit),
+                            'status' => EnumNanotechOperationStatus::SUCCESS,
+                            'type' => EnumNanotechOperationType::PROFIT_WITHDRAWAL,
+                        ]);
 
-                    $output->writeln("<info>{$op2->amount}</info>");
+                        $output->writeln("<info>Lucro: {$op2->amount}</info>");
+                    }
 
-                    $investment->amount = 0;
-                    $investment->save();
 
                     //credito do saque no balance
                     $wallet = UserWallet::where([
@@ -112,7 +115,7 @@ class NanotechWithdraw extends Command
                         'coin_id' => $wallet->coin_id,
                         'wallet_id' => $wallet->id,
                         'toAddress' => $wallet->address,
-                        'amount' => $total,
+                        'amount' => floatval($total),
                         'status' => EnumTransactionsStatus::SUCCESS,
                         'type' => EnumTransactionType::IN,
                         'category' => EnumTransactionCategory::NANOTECH,
@@ -123,7 +126,7 @@ class NanotechWithdraw extends Command
                         'error' => '',
                     ]);
 
-                    $output->writeln("<info>{$transaction->amount}</info>");
+                    $output->writeln("<info>Transaction: {$transaction->amount}</info>");
 
                     TransactionStatus::create([
                         'transaction_id' => $transaction->id,
@@ -131,10 +134,8 @@ class NanotechWithdraw extends Command
                     ]);
 
                     BalanceService::increments($transaction);
-                    DB::commit();
                 }
             } catch (\Exception $ex) {
-                DB::rollBack();
                 $output->writeln("<info>{$ex->getMessage()}</info>");
                 $output->writeln("<info>{$ex->getLine()} - {$ex->getFile()}</info>");
             }

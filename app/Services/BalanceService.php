@@ -120,7 +120,6 @@ class BalanceService
                 //OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
             }
 
-
             DB::commit();
 
         } catch (\Exception $exception) {
