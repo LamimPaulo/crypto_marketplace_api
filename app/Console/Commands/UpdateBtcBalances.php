@@ -69,9 +69,9 @@ class UpdateBtcBalances extends Command
 
                 if ($computed['balances']['BTC']['balance'] < 0) {
                     if (!$wallet->user->is_under_analysis) {
-                        $message = env("APP_NAME") . " - Usuário bloqueado: ". env("ADMIN_URL") ."/user/analysis/" . $wallet->user->email;
+                        $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
                         Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-                        sleep(5);
+                        sleep(2);
                     }
 
                     $user = User::find($wallet->user_id);
@@ -82,14 +82,13 @@ class UpdateBtcBalances extends Command
                         $token->delete();
                     });
                     $output->writeln("<info>BLOQUEADO ANALISE</info>");
-                    }
                 }
+            }
 
-            }
-        catch
-            (\Exception $e) {
-                $output->writeln("<info>{$e->getMessage()}</info>");
-                $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
-            }
+        } catch
+        (\Exception $e) {
+            $output->writeln("<info>{$e->getMessage()}</info>");
+            $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
+        }
     }
 }

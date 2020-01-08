@@ -8,6 +8,7 @@ use App\Mail\AlertsMail;
 use App\Models\Coin;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
+use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -69,9 +70,9 @@ class UpdateLqxBalances extends Command
                 if ($computed['balances']['LQX']['balance'] < 0) {
 
                     if (!$wallet->user->is_under_analysis) {
-                        $message = env("APP_NAME") . " - Usuário bloqueado: ". env("ADMIN_URL") ."/user/analysis/" . $wallet->user->email;
+                        $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
                         Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-                        sleep(5);
+                        sleep(2);
                     }
 
                     $user = User::find($wallet->user_id);
