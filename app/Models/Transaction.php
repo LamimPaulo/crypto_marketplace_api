@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Ramsey\Uuid\Uuid;
 
 /**
  * @property mixed user_id
@@ -98,7 +99,13 @@ class Transaction extends Model
         'fileExt',
         'totalRounded',
         'total',
+        'new_tx',
     ];
+
+    public function getNewTxAttribute()
+    {
+        return Uuid::uuid4()->toString();
+    }
 
     public function getCategoryNameAttribute()
     {
