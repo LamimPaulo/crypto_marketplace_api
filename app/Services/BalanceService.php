@@ -8,7 +8,9 @@ use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
 use App\Helpers\Validations;
+use App\Http\Controllers\Admin\Operations\TransactionsController;
 use App\Http\Controllers\OffScreenController;
+use App\Mail\AlertsMail;
 use App\Models\Coin;
 use App\Models\CoinQuote;
 use App\Models\Transaction;
@@ -18,6 +20,7 @@ use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Ramsey\Uuid\Uuid;
 
 class BalanceService
@@ -188,6 +191,7 @@ class BalanceService
 
     public function verifyBalance($amount, $abbr, $type = null, $user_id = null)
     {
+
         if (is_null($user_id)) {
             $user_id = auth()->user()->id;
         }
@@ -199,11 +203,51 @@ class BalanceService
         $coin = Coin::getByAbbr($abbr);
         $from = UserWallet::where(['coin_id' => $coin->id, 'user_id' => $user_id, 'type' => $type])->first();
 
+        $result = $this->_checkBalance($user_id, $abbr, $from);
+        if(!$result){
+            return false;
+        }
+
         if ((float)$from->balance >= (float)$amount) {
             return true;
         }
 
         return false;
+    }
+
+
+    public function _checkBalance($user_id, $abbr, $wallet)
+    {
+        $user = User::find($user_id);
+
+        $transactionController = new TransactionsController(new BalanceService());
+        $computed = $transactionController->balanceVerify($user->email);
+
+        if ($computed['balances'][$abbr]['balance'] < -0.001) {
+
+            if (!$user->is_admin) {
+                if (!$user->is_under_analysis) {
+
+                    $user->is_under_analysis = true;
+                    $user->save();
+
+                    $user->tokens()->each(function ($token) {
+                        $token->delete();
+                    });
+
+                    $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $user->email;
+                    Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
+                    return false;
+                }
+            }
+        }
+
+        if (!$user->user->is_admin) {
+            $wallet = UserWallet::find($wallet->id);
+            $wallet->balance = $computed['balances'][$abbr]['balance'];
+            $wallet->save();
+        }
+        return true;
     }
 
     public function priorityConversor($amount, $product_coin)

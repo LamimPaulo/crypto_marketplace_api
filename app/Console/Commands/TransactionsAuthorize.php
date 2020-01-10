@@ -2,18 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumUserLevelLimitType;
-use App\Http\Controllers\OffScreenController;
-use App\Mail\UnderAnalysisMail;
-use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\UserLevelLimit;
 use App\Models\User\UserWallet;
 use App\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class TransactionsAuthorize extends Command
 {
@@ -80,6 +75,14 @@ class TransactionsAuthorize extends Command
             return false;
         }
 
+        if (!$this->_checkLimits($pending)) {
+            $pending->update([
+                'status' => EnumTransactionsStatus::ABOVELIMIT
+            ]);
+
+            return false;
+        }
+
         $pending->update([
             'status' => EnumTransactionsStatus::AUTHORIZED
         ]);
@@ -103,5 +106,6 @@ class TransactionsAuthorize extends Command
         $amount = floatval($pending->amount);
         return ($auto >= $amount) ? true : false;
     }
+
 
 }
