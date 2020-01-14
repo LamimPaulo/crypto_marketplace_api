@@ -234,7 +234,6 @@ class UserAnalysisController extends Controller
     public function balanceUpdate(Request $request)
     {
         $request->validate([
-            'password' => 'required',
             'balance' => 'required|numeric',
             'abbr' => 'required|exists:coins,abbr',
         ]);
@@ -252,32 +251,6 @@ class UserAnalysisController extends Controller
 
             $wallet->balance = $request->balance;
             $wallet->save();
-
-            //Offscreen
-            //if ($wallet->coin->is_crypto AND $wallet->coin->abbr != "LQX" AND env("APP_ENV") != "local") {
-            if ($wallet->coin->is_crypto AND $wallet->coin->abbr != "LQXD") {
-                $api = new \GuzzleHttp\Client(['http_errors' => false]);
-
-                $url = str_replace("operation", "syncwallet", config("services.offscreen.{$request->abbr}"));
-
-                $response = $api->post($url, [
-                    \GuzzleHttp\RequestOptions::JSON => [
-                        'amount' => $request->balance,
-                        'address' => $wallet->address,
-                        'key' => $request->password,
-                    ]
-                ]);
-
-                $statuscode = $response->getStatusCode();
-
-                if (401 === $statuscode OR 422 === $statuscode) {
-                    throw new \Exception('Senha inválida.');
-                }
-
-                if (200 !== $statuscode && 201 !== $statuscode) {
-                    throw new \Exception('Erro desconhecido [' . $statuscode . ']');
-                }
-            }
 
             DB::commit();
             return response([
