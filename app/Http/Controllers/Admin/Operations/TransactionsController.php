@@ -288,7 +288,7 @@ class TransactionsController extends Controller
             $transactions = Transaction::whereRaw(
                 "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ") 
                 AND category NOT IN (" . EnumTransactionCategory::FUND_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ") ) 
-                OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
+                OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . ", " . EnumTransactionsStatus::AUTHORIZED . "))")
                 ->whereHas('coin', function ($coin) {
                     return $coin->whereNotIn('abbr', ['ION']);
                 })

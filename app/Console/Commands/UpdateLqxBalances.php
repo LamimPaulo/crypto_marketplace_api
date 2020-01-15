@@ -67,7 +67,7 @@ class UpdateLqxBalances extends Command
 //                $output->writeln("<info>verify balance: {$computed['balances']['LQX']['balance_computed']->balance}</info>");
 //                $output->writeln("<info>verify sum transactions: {$computed['balances']['LQX']['balance']}</info>");
 
-                if ($computed['balances']['LQX']['balance'] < -0.001) {
+                if ($computed['balances']['LQX']['balance'] != $computed['balances']['LQX']['balance_computed']->balance) {
                     $user = User::find($wallet->user_id);
 
                     if (!$user->is_admin) {
