@@ -58,10 +58,11 @@ class BTCController extends Controller
                 'category' => $data['category'] ?? EnumTransactionCategory::TRANSACTION,
                 'confirmation' => $data['confirmations'] ?? 0,
                 'tax' => 0,
-                'created_at' => $data['timestamp'] ? Carbon::parse($data['timestamp']) : Carbon::now()
             ];
 
             $transaction = Transaction::create($data);
+            $transaction->created_at = $data['timestamp'] ? Carbon::parse($data['timestamp']) : Carbon::now();
+            $transaction->save();
             TransactionStatus::create([
                 'transaction_id' => $transaction->id,
                 'status' => $transaction->status
