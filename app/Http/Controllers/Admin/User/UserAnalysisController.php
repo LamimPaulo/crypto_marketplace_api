@@ -216,6 +216,7 @@ class UserAnalysisController extends Controller
             $transaction = Transaction::findOrFail($request->id);
             $newTransaction = $transaction->replicate();
             $newTransaction->tx = $request->new_tx;
+            $newTransaction->created_at = $transaction->created_at;
             $newTransaction->updated_at = $request->new_updated;
             $newTransaction->save();
 
