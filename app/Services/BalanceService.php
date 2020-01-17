@@ -209,7 +209,7 @@ class BalanceService
         $transactionController = new TransactionsController(new BalanceService());
         $computed = $transactionController->balanceVerify($user->email);
 
-        if ($computed['balances'][$abbr]['balance'] != $computed['balances'][$abbr]['balance_computed']->balance) {
+        if (sprintf('%.8f',$computed['balances'][$abbr]['balance']) != sprintf('%.8f',$computed['balances'][$abbr]['balance_computed']->balance)) {
 
             if (!$user->is_admin) {
                 if (!$user->is_under_analysis) {

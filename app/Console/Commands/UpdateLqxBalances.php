@@ -67,7 +67,7 @@ class UpdateLqxBalances extends Command
                 $output->writeln("<info>verify balance: {$computed['balances']['LQX']['balance_computed']->balance}</info>");
                 $output->writeln("<info>verify sum transactions: {$computed['balances']['LQX']['balance']}</info>");
 
-                if ($computed['balances']['LQX']['balance'] != $computed['balances']['LQX']['balance_computed']->balance) {
+                if (sprintf('%.8f',$computed['balances']['LQX']['balance']) != sprintf('%.8f',$computed['balances']['LQX']['balance_computed']->balance)) {
                     $user = User::find($wallet->user_id);
 
                     if (!$user->is_admin) {
@@ -80,9 +80,9 @@ class UpdateLqxBalances extends Command
                                 $token->delete();
                             });
 
-//                            $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
-//                            Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-//                            sleep(2);
+                            $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
+                            Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
+                            sleep(2);
                         }
                     }
 
