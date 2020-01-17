@@ -47,7 +47,7 @@ class BTCController extends Controller
                 'toAddress' => $data['toAddress'],
                 'blockHash' => "",
                 'amount' => $data['amount'],
-                'fee' => $data['fee'],
+                'fee' => $data['fee'] ?? 0,
                 'tx' => $data['txid'],
                 'user_id' => $data['user_id'],
                 'coin_id' => $data['coin_id'],
