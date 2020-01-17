@@ -87,6 +87,7 @@ class Transaction extends Model
         'statusClient',
         'statusClass',
         'dateLocal',
+        'dateHour',
         'updatedLocal',
         'paymentDateLocal',
         'amountRounded',
@@ -101,6 +102,11 @@ class Transaction extends Model
         'total',
         'new_tx',
     ];
+
+    public function getDateHourAttribute()
+    {
+        return $this->created_at->format("Y-m-d H:i");
+    }
 
     public function getNewTxAttribute()
     {
@@ -216,6 +222,16 @@ class Transaction extends Model
             ->get();
     }
 
+    public static function masternodes_confirmation()
+    {
+        return self::join('coins', 'coins.id', '=', 'transactions.coin_id')
+            ->whereIn('transactions.status', [EnumTransactionsStatus::PROCESSING, EnumTransactionsStatus::PENDING])
+            ->where('transactions.type', '=', EnumTransactionType::IN)
+            ->where('transactions.category', '=', EnumTransactionCategory::MASTERNODE_REWARD)
+            ->select('transactions.*', 'coins.abbr')
+            ->get();
+    }
+
     public static function getValueByDayUser($coin_id, $category, $is_internal = 0)
     {
         return self::where('user_id', '=', auth()->user()->id)
@@ -252,7 +268,7 @@ class Transaction extends Model
         ])->with(['wallet', 'user'])
             ->groupBy('toAddress')
             ->orderBy('amount')
-            ->take(env("TRANSACTIONS_SEND", 1))->get();
+            ->take(env("TRANSACTIONS_SEND", 0))->get();
     }
 
     public static function listUnique($id)

@@ -46,7 +46,7 @@ class UpdateLqxBalances extends Command
      */
     public function handle()
     {
-//        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
         try {
             $wallets = UserWallet::with(['user', 'coin'])
@@ -61,11 +61,11 @@ class UpdateLqxBalances extends Command
                 $transactionController = new TransactionsController(new BalanceService());
                 $computed = $transactionController->balanceVerify($wallet->user->email);
 
-//                $output->writeln("<info>-----------------------------</info>");
-//                $output->writeln("<info>{$wallet->user->email}</info>");
-//                $output->writeln("<info>local balance: {$wallet->balance}</info>");
-//                $output->writeln("<info>verify balance: {$computed['balances']['LQX']['balance_computed']->balance}</info>");
-//                $output->writeln("<info>verify sum transactions: {$computed['balances']['LQX']['balance']}</info>");
+                $output->writeln("<info>-----------------------------</info>");
+                $output->writeln("<info>{$wallet->user->email}</info>");
+                $output->writeln("<info>local balance: {$wallet->balance}</info>");
+                $output->writeln("<info>verify balance: {$computed['balances']['LQX']['balance_computed']->balance}</info>");
+                $output->writeln("<info>verify sum transactions: {$computed['balances']['LQX']['balance']}</info>");
 
                 if ($computed['balances']['LQX']['balance'] != $computed['balances']['LQX']['balance_computed']->balance) {
                     $user = User::find($wallet->user_id);
@@ -80,13 +80,13 @@ class UpdateLqxBalances extends Command
                                 $token->delete();
                             });
 
-                            $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
-                            Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-                            sleep(2);
+//                            $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
+//                            Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
+//                            sleep(2);
                         }
                     }
 
-//                    $output->writeln("<info>BLOQUEADO ANALISE</info>");
+                    $output->writeln("<info>BLOQUEADO ANALISE</info>");
                 }
 
                 if (!$wallet->user->is_admin) {
@@ -96,9 +96,9 @@ class UpdateLqxBalances extends Command
             }
 
         } catch (\Exception $e) {
-            throw new \Exception($e->getLine() . ' - ' . $e->getFile() . ' - '. $e->getMessage());
-//            $output->writeln("<info>{$e->getMessage()}</info>");
-//            $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
+//            throw new \Exception($e->getLine() . ' - ' . $e->getFile() . ' - '. $e->getMessage());
+            $output->writeln("<info>{$e->getMessage()}</info>");
+            $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
         }
     }
 }

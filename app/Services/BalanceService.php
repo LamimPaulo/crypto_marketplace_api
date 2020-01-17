@@ -2,14 +2,12 @@
 
 namespace App\Services;
 
-use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
 use App\Helpers\Validations;
 use App\Http\Controllers\Admin\Operations\TransactionsController;
-use App\Http\Controllers\OffScreenController;
 use App\Mail\AlertsMail;
 use App\Models\Coin;
 use App\Models\CoinQuote;
@@ -119,10 +117,6 @@ class BalanceService
 
             $wallet->increment('balance', sprintf("%.8f", $transaction->amount));
 
-            if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-                //OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => sprintf("%.8f", $transaction->amount)], $wallet->first()->coin->abbr);
-            }
-
             DB::commit();
 
         } catch (\Exception $exception) {
@@ -147,10 +141,6 @@ class BalanceService
 
             self::hist($wallet->first(), $transaction, 'decrement');
             $wallet->decrement('balance', sprintf("%.8f", (string)$total));
-
-            if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-                //OffScreenController::post(EnumOperationType::DECREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
-            }
 
             DB::commit();
 
@@ -177,10 +167,6 @@ class BalanceService
             self::hist($wallet->first(), $transaction, 'reverse');
             $wallet->increment('balance', (string)$total);
 
-            if ($wallet->first()->coin->is_crypto AND $wallet->first()->coin->abbr != "LQXD" AND env("APP_ENV") != "local") {
-//                OffScreenController::post(EnumOperationType::INCREMENT_BALANCE, ['address' => $wallet->first()->address, 'amount' => $total], $wallet->first()->coin->abbr);
-            }
-
             DB::commit();
 
         } catch (\Exception $exception) {
@@ -204,7 +190,7 @@ class BalanceService
         $from = UserWallet::where(['coin_id' => $coin->id, 'user_id' => $user_id, 'type' => $type])->first();
 
         $result = $this->_checkBalance($user_id, $abbr, $from);
-        if(!$result){
+        if (!$result) {
             return false;
         }
 

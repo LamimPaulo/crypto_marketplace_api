@@ -6,6 +6,7 @@ use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GatewayController;
 use App\Http\Controllers\OffScreenController;
@@ -16,6 +17,7 @@ use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use App\Services\ConversorService;
 use App\Services\TaxCoinService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,9 +55,10 @@ class BTCController extends Controller
                 'vout' => $data['vout'],
                 'status' => EnumTransactionsStatus::PENDING,
                 'type' => EnumTransactionType::IN,
-                'category' => EnumTransactionCategory::TRANSACTION,
+                'category' => $data['category'] ?? EnumTransactionCategory::TRANSACTION,
                 'confirmation' => $data['confirmations'] ?? 0,
-                'tax' => 0
+                'tax' => 0,
+                'created_at' => $data['timestamp'] ? Carbon::parse($data['timestamp']) : Carbon::now()
             ];
 
             $transaction = Transaction::create($data);
@@ -82,22 +85,43 @@ class BTCController extends Controller
                 ->first();
 
             if (!$transactionController) {
+                //Transaction
+                $wallet = UserWallet::where([
+                    'address' => $data['toAddress'],
+                    'type' => EnumUserWalletType::WALLET
+                ])->first();
 
-                $wallet = UserWallet::where('address', $data['toAddress'])->first();
-
-                if (!$wallet) {
-                    $result = GatewayController::update($data);
-                    DB::commit();
-                    return response([
-                        'message' => $result
-                    ], Response::HTTP_CREATED);
+                if ($wallet) {
+                    $data['user_id'] = $wallet->user_id;
+                    $data['coin_id'] = $wallet->coin_id;
+                    $data['wallet_id'] = $wallet->id;
+                    $transactionsCreate = self::create($data);
+                    return $transactionsCreate;
                 }
 
-                $data['user_id'] = $wallet->user_id;
-                $data['coin_id'] = $wallet->coin_id;
-                $data['wallet_id'] = $wallet->id;
-                $transactionsCreate = self::create($data);
-                return $transactionsCreate;
+                //Masternode
+                $masternode = UserWallet::where([
+                    'address' => $data['toAddress'],
+                    'type' => EnumUserWalletType::MASTERNODE
+                ])->first();
+
+                if ($masternode) {
+                    $data['user_id'] = $masternode->user_id;
+                    $data['coin_id'] = $masternode->coin_id;
+                    $data['wallet_id'] = $masternode->id;
+                    $data['category'] = EnumTransactionCategory::MASTERNODE_REWARD;
+
+                    $transactionsCreate = self::create($data);
+                    return $transactionsCreate;
+                }
+
+                //Gateway
+                $result = GatewayController::update($data);
+                DB::commit();
+                return response([
+                    'message' => $result
+                ], Response::HTTP_CREATED);
+
             }
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());

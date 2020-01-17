@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Enum\EnumMasternodeOperation;
 use App\Enum\EnumMasternodeStatus;
+use App\Enum\EnumOperationType;
+use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumUserWalletType;
 use App\Models\Coin;
 use App\Models\Masternode;
 use App\Models\MasternodeInfo;
+use App\Models\TransactionStatus;
 use App\Models\User\UserWallet;
+use App\Services\BalanceService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use GuzzleHttp\Client;
 
@@ -108,7 +113,7 @@ class MasternodeController extends Controller
         try {
             $masternodes = Masternode::where([
                 'status' => EnumMasternodeStatus::PROCESSING,
-            ])->inRandomOrder()->limit(env('MASTERNODE_CREATE', 1))->get();
+            ])->inRandomOrder()->limit(env('MASTERNODE_CREATE', 0))->get();
 
             foreach ($masternodes as $masternode) {
                 $data = [
@@ -193,6 +198,33 @@ class MasternodeController extends Controller
             });
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage() . ' => ' . $e->getLine() . ' => ' . $e->getFile());
+        }
+    }
+
+    public static function confirmation($transaction)
+    {
+        try {
+            DB::beginTransaction();
+            $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx], Coin::find($transaction->coin_id)->abbr);
+
+            $data['confirmation'] = $result['confirmations'];
+
+            if ($data['confirmation'] >= env("MASTERNODES_CONFIRMATIONS", 100)) {
+                $data['status'] = EnumTransactionsStatus::SUCCESS;
+
+                BalanceService::increments($transaction);
+
+                TransactionStatus::create([
+                    'transaction_id' => $transaction->id,
+                    'status' => $transaction->status
+                ]);
+            }
+
+            $transaction->update($data);
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return $ex->getMessage();
         }
     }
 

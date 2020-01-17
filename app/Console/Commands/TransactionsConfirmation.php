@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\GatewayController;
+use App\Http\Controllers\MasternodeController;
 use App\Http\Controllers\Notify\BTCController;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
@@ -45,6 +46,12 @@ class TransactionsConfirmation extends Command {
             $this->BTC($transaction);
             unset($connection);
         }
+
+        $processing = Transaction::masternodes_confirmation();
+        foreach ($processing as $transaction) {
+            $this->masternodes($transaction);
+            unset($connection);
+        }
     }
 
     private function BTC($transaction) {
@@ -53,6 +60,10 @@ class TransactionsConfirmation extends Command {
 
     private function gateway() {
         GatewayController::confirmation();
+    }
+
+    private function masternodes($transaction) {
+        MasternodeController::confirmation($transaction);
     }
 
 }
