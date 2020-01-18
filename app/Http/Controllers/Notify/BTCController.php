@@ -61,7 +61,7 @@ class BTCController extends Controller
             ];
 
             $transaction = Transaction::create($data);
-            $transaction->created_at = $data['timestamp'] ? Carbon::parse($data['timestamp']) : Carbon::now();
+            $transaction->created_at = Carbon::createFromTimestamp($data['timestamp'])->toDateTimeString() ?? Carbon::now();
             $transaction->save();
             TransactionStatus::create([
                 'transaction_id' => $transaction->id,
