@@ -43,6 +43,8 @@ class BTCController extends Controller
     public static function create($data)
     {
         try {
+	    $date = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp'])->timestamp : Carbon::now();
+
             $data = [
                 'toAddress' => $data['toAddress'],
                 'blockHash' => "",
@@ -61,11 +63,9 @@ class BTCController extends Controller
             ];
 
             $transaction = Transaction::create($data);
+	    $transaction->created_at = $date;
+            $transaction->save();
 
-            if(isset($data['timestamp'])) {
-                $date = Carbon::createFromTimestamp($data['timestamp'])->toDateTimeString();
-                DB::statement("UPDATE transactions SET created_at = '{$date}' WHERE tx = {$transaction->tx}");
-            }
             TransactionStatus::create([
                 'transaction_id' => $transaction->id,
                 'status' => $transaction->status
