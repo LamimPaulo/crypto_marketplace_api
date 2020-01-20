@@ -4,13 +4,10 @@ namespace App\Console\Commands;
 
 use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\Admin\Operations\TransactionsController;
-use App\Mail\AlertsMail;
 use App\Models\Coin;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
-use App\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class UpdateBtcBalances extends Command
 {
@@ -51,39 +48,24 @@ class UpdateBtcBalances extends Command
         try {
             $wallets = UserWallet::with(['user', 'coin'])
                 ->where([
-                    'coin_id' => Coin::getByAbbr("BTC")->id,
+                    'coin_id' => Coin::getByAbbr("BRL")->id,
                     'type' => EnumUserWalletType::WALLET
                 ])
                 ->get();
+
+            $output->writeln("<info>START</info>");
 
             foreach ($wallets as $wallet) {
 
                 $transactionController = new TransactionsController(new BalanceService());
                 $computed = $transactionController->balanceVerify($wallet->user->email);
 
-                $output->writeln("<info>-----------------------------</info>");
-                $output->writeln("<info>{$wallet->user->email}</info>");
-                $output->writeln("<info>local balance: {$wallet->balance}</info>");
-                $output->writeln("<info>verify balance: {$computed['balances']['BTC']['balance_computed']->balance}</info>");
-                $output->writeln("<info>verify sum transactions: {$computed['balances']['BTC']['balance']}</info>");
-
-                if ($computed['balances']['BTC']['balance'] < -0.00003) { //R$1,00
-//                    if (!$wallet->user->is_under_analysis) {
-//                        $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $wallet->user->email;
-//                        Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
-//                        sleep(2);
-//                    }
-                    $user = User::find($wallet->user_id);
-                    $user->is_under_analysis = true;
-                    $user->save();
-
-                    $user->tokens()->each(function ($token) {
-                        $token->delete();
-                    });
-
-                    $output->writeln("<info>BLOQUEADO ANALISE</info>");
+                if ($computed['balances']['BRL']['balance'] > 0.01 || $computed['balances']['BRL']['balance'] < -0.01) {
+                    $output->writeln("<info>{$wallet->user->email}</info>");
                 }
             }
+
+            $output->writeln("<info>END</info>");
 
         } catch
         (\Exception $e) {

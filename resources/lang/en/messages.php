@@ -80,7 +80,7 @@ return [
         'invalid_data' => 'Invalid Data.',
         'invalid_id' => 'Invalid ID.',
         'invalid_operation_type' => 'Incorrect operation type.',
-        'level_up' => 'Level up!',
+        'level_up' => 'Keycode generated!',
         'status_updated' => 'Status Updated.',
         'success' => 'Success!',
     ],

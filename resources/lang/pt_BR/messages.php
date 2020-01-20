@@ -80,7 +80,7 @@ return [
         'invalid_data' => 'Dados Inválidos.',
         'invalid_id' => 'Cpf inválido.',
         'invalid_operation_type' => 'Tipo de operação incorreto.',
-        'level_up' => 'Subiu de Keycode!',
+        'level_up' => 'Gerou um novo Keycode!',
         'status_updated' => 'Status Atualizado.',
         'success' => 'Sucesso!',
     ],

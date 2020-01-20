@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User\UserLevel;
 use App\Models\User\UserWallet;
+use App\Models\UserKeycode;
 use App\Services\BalanceService;
 use App\User;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
+
+    public function buy()
+    {
+        try {
+            $user = User::where('id', auth()->user()->id)->first();
+
+            if ($user->api_key) {
+                UserKeycode::create([
+                    'user_id' => $user->id,
+                    'api-key' => $user->api_key
+                ]);
+            }
+
+            $user->api_key = str_replace('-', '', Uuid::uuid4()->toString());
+            $user->save();
+
+            return response([
+                'message' => trans('messages.general.level_up')
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response([
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+
     public function buyLevel(BuyLevelRequest $request)
     {
         try {

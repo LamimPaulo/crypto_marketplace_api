@@ -178,9 +178,7 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
     });
 
     Route::group(['prefix' => 'levels', 'as' => 'levels.'], function () {
-        Route::post('/buy', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'internationalUserNotAllowed', 'docscheck']);
-        Route::post('/buyLqx', 'ProductController@buyLevel')->middleware(['tokencheck', 'pincheck', 'docscheck']);
-        Route::post('/buyUsd', 'ProductController@buyLevelUsd')->middleware(['tokencheck', 'pincheck', 'nationalUserNotAllowed', 'docscheck']);
+        Route::post('/buy', 'ProductController@buy')->middleware(['tokencheck', 'pincheck']);
     });
 
     Route::group(['prefix' => 'coins', 'as' => 'coins.'], function () {

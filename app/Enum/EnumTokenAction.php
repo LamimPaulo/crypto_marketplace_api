@@ -44,7 +44,7 @@ abstract class EnumTokenAction
         self::INDEX_FUNDS_IN => 'Aquisição de Investimento',
         self::INDEX_FUNDS_OUT => 'Saque de Investimentos',
         self::CANCEL_DRAFT => 'Cancelamento de Saque',
-        self::BUY_LEVEL => 'Compra de Keycode',
+        self::BUY_LEVEL => 'Geração de Keycode',
         self::BRL_SUBMISSION => 'Envio de R$ Credminer',
         self::USD_SUBMISSION => 'Envio de USD Credminer',
         self::CANCEL_ACCOUNT => 'Cancelamento da Conta',
