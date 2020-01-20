@@ -43,7 +43,7 @@ class BTCController extends Controller
     public static function create($data)
     {
         try {
-	    $date = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp'])->timestamp : Carbon::now();
+	        $date = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp'])->timestamp : Carbon::now();
 
             $data = [
                 'toAddress' => $data['toAddress'],
@@ -63,7 +63,7 @@ class BTCController extends Controller
             ];
 
             $transaction = Transaction::create($data);
-	    $transaction->created_at = $date;
+	        $transaction->created_at = $date;
             $transaction->save();
 
             TransactionStatus::create([

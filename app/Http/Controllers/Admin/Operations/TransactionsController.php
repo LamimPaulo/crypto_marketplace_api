@@ -292,6 +292,9 @@ class TransactionsController extends Controller
                 ->whereHas('coin', function ($coin) {
                     return $coin->whereNotIn('abbr', ['ION']);
                 })
+                ->whereHas('wallet', function ($wallet) {
+                    return $wallet->where('type', EnumUserWalletType::WALLET);
+                })
                 ->orderBy('updated_at', 'ASC')->orderBy('type', 'DESC')->get()->makeVisible('coin_id');
 
             $coins = Coin::whereNotIn('abbr', ['ION'])->orderBy('wallet_order')->get();
