@@ -57,7 +57,7 @@ class BTCController extends Controller
                 'vout' => $data['vout'],
                 'status' => EnumTransactionsStatus::PENDING,
                 'type' => EnumTransactionType::IN,
-                'category' => $data['category'] ?? EnumTransactionCategory::TRANSACTION,
+                'category' => $data['category'],
                 'confirmation' => $data['confirmations'] ?? 0,
                 'tax' => 0,
             ];
@@ -99,6 +99,7 @@ class BTCController extends Controller
                     $data['user_id'] = $wallet->user_id;
                     $data['coin_id'] = $wallet->coin_id;
                     $data['wallet_id'] = $wallet->id;
+                    $data['category'] = EnumTransactionCategory::TRANSACTION;
                     $transactionsCreate = self::create($data);
                     return $transactionsCreate;
                 }
