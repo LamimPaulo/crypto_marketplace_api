@@ -229,7 +229,8 @@ class Transaction extends Model
             ->where('transactions.type', '=', EnumTransactionType::IN)
             ->where('transactions.category', '=', EnumTransactionCategory::MASTERNODE_REWARD)
             ->select('transactions.*', 'coins.abbr')
-            ->inRandomOrder()->take(100)
+            ->orderBy('transactions.created_at')
+            ->take(env("MASTERNODES_LIMIT_CONFIRMATION", 0))
             ->get();
     }
 

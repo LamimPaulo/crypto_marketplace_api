@@ -172,7 +172,7 @@ class MasternodeController extends Controller
 
             $response = $result->getBody()->getContents();
             $response = decrypt($response);
-            return $response;
+
             if (!isset($response['error'])) {
                 return $response;
             } else {
@@ -205,7 +205,7 @@ class MasternodeController extends Controller
     {
         try {
             DB::beginTransaction();
-            $result = OffScreenController::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx], Coin::find($transaction->coin_id)->abbr);
+            $result = self::post(EnumOperationType::CONFIRMATION, ['txid' => $transaction->tx]);
 
             $data['confirmation'] = $result['confirmations'];
 
