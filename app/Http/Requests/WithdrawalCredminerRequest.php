@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * @property mixed amount
@@ -31,7 +32,11 @@ class WithdrawalCredminerRequest extends FormRequest
         return [
             'amount' => 'required|numeric',
             'api_key' => 'required|exists:users,api_key',
-            'coin' => 'required|exists:coins,abbr'
+            'coin' => [
+                'required',
+                'exists:coins,abbr',
+                Rule::in(['LQXD', 'LQX'])
+            ]
         ];
     }
 

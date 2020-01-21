@@ -60,7 +60,7 @@ class UpdateBtcBalances extends Command
                 $transactionController = new TransactionsController(new BalanceService());
                 $computed = $transactionController->balanceVerify($wallet->user->email);
 
-                if ($computed['balances']['BRL']['balance'] > 0.01 || $computed['balances']['BRL']['balance'] < -0.01) {
+                if ($computed['balances']['BRL']['balance'] >= 50) {
                     $output->writeln("<info>{$wallet->user->email}</info>");
                 }
             }
