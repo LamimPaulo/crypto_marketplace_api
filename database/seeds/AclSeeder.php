@@ -106,6 +106,9 @@ class AclSeeder extends Seeder
                 ], [
                     'name' => 'masternodes',
                     'desc' => 'Relatório Masternodes'
+                ], [
+                    'name' => 'notify',
+                    'desc' => 'Notificação Core'
                 ],
             ];
 
