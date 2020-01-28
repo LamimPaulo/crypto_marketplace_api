@@ -328,7 +328,7 @@ class AuthController extends Controller
             }
         }
 
-        $coins = Coin::whereNotIn('abbr', ['BRL', 'USD', 'LQXD'])->where([
+        $coins = Coin::whereNotIn('abbr', ['BRL', 'USD'])->where([
             'is_wallet' => true,
             'is_active' => true,
             'core_status' => true
