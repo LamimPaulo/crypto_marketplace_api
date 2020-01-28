@@ -11,6 +11,7 @@ use App\Models\Coin;
 use App\Models\Transaction;
 use App\Models\User\UserWallet;
 use App\Services\BalanceService;
+use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -49,90 +50,33 @@ class SyncLqxWallets extends Command
      */
     public function handle()
     {
+        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
         try {
+            $users = User::all();
+            $lqxd = Coin::getByAbbr("LQXD");
 
-            $wallets = UserWallet::where([
-                'coin_id' => Coin::getByAbbr("LQXD")->id,
-                'sync' => false
-            ])
-                ->get();
+            foreach ($users as $user) {
+                $wallet = UserWallet::where([
+                    "user_id" => $user->id,
+                    "coin_id" => $lqxd->id
+                ])->first();
 
-            foreach ($wallets as $wallet) {
+                if (!$wallet) {
+                    $address = Uuid::uuid4()->toString();
+                    $output->writeln("<info>address: {$address}</info>");
 
-                $balancePercent = 0;
-
-                if ($wallet->balance > 0) {
-                    $balancePercent = $wallet->balance * 0.25;
-                }
-
-                $address = OffScreenController::post(EnumOperationType::CREATE_ADDRESS, ['amount' => $balancePercent], "LQX");
-
-                $lqx_wallet = UserWallet::with('coin')
-                    ->whereHas('coin', function ($coin) {
-                        return $coin->where('abbr', 'LIKE', 'LQX');
-                    })
-                    ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
-
-                if (!$lqx_wallet) {
-                    DB::beginTransaction();
-
-                    $lqx_wallet = UserWallet::create([
-                        'user_id' => $wallet->user_id,
-                        'coin_id' => Coin::getByAbbr('LQX')->id,
+                    UserWallet::create([
+                        'user_id' => $user->id,
+                        'coin_id' => $lqxd->id,
                         'address' => $address,
-                        'balance' => $balancePercent
+                        'balance' => 0
                     ]);
-
-
-                    $tx = Uuid::uuid4()->toString();
-
-                    $transaction_in = Transaction::create([
-                        'user_id' => $lqx_wallet->user_id,
-                        'coin_id' => $lqx_wallet->coin_id,
-                        'wallet_id' => $lqx_wallet->id,
-                        'toAddress' => $lqx_wallet->address,
-                        'amount' => $balancePercent,
-                        'status' => EnumTransactionsStatus::SUCCESS,
-                        'type' => EnumTransactionType::IN,
-                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                        'fee' => 0,
-                        'tax' => 0,
-                        'tx' => $tx,
-                        'info' => '',
-                        'error' => '',
-                        'is_internal' => true,
-                    ]);
-
-                    $transaction_out = Transaction::create([
-                        'user_id' => $wallet->user_id,
-                        'coin_id' => $wallet->coin_id,
-                        'wallet_id' => $wallet->id,
-                        'toAddress' => $lqx_wallet->address,
-                        'amount' => $balancePercent,
-                        'status' => EnumTransactionsStatus::SUCCESS,
-                        'type' => EnumTransactionType::OUT,
-                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                        'fee' => 0,
-                        'tax' => 0,
-                        'tx' => $tx,
-                        'info' => '',
-                        'error' => '',
-                        'is_internal' => true,
-                    ]);
-
-                    BalanceService::decrements($transaction_out);
-
-                    $wallet->sync = 1;
-                    $wallet->save();
-
-                    DB::commit();
                 }
             }
 
-        } catch
-        (\Exception $e) {
-            DB::rollBack();
-            throw new \Exception($e->getMessage());
+        } catch (\Exception $e) {
+            $output->writeln("<info>{$e->getMessage()}</info>");
+            $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
         }
     }
 }

@@ -12,7 +12,6 @@ use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
 use App\Enum\EnumUserWalletType;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckCpfRequest;
 use App\Http\Requests\CheckKeyRequest;
@@ -155,9 +154,6 @@ class PaymentController extends Controller
             if (!$user) {
                 throw new \Exception("Api Key Inválida.");
             }
-
-            $auth = new AuthController();
-            $auth->checkWallets($user);
 
             $quote_coin = $user->country_id == 31 ? Coin::getByAbbr("BRL")->id : Coin::getByAbbr("USD")->id;
 
