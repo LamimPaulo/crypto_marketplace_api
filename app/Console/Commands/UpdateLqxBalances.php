@@ -51,8 +51,10 @@ class UpdateLqxBalances extends Command
         try {
             $wallets = UserWallet::with(['user', 'coin'])
                 ->where([
-                    'coin_id' => Coin::getByAbbr("LQX")->id,
                     'type' => EnumUserWalletType::WALLET
+                ])
+                ->whereIn('coin_id', [
+                    Coin::getByAbbr("LQX")->id, Coin::getByAbbr("LQXD")->id
                 ])
                 ->get();
 
@@ -64,10 +66,10 @@ class UpdateLqxBalances extends Command
                 $output->writeln("<info>-----------------------------</info>");
                 $output->writeln("<info>{$wallet->user->email}</info>");
                 $output->writeln("<info>local balance: {$wallet->balance}</info>");
-                $output->writeln("<info>verify balance: {$computed['balances']['LQX']['balance_computed']->balance}</info>");
-                $output->writeln("<info>verify sum transactions: {$computed['balances']['LQX']['balance']}</info>");
+                $output->writeln("<info>verify balance: {$computed['balances'][$wallet->coin->abbr]['balance_computed']->balance}</info>");
+                $output->writeln("<info>verify sum transactions: {$computed['balances'][$wallet->coin->abbr]['balance']}</info>");
 
-                if (sprintf('%.8f',$computed['balances']['LQX']['balance']) != sprintf('%.8f',$computed['balances']['LQX']['balance_computed']->balance)) {
+                if (sprintf('%.8f',$computed['balances'][$wallet->coin->abbr]['balance']) != sprintf('%.8f',$computed['balances'][$wallet->coin->abbr]['balance_computed']->balance)) {
                     $user = User::find($wallet->user_id);
 
                     if (!$user->is_admin) {
@@ -90,7 +92,7 @@ class UpdateLqxBalances extends Command
                 }
 
                 if (!$wallet->user->is_admin) {
-                    $wallet->balance = $computed['balances']['LQX']['balance'];
+                    $wallet->balance = $computed['balances'][$wallet->coin->abbr]['balance'];
                     $wallet->save();
                 }
             }
