@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DocumentsRequest;
 use App\Models\User\Document;
 use App\Models\User\DocumentType;
+use App\Services\FileApiService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,6 +40,44 @@ class DocumentController extends Controller
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
     public function store(DocumentsRequest $request)
+    {
+        try {
+            $extension = $request->file('file')->getClientOriginalExtension();
+            $subfolder = auth()->user()->id . "/documents";
+
+            $fileApi = FileApiService::storeFile($request->file('file'), $subfolder);
+
+            $document = Document::firstOrNew([
+                "user_id" => auth()->user()->id,
+                "document_type_id" => $request->document_type_id
+            ]);
+
+            $document->ext = $extension;
+            $document->status = EnumStatusDocument::PENDING;
+            $document->api_id = $fileApi['id'];
+            $document->path = $fileApi['file'];
+            $document->save();
+
+            return response([
+                'message' => trans('messages.general.success'),
+                'document' => $document
+            ], Response::HTTP_CREATED);
+
+        } catch (\Exception $e) {
+            return response([
+                'message' => trans('messages.documents.sent_error'),
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @param DocumentsRequest $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function storeS3(DocumentsRequest $request)
     {
         try {
             $type = DocumentType::findOrFail($request->document_type_id);

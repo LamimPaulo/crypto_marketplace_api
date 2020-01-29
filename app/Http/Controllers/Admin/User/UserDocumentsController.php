@@ -7,6 +7,7 @@ use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
 use App\Mail\DocumentReject;
+use App\Services\FileApiService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,12 +20,14 @@ class UserDocumentsController extends Controller
     public function index()
     {
         try {
-            $users = User::with('documents')
-                        ->whereHas('documents', function ($documents) {
-                            return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
-                        })->orderBy('created_at')->paginate(10);
+
+            $users = User::with(['documents'])
+                ->whereHas('documents', function ($documents) {
+                    return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
+                })->orderBy('created_at')->paginate(10);
 
             return response($users, Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return response([
                 'message' => "Erro: {$e->getMessage()}"
@@ -40,9 +43,9 @@ class UserDocumentsController extends Controller
 
         try {
             $users = User::with('documents')
-                        ->whereHas('documents', function ($documents) {
-                            return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
-                        })->where('name', 'like', "%{$request->name}%")
+                ->whereHas('documents', function ($documents) {
+                    return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
+                })->where('name', 'like', "%{$request->name}%")
                 ->orderBy('name', 'ASC')->get();
 
             return response(['data' => $users]
@@ -70,12 +73,12 @@ class UserDocumentsController extends Controller
 
             $user = User::with('documents')->where('email', $request->user_email)->first();
 
-            foreach($user->documents as $doc){
+            foreach ($user->documents as $doc) {
                 $doc->status = EnumStatusDocument::INVALID;
                 $doc->save();
             }
 
-            if($user->country_id!=31){
+            if ($user->country_id != 31) {
                 $user->document = null;
                 $user->save();
             }
@@ -113,7 +116,7 @@ class UserDocumentsController extends Controller
 
             $user = User::with('documents')->where('email', $request->user_email)->first();
 
-            foreach($user->documents as $doc){
+            foreach ($user->documents as $doc) {
                 $doc->status = EnumStatusDocument::VALID;
                 $doc->save();
             }

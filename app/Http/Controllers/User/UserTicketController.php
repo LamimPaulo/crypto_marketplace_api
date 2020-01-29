@@ -10,6 +10,7 @@ use App\Http\Requests\UserTicketRequest;
 use App\Models\User\UserTicketMessage;
 use App\Models\User\UserTicket;
 use App\Models\SupportConfig;
+use App\Services\FileApiService;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +22,7 @@ class UserTicketController extends Controller
         try {
             $tickets = UserTicket::with([
                 'messages' => function ($messages) {
-                    return $messages->with('files','user');
+                    return $messages->with('files', 'user');
                 }
             ])->where('user_id', auth()->user()->id)
                 ->orderBy('status')
@@ -40,9 +41,9 @@ class UserTicketController extends Controller
     {
         try {
             $tickets = UserTicket::where('user_id', auth()->user()->id)
-            ->whereIn('status', [EnumUserTicketsStatus::PENDING, EnumUserTicketsStatus::WAIT_USER])->first();
+                ->whereIn('status', [EnumUserTicketsStatus::PENDING, EnumUserTicketsStatus::WAIT_USER])->first();
 
-            if($tickets) {
+            if ($tickets) {
                 throw new \Exception('Não é possivel abrir um novo ticket enquanto há um pendente');
             }
 
@@ -60,9 +61,12 @@ class UserTicketController extends Controller
             ]);
 
             if ($request->hasFile('file')) {
+                $extension = $request->file('file')->getClientOriginalExtension();
                 $file = $this->uploadFile($request);
                 $message->files()->create([
-                    'file' => $file
+                    'file' => $file['file'],
+                    'api_id' => $file['id'],
+                    'type' => $extension,
                 ]);
             }
 
@@ -98,8 +102,11 @@ class UserTicketController extends Controller
 
             if ($request->hasFile('file')) {
                 $file = $this->uploadFile($request);
+                $extension = $request->file('file')->getClientOriginalExtension();
                 $message->files()->create([
-                    'file' => $file
+                    'file' => $file['file'],
+                    'api_id' => $file['id'],
+                    'type' => $extension,
                 ]);
             }
 
@@ -117,14 +124,14 @@ class UserTicketController extends Controller
         }
     }
 
-    public function config() 
+    public function config()
     {
         try {
             $config = SupportConfig::first();
 
-        return response([
-            'config' => $config
-        ], Response::HTTP_OK);
+            return response([
+                'config' => $config
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             return response([
                 'message' => $e->getMessage()
@@ -133,6 +140,19 @@ class UserTicketController extends Controller
     }
 
     private function uploadFile($request)
+    {
+        try {
+
+            $subfolder = auth()->user()->id . "/tickets";
+            $fileApi = FileApiService::storeFile($request->file('file'), $subfolder);
+
+            return $fileApi;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    private function uploadFileS3($request)
     {
         try {
             $uuid4 = Uuid::uuid4()->toString();
