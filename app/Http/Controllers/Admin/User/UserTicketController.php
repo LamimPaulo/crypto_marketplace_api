@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserTicketMessageRequest;
 use App\Models\User\UserTicket;
 use App\Models\User\UserTicketMessage;
+use App\Services\FileApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
@@ -117,9 +118,12 @@ class UserTicketController extends Controller
             ]);
 
             if ($request->hasFile('file')) {
+                $extension = $request->file('file')->getClientOriginalExtension();
                 $file = $this->uploadFile($request);
                 $message->files()->create([
-                    'file' => $file
+                    'file' => $file['file'],
+                    'api_id' => $file['id'],
+                    'type' => $extension,
                 ]);
             }
 
@@ -138,6 +142,18 @@ class UserTicketController extends Controller
     }
 
     private function uploadFile($request)
+    {
+        try {
+            $subfolder = auth()->user()->id . "/tickets";
+            $fileApi = FileApiService::storeFile($request->file('file'), $subfolder);
+
+            return $fileApi;
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    private function uploadFileS3($request)
     {
         try {
             $uuid4 = Uuid::uuid4()->toString();

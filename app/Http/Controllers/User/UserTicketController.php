@@ -142,7 +142,6 @@ class UserTicketController extends Controller
     private function uploadFile($request)
     {
         try {
-
             $subfolder = auth()->user()->id . "/tickets";
             $fileApi = FileApiService::storeFile($request->file('file'), $subfolder);
 
