@@ -101,7 +101,13 @@ class Transaction extends Model
         'totalRounded',
         'total',
         'new_tx',
+        'dateShow'
     ];
+
+    public function getDateShowAttribute()
+    {
+        return Carbon::parse("2020-01-30")->gte($this->created_at);
+    }
 
     public function getDateHourAttribute()
     {

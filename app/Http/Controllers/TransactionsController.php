@@ -410,7 +410,6 @@ class TransactionsController extends Controller
         try {
             $transactions = Transaction::with('coin', 'user_account')
                 ->where('user_id', auth()->user()->id)
-                ->whereNotIn('category', [EnumTransactionCategory::MASTERNODE_REWARD])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
@@ -429,13 +428,6 @@ class TransactionsController extends Controller
             $wallet_id = UserWallet::where('address', $address)->firstOrFail();
 
             $transactions = Transaction::with('coin', 'user_account')
-                //                ->whereHas('wallet', function ($wallet) use ($address) {
-                //                    return $wallet->where('address', $address);
-                //                })
-                //                ->whereHas('coin', function ($coin) use ($abbr) {
-                //                    return $coin->where('abbr', $abbr);
-                //                })
-                ->whereNotIn('category', [EnumTransactionCategory::MASTERNODE_REWARD])
                 ->where([
                     'user_id' => auth()->user()->id,
                     'coin_id' => Coin::getByAbbr($abbr)->id,
