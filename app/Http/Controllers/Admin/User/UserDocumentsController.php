@@ -7,9 +7,7 @@ use App\Helpers\ActivityLogger;
 use App\Helpers\Localization;
 use App\Http\Controllers\Controller;
 use App\Mail\DocumentReject;
-use App\Services\FileApiService;
 use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -20,7 +18,6 @@ class UserDocumentsController extends Controller
     public function index()
     {
         try {
-
             $users = User::with(['documents'])
                 ->whereHas('documents', function ($documents) {
                     return $documents->with('type')->where('status', EnumStatusDocument::PENDING);
