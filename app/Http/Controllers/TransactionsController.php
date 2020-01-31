@@ -49,7 +49,8 @@ class TransactionsController extends Controller
         ConversorService $conversor,
         TaxCoinService $taxCoin,
         GatewayService $gateway
-    ) {
+    )
+    {
         $this->conversorService = $conversor;
         $this->taxCoinService = $taxCoin;
         $this->balanceService = $balance;
@@ -334,7 +335,7 @@ class TransactionsController extends Controller
 
         $sumValueTransaction = floatval($sumTaxas + $request->amount + $fee);
 
-        if (!((float) $sumValueTransaction <= (float) $from->balance)) {
+        if (!((float)$sumValueTransaction <= (float)$from->balance)) {
             return response([
                 'message' => trans('messages.transaction.value_exceeds_balance')
             ], Response::HTTP_NOT_ACCEPTABLE);
@@ -409,6 +410,7 @@ class TransactionsController extends Controller
         try {
             $transactions = Transaction::with('coin', 'user_account')
                 ->where('user_id', auth()->user()->id)
+                ->whereNotIn('category', [EnumTransactionCategory::MASTERNODE_REWARD])
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
 
@@ -433,6 +435,7 @@ class TransactionsController extends Controller
                 //                ->whereHas('coin', function ($coin) use ($abbr) {
                 //                    return $coin->where('abbr', $abbr);
                 //                })
+                ->whereNotIn('category', [EnumTransactionCategory::MASTERNODE_REWARD])
                 ->where([
                     'user_id' => auth()->user()->id,
                     'coin_id' => Coin::getByAbbr($abbr)->id,
@@ -451,7 +454,7 @@ class TransactionsController extends Controller
 
     public function transfer(TransferRequest $request)
     {
-        $amount = (float) $request->amount;
+        $amount = (float)$request->amount;
 
         if (auth()->user()->country_id == 31) {
             if (!$this->balanceService->verifyBalance($amount, 'BRL')) {
