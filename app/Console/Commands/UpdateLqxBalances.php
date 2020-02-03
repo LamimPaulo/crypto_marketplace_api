@@ -69,7 +69,7 @@ class UpdateLqxBalances extends Command
                 $output->writeln("<info>verify balance: {$computed['balances'][$wallet->coin->abbr]['balance_computed']->balance}</info>");
                 $output->writeln("<info>verify sum transactions: {$computed['balances'][$wallet->coin->abbr]['balance']}</info>");
 
-                if (sprintf('%.8f',$computed['balances'][$wallet->coin->abbr]['balance']) != sprintf('%.8f',$computed['balances'][$wallet->coin->abbr]['balance_computed']->balance)) {
+                if ($computed['balances'][$wallet->coin->abbr]['balance'] < -0.001) {
                     $user = User::find($wallet->user_id);
 
                     if (!$user->is_admin) {

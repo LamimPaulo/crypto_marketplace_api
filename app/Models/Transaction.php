@@ -151,7 +151,7 @@ class Transaction extends Model
 
     public function getPaymentDateLocalAttribute()
     {
-        return !is_null($this->payment_at) ? Carbon::parse($this->payment_at)->format('d/m/Y') : '-';
+        return !is_null($this->payment_at) ? Carbon::parse($this->payment_at)->format('d/m/Y') : null;
     }
 
     public function getUpdatedLocalAttribute()

@@ -2,20 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
-use App\Enum\EnumTransactionType;
-use App\Http\Controllers\OffScreenController;
 use App\Models\Coin;
-use App\Models\LqxWithdrawal;
 use App\Models\Transaction;
-use App\Models\User\UserWallet;
 use App\Services\BalanceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Ramsey\Uuid\Uuid;
 
 class LqxWithdrawals extends Command
 {
@@ -54,78 +48,32 @@ class LqxWithdrawals extends Command
         $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
         try {
+            $carbon = Carbon::now()->format("Y-m-d");
 
-            $wallets = UserWallet::with('user', 'coin')
-                ->where('coin_id', Coin::getByAbbr("LQXD")->id)
-                ->orderBy('balance')
+            $transactions = Transaction::with('user', 'coin')
+                ->where([
+                    'coin_id' => Coin::getByAbbr("LQX")->id,
+                    'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
+                    'status' => EnumTransactionsStatus::PENDING
+                ])
+                ->where('payment_at', 'LIKE', "$carbon%")
                 ->get();
 
-            foreach ($wallets as $wallet) {
+            foreach ($transactions as $transaction) {
+                $output->writeln("<info>-----------------------------</info>");
+                $output->writeln("<info>{$transaction->user->email}</info>");
+                $output->writeln("<info>{$transaction->coin->abbr}: {$transaction->amount}</info>");
 
-                if ($wallet->balance >= 0.00001) {
+                DB::beginTransaction();
 
-                    $output->writeln("<info>-----------------------------</info>");
-                    $output->writeln("<info>{$wallet->user->email}</info>");
-                    $output->writeln("<info>{$wallet->coin->abbr}: {$wallet->balance}</info>");
+                $transaction->status = EnumTransactionsStatus::SUCCESS;
+                $transaction->save();
 
-                    DB::beginTransaction();
-                    $balancePercent = $wallet->balance;
-
-                    $lqx_wallet = UserWallet::with('coin')
-                        ->whereHas('coin', function ($coin) {
-                            return $coin->where('abbr', 'LIKE', 'LQX');
-                        })
-                        ->where(['user_id' => $wallet->user_id, 'is_active' => 1])->first();
-
-                    $tx = Uuid::uuid4()->toString();
-
-                    $transaction_in = Transaction::create([
-                        'user_id' => $lqx_wallet->user_id,
-                        'coin_id' => $lqx_wallet->coin_id,
-                        'wallet_id' => $lqx_wallet->id,
-                        'toAddress' => $lqx_wallet->address,
-                        'amount' => $balancePercent,
-                        'status' => EnumTransactionsStatus::SUCCESS,
-                        'type' => EnumTransactionType::IN,
-                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                        'fee' => 0,
-                        'tax' => 0,
-                        'tx' => $tx,
-                        'info' => '',
-                        'error' => '',
-                        'is_internal' => true,
-                    ]);
-
-                    BalanceService::increments($transaction_in);
-
-                    $transaction_out = Transaction::create([
-                        'user_id' => $wallet->user_id,
-                        'coin_id' => $wallet->coin_id,
-                        'wallet_id' => $wallet->id,
-                        'toAddress' => $lqx_wallet->address,
-                        'amount' => $balancePercent,
-                        'status' => EnumTransactionsStatus::SUCCESS,
-                        'type' => EnumTransactionType::OUT,
-                        'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                        'fee' => 0,
-                        'tax' => 0,
-                        'tx' => $tx,
-                        'info' => '',
-                        'error' => '',
-                        'is_internal' => true,
-                    ]);
-
-                    BalanceService::decrements($transaction_out);
-
-                    DB::commit();
-                } else {
-                    $wallet->balance = 0;
-                    $wallet->save();
-                }
+                BalanceService::increments($transaction);
+                DB::commit();
             }
 
-        } catch
-        (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             throw new \Exception($e->getMessage());
         }
