@@ -58,7 +58,7 @@ class LqxdGeneratePayments extends Command
 
                 $wallets = UserWallet::with('user', 'coin')
                     ->where('coin_id', Coin::getByAbbr("LQXD")->id)
-                    ->where('balance', '>', 0)
+                    ->where('balance', '>=', 0.00001)
                     ->get();
 
                 foreach ($wallets as $wallet) {
@@ -106,7 +106,7 @@ class LqxdGeneratePayments extends Command
                             'wallet_id' => $lqx_wallet->id,
                             'toAddress' => $lqx_wallet->address,
                             'amount' => $amount,
-                            'status' => EnumTransactionsStatus::PENDING,
+                            'status' => EnumTransactionsStatus::TO_RELEASE,
                             'type' => EnumTransactionType::IN,
                             'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
                             'fee' => 0,
