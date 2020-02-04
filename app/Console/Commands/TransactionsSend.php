@@ -57,7 +57,9 @@ class TransactionsSend extends Command
         $authorizedTransactions = [];
 
         foreach ($coins as $coin) {
-            $authorizedTransactions[$coin->abbr] = Transaction::listAuthorized($coin->id);
+            if ($coin->core_status && $coin->core_balance > 0) {
+                $authorizedTransactions[$coin->abbr] = Transaction::listAuthorized($coin->id);
+            }
         }
 
         try {
@@ -97,7 +99,7 @@ class TransactionsSend extends Command
             }
 
         } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage() . ' => ' . $ex->getLine() . ' => '. $ex->getFile());
+            throw new \Exception($ex->getMessage() . ' => ' . $ex->getLine() . ' => ' . $ex->getFile());
         }
     }
 

@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class CoreNotification extends Model
 {
-    protected $fillable = ['email', 'status', 'description'];
+    protected $fillable = ['email', 'coin_id', 'description'];
 }

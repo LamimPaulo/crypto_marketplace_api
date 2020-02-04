@@ -86,5 +86,9 @@ return [
         'profile' => 'https://slushpool.com/accounts/profile/json/btc',
         'workers' => 'https://slushpool.com/accounts/workers/json/btc'
     ],
+    'devs' => [
+        'me' => explode(",", env('DEV_MAIL'))[0],
+        'not_me' => explode(",", env('DEV_MAIL'))[1] ?? null,
+    ]
 
 ];

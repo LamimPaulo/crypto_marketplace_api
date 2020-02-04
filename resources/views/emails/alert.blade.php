@@ -10,5 +10,5 @@
 {{ $alert }}
 
 Atenciosamente,<br>
-{{ config('app.name') }}
+Tio Lu
 @endcomponent

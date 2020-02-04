@@ -222,7 +222,7 @@ class BalanceService
                     });
 
                     $message = env("APP_NAME") . " - Usuário bloqueado: " . env("ADMIN_URL") . "/user/analysis/" . $user->email;
-                    Mail::to(env('DEV_MAIL', 'cristianovelkan@gmail.com'))->send(new AlertsMail($message));
+                    Mail::to(config('services.devs.me'))->send(new AlertsMail($message));
                     return false;
                 }
             }

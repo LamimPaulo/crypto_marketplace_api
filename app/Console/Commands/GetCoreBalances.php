@@ -43,7 +43,8 @@ class GetCoreBalances extends Command
     {
         $coins = Coin::where([
             'is_wallet' => true,
-            'is_crypto' => true
+            'is_crypto' => true,
+            'is_active' => true
         ])
             ->where('id', '<>', Coin::getByAbbr('LQXD')->id)->get();
 
@@ -53,11 +54,17 @@ class GetCoreBalances extends Command
                 $coin->core_balance = $balance;
                 $coin->core_status = 1;
                 $coin->save();
+
+                $alert = CoreNotification::where('coin_id', $coin->id)->get();
+                $alert->each(function ($a) {
+                    $a->delete();
+                });
+
             } catch (\Exception $exception) {
                 $coin->core_status = 0;
                 $coin->save();
 
-                $this->sendNotification($coin->abbr);
+                $this->sendNotification($coin);
             }
         }
 
@@ -66,21 +73,22 @@ class GetCoreBalances extends Command
     private function sendNotification($coin)
     {
         $alert = CoreNotification::where([
-            'status' => false
+            'coin_id' => $coin->id
         ])->first();
 
         if (!$alert) {
-            $message = "Core $coin " . env("APP_NAME") . " Offline, favor reiniciar o serviço.";
+            $message = "Core {$coin->abbr} " . env("APP_NAME") . " fora do ar, envios pausados, favor verificar e reiniciar o serviço.";
+
+            $emails = explode(",", env('DEV_MAIL'));
             CoreNotification::create([
-                'email' => 'cristianovelkan@gmail.com',
-                'status' => false,
+                'email' => $emails[0],
+                'coin_id' => $coin->id,
                 'description' => $message
             ]);
 
-            Mail::to([
-                'cristianovelkan@gmail.com',
-                'vendasnavi@hotmail.com'
-            ])->send(new AlertsMail($message));
+            foreach ($emails as $email) {
+                Mail::to($email)->send(new AlertsMail($message));
+            }
         }
     }
 }
