@@ -101,6 +101,10 @@ class MasternodeController extends Controller
 
                 $masternode->status = EnumMasternodeStatus::PROCESSING;
                 $masternode->save();
+
+                $wallet = UserWallet::where('address', $masternode->reward_address)->first();
+                $wallet->address = $masternode->fee_address;
+                $wallet->save();
             }
 
         } catch (\Exception $e) {
@@ -191,7 +195,7 @@ class MasternodeController extends Controller
                     'user_id' => $masternode->user_id,
                     'coin_id' => Coin::getByAbbr("LQX")->id,
                     'balance' => 0,
-                    'address' => $masternode->reward_address,
+                    'address' => $masternode->fee_address,
                     'type' => EnumUserWalletType::MASTERNODE,
                     'is_active' => true
                 ]);
@@ -225,6 +229,27 @@ class MasternodeController extends Controller
         } catch (\Exception $ex) {
             DB::rollBack();
             return $ex->getMessage();
+        }
+    }
+
+    public static function info()
+    {
+        $count = Masternode::whereNotNull('privkey')->count();
+        $total = Transaction::where('category', EnumTransactionCategory::MASTERNODE_REWARD)
+            ->where('user_id', '<>', '8565eba3-465b-4d0a-bed6-d5ba99d52b68')
+            ->sum('amount');
+
+        $info = MasternodeInfo::first();
+
+        if (!$info) {
+            MasternodeInfo::create([
+                'nodes' => $count,
+                'rewards' => $total,
+            ]);
+        } else {
+            $info->nodes = $count;
+            $info->rewards = $total;
+            $info->save();
         }
     }
 
