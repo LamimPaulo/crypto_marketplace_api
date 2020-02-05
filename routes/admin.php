@@ -96,7 +96,7 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/accept', 'CredminerController@accept')->middleware('can_execute:credminer_transactions');
         });
 
-        Route::get('/balance/verify/{user_email}', 'TransactionsController@balanceVerify')->middleware('is_dev');
+        Route::get('/balance/verify/{user_email}', 'TransactionsController@balanceVerify');
 
     });
 
@@ -168,9 +168,10 @@ Route::group(['namespace' => 'Admin'], function () {
             Route::post('/reject', 'UserDocumentsController@reject')->middleware('can_execute:user_documents');
         });
 
+
+        Route::get('/analysis', 'UserAnalysisController@list');
+        Route::post('/analysis/search', 'UserAnalysisController@search');
         Route::group(['middleware' => 'is_dev'], function () {
-            Route::get('/analysis', 'UserAnalysisController@list');
-            Route::post('/analysis/search', 'UserAnalysisController@search');
             Route::get('/analysis/release/{email}', 'UserAnalysisController@release');
             Route::get('/analysis/block/{email}', 'UserAnalysisController@block');
             Route::post('/analysis/transaction/update', 'UserAnalysisController@transactionUpdate');
