@@ -216,7 +216,7 @@ class MasternodeController extends Controller
             if ($data['confirmation'] >= env("MASTERNODES_CONFIRMATIONS", 100)) {
                 $data['status'] = EnumTransactionsStatus::SUCCESS;
 
-                BalanceService::increments($transaction);
+                $data['status'] = EnumTransactionsStatus::BLOCKED;
 
                 TransactionStatus::create([
                     'transaction_id' => $transaction->id,
