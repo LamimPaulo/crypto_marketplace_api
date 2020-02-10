@@ -27,6 +27,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
         $schedule->command('nanotech:profits')->dailyAt('01:00');
         $schedule->command('nanotech:profits')->dailyAt('02:00');
+        $schedule->command('update:lqxbalance')->dailyAt('05:00');
 
         $schedule->command('lqxd:generate')->dailyAt('03:00');
         $schedule->command('lqx:withdrawals')->dailyAt('03:00');
@@ -38,23 +39,27 @@ class Kernel extends ConsoleKernel
         $schedule->command('pool:refresh')->everyMinute();
         $schedule->command('estimate:fee')->everyTenMinutes();
         $schedule->command('get:btcquote')->everyFiveMinutes();
-//        $schedule->command('get:marketcapquotes')->everyTenMinutes();
         $schedule->command('transactions:authorize')->everyMinute()->withoutOverlapping();
         $schedule->command('transactions:send')->everyFiveMinutes()->withoutOverlapping();
         $schedule->command('transactions:confirmation')->everyMinute()->withoutOverlapping();
 
         $schedule->command('update:corebalances')->everyTenMinutes()->withoutOverlapping();
+        $schedule->command('sync:lqxwallets')->everyTenMinutes()->withoutOverlapping();
         $schedule->command('trade:execute')->everyFiveMinutes();
 
         $schedule->command('masternode:create')->everyMinute();
         $schedule->command('masternode:update')->everyFiveMinutes();
         $schedule->command('masternode:info')->everyFiveMinutes();
+        
+        $schedule->command('masternode:generateplans')->everyTenMinutes();
+        $schedule->command('masternode:verifypayments')->everyTenMinutes();
 
         $schedule->command('gateway:reverseunderpaid')->everyFiveMinutes();
         $schedule->command('gateway:reverseoverpaid')->everyFiveMinutes();
 
         $schedule->command('messages:create')->everyMinute();
-        $schedule->command('update:lqxbalance')->dailyAt('05:00');
+
+
     }
 
     /**

@@ -101,13 +101,7 @@ class Transaction extends Model
         'totalRounded',
         'total',
         'new_tx',
-        'dateShow'
     ];
-
-    public function getDateShowAttribute()
-    {
-        return Carbon::parse("2020-01-30")->gte($this->created_at);
-    }
 
     public function getDateHourAttribute()
     {
@@ -206,6 +200,11 @@ class Transaction extends Model
     public function internalWallet()
     {
         return $this->belongsTo(UserWallet::class, 'toAddress', 'address');
+    }
+
+    public function masternode()
+    {
+        return $this->belongsTo(Masternode::class, 'toAddress', 'fee_address');
     }
 
     public function taxCoin()

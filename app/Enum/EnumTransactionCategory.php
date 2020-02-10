@@ -20,12 +20,13 @@ abstract class EnumTransactionCategory
     const MASTERNODE_CREDMINER = 14;//IN - OUT
     const FUND_CREDMINER = 15;      //IN - OUT
     const NANOTECH = 16;            //IN - OUT
-    const MASTERNODE = 17;          //IN - OUT
+    const MASTERNODE = 17;          //OUT
     const BRL_SUBMIT = 18;          //OUT
     const USD_SUBMIT = 19;          //OUT
     const LQX_WITHDRAWAL = 20;      //IN - OUT
     const LQX_REVERSION = 21;       //IN - OUT
-    const MASTERNODE_REWARD = 22;   //IN - OUT
+    const MASTERNODE_REWARD = 22;   //IN
+    const MASTERNODE_UNDO = 23;     //IN
 
     const TYPES = [
         self::TRANSACTION => 'Transação',
@@ -44,11 +45,12 @@ abstract class EnumTransactionCategory
         self::FUND_CREDMINER => 'Fundos Credminer',
         self::MASTERNODE_CREDMINER => 'Masternode Credminer',
         self::NANOTECH=> 'Nanotech',
-        self::MASTERNODE => 'Masternode',
+        self::MASTERNODE => 'Mensalidade Masternode',
         self::BRL_SUBMIT => 'Envio de R$ Credminer',
         self::USD_SUBMIT => 'Submited USD Credminer',
         self::LQX_WITHDRAWAL => 'Resgate Automático de Saldo',
         self::LQX_REVERSION => 'Estorno Gateway',
         self::MASTERNODE_REWARD => 'Recompensa Masternode',
+        self::MASTERNODE_UNDO => 'Desfazimento de Masternode',
     ];
 }

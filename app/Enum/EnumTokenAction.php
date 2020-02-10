@@ -25,6 +25,9 @@ abstract class EnumTokenAction
     const BRL_SUBMISSION = 19;
     const CANCEL_ACCOUNT = 20;
     const USD_SUBMISSION = 21;
+    const MASTERNODE_REFUSE = 22;
+    const MASTERNODE_PAYMENT = 23;
+    const MASTERNODE_UNDO = 24;
 
     const ACTION = [
         self::DRAFT => 'Saque',
@@ -48,5 +51,8 @@ abstract class EnumTokenAction
         self::BRL_SUBMISSION => 'Envio de R$ Credminer',
         self::USD_SUBMISSION => 'Envio de USD Credminer',
         self::CANCEL_ACCOUNT => 'Cancelamento da Conta',
+        self::MASTERNODE_REFUSE => 'Recusa de Recompensas do Masternode',
+        self::MASTERNODE_PAYMENT => 'Pagamento de Mensalidade do Masternode',
+        self::MASTERNODE_UNDO => 'Desfazimento do Masternode',
     ];
 }

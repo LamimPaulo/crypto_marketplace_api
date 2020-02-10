@@ -243,6 +243,17 @@ Route::middleware(['auth:api', 'localization'])->group(function () {
         Route::get('/list', 'MasternodeController@list');
         Route::get('/processing', 'MasternodeController@processing');
         Route::get('/founders-reward', 'MasternodeController@foundersInfo');
+        Route::get('/{address}/rewards', 'MasternodeController@rewards');
+
+        Route::get('/verifyPending', 'MasternodeController@verifyPendingPayments');
+        Route::get('/pending', 'MasternodeController@listPendingPayment');
+        Route::get('/allPlans', 'MasternodeController@listAllPlans');
+
+        Route::group(['middleware' => ['pincheck', 'tokencheck']], function () {
+            Route::post('/payment/accept', 'MasternodeController@acceptPayment');
+            Route::post('/payment/refuse', 'MasternodeController@refusePayment');
+            Route::post('/undo', 'MasternodeController@undo');
+        });
     });
 
     //funds

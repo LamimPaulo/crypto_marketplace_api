@@ -26,6 +26,12 @@ class Masternode extends Model
         'label',
     ];
 
+    protected $hidden = [
+        'coin_id',
+        'user_id',
+        'privkey',
+    ];
+
     protected $appends = [
         'createdLocal',
         'updatedLocal',
@@ -91,7 +97,17 @@ class Masternode extends Model
 
     public function wallet()
     {
-        return $this->belongsTo(UserWallet::class, 'reward_address', 'address');
+        return $this->belongsTo(UserWallet::class, 'fee_address', 'address');
+    }
+
+    public function plans()
+    {
+        return $this->hasMany(MasternodeUserPlan::class, 'masternode_id');
+    }
+
+    public function hist()
+    {
+        return $this->hasMany(MasternodeHist::class, 'masternode_id');
     }
 
     public function getBalanceAttribute()

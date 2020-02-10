@@ -54,7 +54,7 @@ class LqxWithdrawals extends Command
                 ->where([
                     'coin_id' => Coin::getByAbbr("LQX")->id,
                     'category' => EnumTransactionCategory::LQX_WITHDRAWAL,
-                    'status' => EnumTransactionsStatus::PENDING
+                    'status' => EnumTransactionsStatus::TO_RELEASE
                 ])
                 ->where('payment_at', 'LIKE', "$carbon%")
                 ->get();

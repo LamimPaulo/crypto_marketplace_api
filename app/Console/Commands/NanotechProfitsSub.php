@@ -43,8 +43,10 @@ class NanotechProfitsSub extends Command
      */
     public function handle()
     {
-        $days = $this->option('day');
-        $this->generate($days);
+        if (env("APP_ENV") == 'local') {
+            $days = $this->option('day');
+            $this->generate($days);
+        }
     }
 
     private function generate($days)
@@ -53,17 +55,17 @@ class NanotechProfitsSub extends Command
 
         foreach ($investments as $investment) {
             $profits_today = NanotechOperation::where('type', EnumNanotechOperationType::PROFIT)
-                                                ->where('investment_id', $investment->id)
-                                                ->whereDate('created_at', '=', Carbon::now()->subDays($days[0])->toDateString())
-                                                ->where('user_id', $investment->user_id)->count();
+                ->where('investment_id', $investment->id)
+                ->whereDate('created_at', '=', Carbon::now()->subDays($days[0])->toDateString())
+                ->where('user_id', $investment->user_id)->count();
 
             if ($profits_today == 0) {
                 $profitPercentToday = NanotechProfitPercent::where('day', Carbon::now()->subDays($days[0])->format("Y-m-d"))
-                                                             ->where('type_id', $investment->type_id)->first()->percent;
+                    ->where('type_id', $investment->type_id)->first()->percent;
 
                 $total_profit = ($profitPercentToday * $investment->amount) / 100;
 
-                if($total_profit>0) {
+                if ($total_profit > 0) {
                     NanotechOperation::create([
                         'user_id' => $investment->user_id,
                         'investment_id' => $investment->id,

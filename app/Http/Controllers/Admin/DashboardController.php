@@ -23,6 +23,7 @@ class DashboardController extends Controller
         return Coin::where([
             'is_wallet' => true,
             'is_crypto' => true,
+            'is_active' => true
         ])->get();
     }
 

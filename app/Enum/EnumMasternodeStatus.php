@@ -10,14 +10,24 @@ abstract class EnumMasternodeStatus
     const CANCELED = 4;
     const ERROR = 5;
     const SUSPENDED = 6;
+    const PENDING_PAYMENT = 7;
+    const REFUSED = 8;
 
     const STATUS = [
         self::PENDING => 'Pendente',
         self::PROCESSING => 'Em Ativação',
-        self::SUCCESS => 'Ativado',
+        self::SUCCESS => 'Ativo',
         self::CANCELED => 'Cancelado',
         self::ERROR => 'Erro',
         self::SUSPENDED => 'Suspenso',
+        self::PENDING_PAYMENT => 'Pagamento Pendente',
+        self::REFUSED => 'Recusado',
+    ];
+
+    const STATUS_ = [
+        self::SUCCESS => 'Ativo',
+        self::PENDING_PAYMENT => 'Pagamento Pendente',
+        self::REFUSED => 'Recusado',
     ];
 
     const TYPE = [
@@ -27,6 +37,8 @@ abstract class EnumMasternodeStatus
         self::CANCELED => 'canceled',
         self::ERROR => 'error',
         self::SUSPENDED => 'suspended',
+        self::PENDING_PAYMENT => 'pending_payment',
+        self::REFUSED => 'refused',
     ];
 
     const COLOR = [
@@ -36,5 +48,7 @@ abstract class EnumMasternodeStatus
         self::CANCELED => 'secondary',
         self::ERROR => 'danger',
         self::SUSPENDED => 'danger',
+        self::PENDING_PAYMENT => 'danger',
+        self::REFUSED => 'danger',
     ];
 }

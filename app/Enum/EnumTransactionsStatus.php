@@ -14,6 +14,7 @@ abstract class EnumTransactionsStatus {
     const AUTHORIZED = 9;
     const TO_RELEASE = 10;
     const BLOCKED = 11;
+    const REFUSED = 12;
 
 
     const STATUS = [
@@ -28,6 +29,7 @@ abstract class EnumTransactionsStatus {
         self::AUTHORIZED => 'Autorizada',
         self::BLOCKED => 'Bloqueado',
         self::TO_RELEASE => 'Lançamento Futuro',
+        self::REFUSED => 'Recusada',
     ];
 
     const STATUS_CLIENT = [
@@ -42,6 +44,7 @@ abstract class EnumTransactionsStatus {
         self::AUTHORIZED => 'Autorizada',
         self::BLOCKED => 'Bloqueado',
         self::TO_RELEASE => 'Lançamento Futuro',
+        self::REFUSED => 'Recusada',
     ];
 
     const STATUS_DRAFT = [
@@ -63,5 +66,6 @@ abstract class EnumTransactionsStatus {
         self::AUTHORIZED => 'success',
         self::BLOCKED => 'danger',
         self::TO_RELEASE => 'warning',
+        self::REFUSED => 'info',
     ];
 }

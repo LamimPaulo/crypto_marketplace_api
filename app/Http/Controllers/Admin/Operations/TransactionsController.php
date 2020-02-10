@@ -286,18 +286,20 @@ class TransactionsController extends Controller
             $user = User::where(['email' => $user_email])->first();
 
             $transactions = Transaction::whereRaw(
-                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT  . ", " . EnumTransactionsStatus::AUTHORIZED . ") 
-                AND category NOT IN (" . EnumTransactionCategory::FUND_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ", " . EnumTransactionCategory::MASTERNODE_REWARD . ") ) 
+                "(user_id = '{$user->id}' AND status IN (" . EnumTransactionsStatus::SUCCESS . ", " . EnumTransactionsStatus::ABOVELIMIT . ", " . EnumTransactionsStatus::AUTHORIZED . ") 
+                AND category NOT IN (" . EnumTransactionCategory::FUND_CREDMINER . ", " . EnumTransactionCategory::NANOTECH_CREDMINER . ") ) 
                 OR (user_id = '{$user->id}' AND category = " . EnumTransactionCategory::WITHDRAWAL . " AND status IN (" . EnumTransactionsStatus::PENDING . ", " . EnumTransactionsStatus::PROCESSING . "))")
-                ->whereHas('coin', function ($coin) {
-                    return $coin->whereNotIn('abbr', ['ION']);
-                })
                 ->whereHas('wallet', function ($wallet) {
                     return $wallet->where('type', EnumUserWalletType::WALLET);
                 })
                 ->orderBy('updated_at', 'ASC')->orderBy('type', 'DESC')->get()->makeVisible('coin_id');
 
-            $coins = Coin::whereNotIn('abbr', ['ION'])->orderBy('wallet_order')->get();
+            if (!auth()->user()->is_dev) {
+                $coins = Coin::where('is_active', true)->orderBy('wallet_order')->get();
+            } else {
+                $coins = Coin::whereNotIn('abbr', ['ION'])->orderBy('wallet_order')->get();
+            }
+
             $balances = [];
 
             foreach ($coins as $c) {
@@ -312,11 +314,14 @@ class TransactionsController extends Controller
             }
 
             foreach ($transactions as $transaction) {
-                if ($transaction->type == EnumTransactionType::IN) {
-                    $balances[$transaction->coin->abbr]['balance'] += floatval($transaction->total);
-                } else {
-                    $balances[$transaction->coin->abbr]['balance'] -= floatval($transaction->total);
+                if (isset($balances[$transaction->coin->abbr])) {
+                    if ($transaction->type == EnumTransactionType::IN) {
+                        $balances[$transaction->coin->abbr]['balance'] += floatval($transaction->total);
+                    } else {
+                        $balances[$transaction->coin->abbr]['balance'] -= floatval($transaction->total);
+                    }
                 }
+
                 $transaction['balances'] = $balances;
             }
 
@@ -325,13 +330,14 @@ class TransactionsController extends Controller
                 'transactions' => $transactions,
             ];
         } catch (\Exception $e) {
-            return response([
-                'message' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
+            return response(['message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),], Response::HTTP_BAD_REQUEST);
         }
     }
 
-    public function listTxGroup(Request $request)
+    public
+    function listTxGroup(Request $request)
     {
         try {
             $transactions = Transaction::with('coin')
@@ -362,7 +368,8 @@ class TransactionsController extends Controller
         }
     }
 
-    public function listAddressGroup(Request $request)
+    public
+    function listAddressGroup(Request $request)
     {
         try {
             $transactions = Transaction::with(['coin', 'user', 'internalWallet' => function ($internal) {
@@ -391,7 +398,8 @@ class TransactionsController extends Controller
         }
     }
 
-    public function listTxTransactions($tx)
+    public
+    function listTxTransactions($tx)
     {
         try {
             $transactions = Transaction::with(['coin', 'user'])
@@ -409,7 +417,8 @@ class TransactionsController extends Controller
         }
     }
 
-    public function listAddressTransactions($address)
+    public
+    function listAddressTransactions($address)
     {
         try {
             $transactions = Transaction::with(['coin', 'user', 'internalWallet' => function ($internal) {

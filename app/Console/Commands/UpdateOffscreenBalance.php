@@ -39,6 +39,10 @@ class UpdateOffscreenBalance extends Command
      */
     public function handle()
     {
+        if (env("APP_ENV") == 'local') {
+            dd("Não é permitida a execução");
+        }
+
         try {
             $wallets = UserWallet::where('sync', 0)
                 ->where('coin_id', 1)
