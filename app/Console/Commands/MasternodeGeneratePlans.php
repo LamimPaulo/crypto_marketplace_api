@@ -55,7 +55,7 @@ class MasternodeGeneratePlans extends Command
         $output = new \Symfony\Component\Console\Output\ConsoleOutput();
 
         try {
-            DB::beginTransaction();
+
             $output->writeln("<info>START</info>");
             $output->writeln("<info>--------------------------</info>");
 
@@ -68,6 +68,7 @@ class MasternodeGeneratePlans extends Command
                 ->get();
 
             foreach ($transactions as $transaction) {
+                DB::beginTransaction();
                 $output->writeln("<info>{$transaction->toAddress}</info>");
                 $output->writeln("<info>{$transaction->masternode->fee_address}</info>");
 
@@ -133,9 +134,8 @@ class MasternodeGeneratePlans extends Command
                         $transaction->masternode->save();
                     }
                 }
+                DB::commit();
             }
-
-            DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             $output->writeln("<info>{$e->getMessage()}</info>");
