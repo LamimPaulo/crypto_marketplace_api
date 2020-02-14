@@ -107,7 +107,7 @@ class MasternodeReverse extends Command
                             'toAddress' => $masternode->payment_address,
                             'amount' => $amount,
                             'status' => EnumTransactionsStatus::SUCCESS,
-                            'type' => EnumTransactionType::OUT,
+                            'type' => EnumTransactionType::IN,
                             'category' => EnumTransactionCategory::MASTERNODE_UNDO,
                             'confirmation' => 0,
                             'tax' => 0,

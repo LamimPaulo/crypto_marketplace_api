@@ -294,12 +294,7 @@ class TransactionsController extends Controller
                 })
                 ->orderBy('updated_at', 'ASC')->orderBy('type', 'DESC')->get()->makeVisible('coin_id');
 
-            if (!auth()->user()->is_dev) {
-                $coins = Coin::where('is_active', true)->orderBy('wallet_order')->get();
-            } else {
-                $coins = Coin::whereNotIn('abbr', ['ION'])->orderBy('wallet_order')->get();
-            }
-
+            $coins = Coin::where('is_active', true)->orderBy('wallet_order')->get();
             $balances = [];
 
             foreach ($coins as $c) {

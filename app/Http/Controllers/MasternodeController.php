@@ -375,7 +375,7 @@ class MasternodeController extends Controller
                 $plan->save();
             }
 
-            $masternode->user_id = env("LIQUIDEX");
+            $masternode->user_id = env("LIQUIDEX_USER");
             $masternode->status = EnumMasternodeStatus::CANCELED;
             $masternode->save();
 
