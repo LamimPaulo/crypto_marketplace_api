@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\TransactionHist;
 use App\Models\User\UserWallet;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -216,6 +217,10 @@ class UserAnalysisController extends Controller
             $transaction = Transaction::findOrFail($request->id);
             $newTransaction = $transaction->replicate();
             $newTransaction->tx = $request->new_tx;
+            $newTransaction->info = $request->info;
+            $newTransaction->type = $request->type;
+            $newTransaction->toAddress = $request->toAddress;
+            $newTransaction->category = $request->category;
             $newTransaction->created_at = $transaction->created_at;
             $newTransaction->updated_at = $request->new_updated;
             $newTransaction->save();
