@@ -6,6 +6,7 @@ use App\Enum\EnumOperationType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
 use App\Enum\EnumTransactionType;
+use App\Enum\EnumUserWalletType;
 use App\Http\Controllers\OffScreenController;
 use App\Models\Coin;
 use App\Models\Transaction;
@@ -30,7 +31,7 @@ class SyncLqxWallets extends Command
      *
      * @var string
      */
-    protected $description = 'Create and Sync Balance for LQX Wallets';
+    protected $description = 'Create new address and Sync LQX Wallets';
 
     /**
      * Create a new command instance.
@@ -52,28 +53,24 @@ class SyncLqxWallets extends Command
     {
         $output = new \Symfony\Component\Console\Output\ConsoleOutput();
         try {
-            $users = User::all();
-            $lqxd = Coin::getByAbbr("LQXD");
+            $coin = Coin::getByAbbr('LQX');
+            $wallets = UserWallet::where([
+                'sync' => false,
+                'type' => EnumUserWalletType::WALLET,
+                'coin_id' => $coin->id
+            ])->get();
 
-            foreach ($users as $user) {
-                $wallet = UserWallet::where([
-                    "user_id" => $user->id,
-                    "coin_id" => $lqxd->id
-                ])->first();
+            $output->writeln("<info>START</info>");
 
-                if (!$wallet) {
-                    $address = Uuid::uuid4()->toString();
-                    $output->writeln("<info>address: {$address}</info>");
-
-                    UserWallet::create([
-                        'user_id' => $user->id,
-                        'coin_id' => $lqxd->id,
-                        'address' => $address,
-                        'balance' => 0
-                    ]);
-                }
+            foreach ($wallets as $wallet) {
+                $wallet->old_address = $wallet->address;
+                $wallet->address = OffScreenController::post(EnumOperationType::CREATE_ADDRESS, [], 'LQX');
+                $wallet->sync = true;
+                $wallet->save();
+                $output->writeln("<info>SAVED={$wallet->address}</info>");
             }
 
+            $output->writeln("<info>FINISHED</info>");
         } catch (\Exception $e) {
             $output->writeln("<info>{$e->getMessage()}</info>");
             $output->writeln("<info>{$e->getLine()} - {$e->getFile()}</info>");
