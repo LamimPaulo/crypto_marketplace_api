@@ -343,9 +343,9 @@ Route::group(
         'middleware' => 'credminer'
     ],
     function () {
-        Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
-        Route::post('/check-key', 'Credminer\PaymentController@checkKey');
-        Route::post('/check-cpf', 'Credminer\PaymentController@checkCpf');
+//        Route::post('/withdrawal', 'Credminer\PaymentController@withdrawal');
+//        Route::post('/check-key', 'Credminer\PaymentController@checkKey');
+//        Route::post('/check-cpf', 'Credminer\PaymentController@checkCpf');
     }
 );
 

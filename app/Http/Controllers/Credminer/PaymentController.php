@@ -6,7 +6,6 @@ use App\Enum\EnumCalcType;
 use App\Enum\EnumGatewayStatus;
 use App\Enum\EnumGatewayType;
 use App\Enum\EnumOperations;
-use App\Enum\EnumOperationType;
 use App\Enum\EnumTaxType;
 use App\Enum\EnumTransactionCategory;
 use App\Enum\EnumTransactionsStatus;
@@ -22,10 +21,8 @@ use App\Models\Gateway;
 use App\Models\SysConfig;
 use App\Models\Transaction;
 use App\Models\User\UserWallet;
-use App\Services\BalanceService;
 use App\User;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,9 +69,9 @@ class PaymentController extends Controller
     public function checkCpf(CheckCpfRequest $request)
     {
         try {
-            $user = User::whereHas('level', function ($level){
-                    return $level->whereNotIn('id',[1,7]);
-                })
+            $user = User::whereHas('level', function ($level) {
+                return $level->whereNotIn('id', [1, 7]);
+            })
                 ->where('document', $request->cpf)
                 ->whereNotNull('api_key')
                 ->first();
