@@ -233,9 +233,10 @@ class Transaction extends Model
             ->whereIn('transactions.status', [EnumTransactionsStatus::PROCESSING, EnumTransactionsStatus::PENDING])
             ->where('transactions.type', '=', EnumTransactionType::IN)
             ->where('transactions.category', '=', EnumTransactionCategory::MASTERNODE_REWARD)
+            ->where('transactions.category', '=', EnumTransactionCategory::MASTERNODE_REWARD)
             ->select('transactions.*', 'coins.abbr')
-            ->orderBy('transactions.created_at')
             ->take(env("MASTERNODES_LIMIT_CONFIRMATION", 0))
+            ->inRandomOrder()
             ->get();
     }
 
