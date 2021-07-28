@@ -24,9 +24,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
-        $schedule->command('nanotech:profits')->dailyAt('01:00');
-        $schedule->command('nanotech:profits')->dailyAt('02:00');
+        //$schedule->command('nanotech:percentages')->monthlyOn(1, '00:30');
+        //$schedule->command('nanotech:profits')->dailyAt('01:00');
+        //$schedule->command('nanotech:profits')->dailyAt('02:00');
         $schedule->command('update:lqxbalance')->dailyAt('05:00');
 
         $schedule->command('lqxd:generate')->dailyAt('03:00');
@@ -50,7 +50,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('masternode:create')->everyMinute();
         $schedule->command('masternode:update')->everyFiveMinutes();
         $schedule->command('masternode:info')->everyFiveMinutes();
-        
+
         $schedule->command('masternode:generateplans')->everyTenMinutes();
         $schedule->command('masternode:verifypayments')->everyTenMinutes();
 
